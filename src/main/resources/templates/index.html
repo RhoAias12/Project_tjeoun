@@ -1,0 +1,29 @@
+<!-- src/main/resources/templates/index.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>크롤링 결과</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .job-card { border: 1px solid #ccc; padding: 15px; margin-bottom: 20px; border-radius: 10px; display: flex; align-items: center; }
+        .logo { width: 80px; height: 80px; margin-right: 20px; object-fit: contain; background-color: #f9f9f9; border-radius: 5px; }
+        .info { flex-grow: 1; }
+        h3 { margin: 0 0 5px; }
+        .company { font-size: 14px; color: #555; }
+    </style>
+</head>
+<body>
+
+<h1>수집된 채용 공고 리스트</h1>
+
+<div th:each="job : ${jobs}" class="job-card">
+    <img th:src="@{${job.logoUrl}}" alt="logo" class="logo"/>
+    <div class="info">
+        <h3 th:text="${job.title}">제목</h3>
+        <div class="company" th:text="${job.company}">회사명</div>
+    </div>
+</div>
+
+</body>
+</html>

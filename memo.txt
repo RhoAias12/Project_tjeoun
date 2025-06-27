@@ -1,0 +1,21 @@
+<DB생성>
+CREATE DATABASE project CHARACTER SET utf8mb4 COLLATE UTF8MB4_GENERAL_CI;
+GRANT ALL PRIVILEGES ON project.* TO 'root'@'localhost';
+FLUSH PRIVILEGES;
+
+USE project;
+
+-- 주의 : application.properties에서
+-- spring.datasource.username=root
+-- spring.datasource.password=1234
+-- spring.datasource.url=jdbc:mysql://localhost:3306/project
+-- HeidiSQL과 똑같아야함. 사용자명, 암호, 포트번호 주의
+-- HeidiSQL의 세션명은 아무런 상관 없음
+
+build.gradle에서
+implementation 'org.springframework.boot:spring-boot-starter-security'
+크롤링한 데이터와 이미지를 local에서 잘 보이는지 확인하기 위해 보안 프레임워크(접근제한)을
+주석 처리해놨는데 나중에 풀어야할지 말아야할지 결정해야함
+
+index.html, HomeController는 위와 같이 데이터 로컬에서 확인하기 위해 만든 거라
+삭제하고 진행해주세요
