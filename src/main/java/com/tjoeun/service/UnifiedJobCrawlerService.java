@@ -67,7 +67,7 @@ public class UnifiedJobCrawlerService {
 
   private List<JobPosting> crawlJobKorea() {
     List<JobPosting> result = new ArrayList<>();
-    int totalPages = 1; // 페이지 수 조정
+    int totalPages = 1;
 
     try {
       for (int page = 1; page <= totalPages; page++) {
