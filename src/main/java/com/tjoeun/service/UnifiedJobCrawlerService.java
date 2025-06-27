@@ -47,8 +47,8 @@ public class UnifiedJobCrawlerService {
     System.out.println("크롤러 실행됨 (스케줄링 시작)");
 
     allJobs.addAll(crawlJobKorea());
-    allJobs.addAll(crawlJobPlanet());
-    allJobs.addAll(crawlWanted());
+//    allJobs.addAll(crawlJobPlanet());
+//    allJobs.addAll(crawlWanted());
 
     // 결측 필터링
     List<JobPosting> filteredJobs = allJobs.stream()
@@ -104,8 +104,22 @@ public class UnifiedJobCrawlerService {
             job.setTitle(title);
             job.setCompany(getText(detail, "div.header > span.coName"));
 
-            // 마감일
-            String deadlineRaw = getText(detail, "dl.date span.tahoma");
+            // 마감일 추출
+            String deadlineRaw = ""; // 초기화
+            Element dateDl = detail.selectFirst("dl.date");
+            if (dateDl != null) {
+              Elements dtList = dateDl.select("dt");
+              Elements ddList = dateDl.select("dd");
+
+              for (int i = 0; i < Math.min(dtList.size(), ddList.size()); i++) {
+                String dtText = dtList.get(i).text();
+                if (dtText.contains("마감일")) {
+                  Element span = ddList.get(i).selectFirst("span.tahoma");
+                  deadlineRaw = (span != null) ? span.text().trim() : "";
+                  break;
+                }
+              }
+            }
             job.setDeadline(parseDeadline(deadlineRaw));
 
             // 회사로고 저장 및 로컬 경로 설정
