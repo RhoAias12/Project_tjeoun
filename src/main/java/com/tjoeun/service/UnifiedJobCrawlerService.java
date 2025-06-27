@@ -40,8 +40,8 @@ public class UnifiedJobCrawlerService {
   private JobPostingRepository repository;
 
   private final String logoSaveDir = "src/main/resources/static/images/logos/";
-//  @Scheduled(cron = "0 54 11 * * *", zone = "Asia/Seoul")
-  @Scheduled(fixedDelay = 10000) // 10초마다 실행
+  @Scheduled(cron = "0 54 11 * * *", zone = "Asia/Seoul")
+//  @Scheduled(fixedDelay = 10000) // 10초마다 실행
   public void runCrawler() {
     List<JobPosting> allJobs = new ArrayList<>();
     System.out.println("크롤러 실행됨 (스케줄링 시작)");
@@ -50,19 +50,35 @@ public class UnifiedJobCrawlerService {
     allJobs.addAll(crawlJobPlanet());
     allJobs.addAll(crawlWanted());
 
-    // 결측 필터링
+    // 필수 항목 필터링
     List<JobPosting> filteredJobs = allJobs.stream()
       .filter(job -> isNotEmpty(job.getTitle()) && isNotEmpty(job.getCompany()) && isNotEmpty(job.getResponsibilities()))
       .collect(Collectors.toList());
 
-    // 중복 제거
+    // 메모리 기준 중복 제거 (title+company)
     List<JobPosting> uniqueJobs = removeDuplicates(filteredJobs);
 
-    repository.saveAll(uniqueJobs);
-    System.out.println("크롤링 및 저장 완료: 총 " + uniqueJobs.size() + "건");
+    // DB에 존재하는 것 제거 (title + company + deadline 기준)
+    List<JobPosting> newJobs = uniqueJobs.stream()
+      .filter(job -> !repository.existsByTitleAndCompanyAndDeadline(
+        job.getTitle(), job.getCompany(), job.getDeadline()))
+      .collect(Collectors.toList());
 
-    List<JobPosting> cleanedJobs = preprocessJobs(uniqueJobs); // 전처리
-    repository.saveAll(cleanedJobs);
+    // 전처리
+    List<JobPosting> cleanedJobs = preprocessJobs(newJobs);
+
+    // 저장: 개별 save로 예외 발생 시 catch 처리
+    int savedCount = 0;
+    for (JobPosting job : cleanedJobs) {
+      try {
+        repository.save(job);
+        savedCount++;
+      } catch (Exception e) {
+        System.out.println("[저장 실패] 중복 또는 오류: " + job.getTitle());
+      }
+    }
+
+    System.out.println("크롤링 및 저장 완료: 총 " + savedCount + "건 저장됨");
   }
 
   private List<JobPosting> crawlJobKorea() {
