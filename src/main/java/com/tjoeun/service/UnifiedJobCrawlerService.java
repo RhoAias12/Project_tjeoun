@@ -47,8 +47,8 @@ public class UnifiedJobCrawlerService {
     System.out.println("크롤러 실행됨 (스케줄링 시작)");
 
     allJobs.addAll(crawlJobKorea());
-//    allJobs.addAll(crawlJobPlanet());
-//    allJobs.addAll(crawlWanted());
+    allJobs.addAll(crawlJobPlanet());
+    allJobs.addAll(crawlWanted());
 
     // 결측 필터링
     List<JobPosting> filteredJobs = allJobs.stream()
