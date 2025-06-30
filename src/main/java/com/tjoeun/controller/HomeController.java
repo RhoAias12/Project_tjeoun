@@ -1,7 +1,7 @@
 package com.tjoeun.controller;
 
+import com.tjoeun.entity.Recruitment;
 import org.springframework.ui.Model;
-import com.tjoeun.entity.JobPosting;
 import com.tjoeun.repository.JobPostingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -17,7 +17,7 @@ public class HomeController {
 
   @GetMapping("/")
   public String index(Model model) {
-    List<JobPosting> jobs = repository.findAll();
+    List<Recruitment> jobs = repository.findAll();
     model.addAttribute("jobs", jobs);
     return "index";
   }

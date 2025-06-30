@@ -1,5 +1,6 @@
 package com.tjoeun.service;
 
+import com.tjoeun.entity.Recruitment;
 import org.jsoup.Jsoup;
 import org.jsoup.Connection;
 import org.jsoup.nodes.Document;
@@ -30,7 +31,6 @@ import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import com.tjoeun.entity.JobPosting;
 import com.tjoeun.repository.JobPostingRepository;
 
 @Service
@@ -40,10 +40,10 @@ public class UnifiedJobCrawlerService {
   private JobPostingRepository repository;
 
   private final String logoSaveDir = "src/main/resources/static/images/logos/";
-  @Scheduled(cron = "0 54 11 * * *", zone = "Asia/Seoul")
+  @Scheduled(cron = "0 08 11 * * *", zone = "Asia/Seoul")
 //  @Scheduled(fixedDelay = 10000) // 10초마다 실행
   public void runCrawler() {
-    List<JobPosting> allJobs = new ArrayList<>();
+    List<Recruitment> allJobs = new ArrayList<>();
     System.out.println("크롤러 실행됨 (스케줄링 시작)");
 
     allJobs.addAll(crawlJobKorea());
@@ -51,25 +51,25 @@ public class UnifiedJobCrawlerService {
     allJobs.addAll(crawlWanted());
 
     // 필수 항목 필터링
-    List<JobPosting> filteredJobs = allJobs.stream()
+    List<Recruitment> filteredJobs = allJobs.stream()
       .filter(job -> isNotEmpty(job.getTitle()) && isNotEmpty(job.getCompany()) && isNotEmpty(job.getResponsibilities()))
       .collect(Collectors.toList());
 
     // 메모리 기준 중복 제거 (title+company)
-    List<JobPosting> uniqueJobs = removeDuplicates(filteredJobs);
+    List<Recruitment> uniqueJobs = removeDuplicates(filteredJobs);
 
     // DB에 존재하는 것 제거 (title + company + deadline 기준)
-    List<JobPosting> newJobs = uniqueJobs.stream()
+    List<Recruitment> newJobs = uniqueJobs.stream()
       .filter(job -> !repository.existsByTitleAndCompanyAndDeadline(
         job.getTitle(), job.getCompany(), job.getDeadline()))
       .collect(Collectors.toList());
 
     // 전처리
-    List<JobPosting> cleanedJobs = preprocessJobs(newJobs);
+    List<Recruitment> cleanedJobs = preprocessJobs(newJobs);
 
     // 저장: 개별 save로 예외 발생 시 catch 처리
     int savedCount = 0;
-    for (JobPosting job : cleanedJobs) {
+    for (Recruitment job : cleanedJobs) {
       try {
         repository.save(job);
         savedCount++;
@@ -81,8 +81,8 @@ public class UnifiedJobCrawlerService {
     System.out.println("크롤링 및 저장 완료: 총 " + savedCount + "건 저장됨");
   }
 
-  private List<JobPosting> crawlJobKorea() {
-    List<JobPosting> result = new ArrayList<>();
+  private List<Recruitment> crawlJobKorea() {
+    List<Recruitment> result = new ArrayList<>();
     int totalPages = 5;
 
     try {
@@ -116,7 +116,7 @@ public class UnifiedJobCrawlerService {
               .userAgent("Mozilla/5.0")
               .timeout(20000).get();
 
-            JobPosting job = new JobPosting();
+            Recruitment job = new Recruitment();
             job.setTitle(title);
             job.setCompany(getText(detail, "div.header > span.coName"));
 
@@ -219,8 +219,8 @@ public class UnifiedJobCrawlerService {
   }
 
 
-  private List<JobPosting> crawlJobPlanet() {
-    List<JobPosting> result = new ArrayList<>();
+  private List<Recruitment> crawlJobPlanet() {
+    List<Recruitment> result = new ArrayList<>();
     WebDriver driver = getDriver();
     if (driver == null) return result;
 
@@ -251,7 +251,7 @@ public class UnifiedJobCrawlerService {
           summary.put(items.get(i).getText().trim(), items.get(i + 1).getText().trim());
         }
 
-        JobPosting job = new JobPosting();
+        Recruitment job = new Recruitment();
         job.setTitle(getText(driver, By.className("ttl")));
         job.setCompany(getText(driver, By.cssSelector("span.company_name a")));
 
@@ -292,8 +292,8 @@ public class UnifiedJobCrawlerService {
 
 
 
-  private List<JobPosting> crawlWanted() {
-    List<JobPosting> result = new ArrayList<>();
+  private List<Recruitment> crawlWanted() {
+    List<Recruitment> result = new ArrayList<>();
     WebDriver driver = getDriver();
     if (driver == null) return result;
 
@@ -328,7 +328,7 @@ public class UnifiedJobCrawlerService {
           Thread.sleep(1000);
         } catch (Exception ignored) {}
 
-        JobPosting job = new JobPosting();
+        Recruitment job = new Recruitment();
         job.setTitle(getText(driver, By.cssSelector("h1.wds-58fmok")));
         job.setCompany(getText(driver, By.cssSelector("a.JobHeader_JobHeader__Tools__Company__Link__NoBQI")));
 
@@ -377,9 +377,9 @@ public class UnifiedJobCrawlerService {
   }
 
 
-  private List<JobPosting> removeDuplicates(List<JobPosting> jobs) {
-    Map<String, JobPosting> map = new LinkedHashMap<>();
-    for (JobPosting job : jobs) {
+  private List<Recruitment> removeDuplicates(List<Recruitment> jobs) {
+    Map<String, Recruitment> map = new LinkedHashMap<>();
+    for (Recruitment job : jobs) {
       String key = job.getTitle() + "|" + job.getCompany();
       map.putIfAbsent(key, job);
     }
@@ -450,7 +450,7 @@ public class UnifiedJobCrawlerService {
     }
   }
 
-  private List<JobPosting> preprocessJobs(List<JobPosting> jobs) {
+  private List<Recruitment> preprocessJobs(List<Recruitment> jobs) {
     String defaultLogo = "/images/logos/logo.jpg";
     return jobs.stream()
       // 그 외는 기존처럼 기본값 세팅
