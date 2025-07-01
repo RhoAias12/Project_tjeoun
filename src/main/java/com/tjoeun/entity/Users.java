@@ -1,7 +1,10 @@
 package com.tjoeun.entity;
 
+import com.tjoeun.constant.UserRole;
+import com.tjoeun.dto.UserFormDto;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
 
@@ -40,7 +43,15 @@ public class Users {
   @Column(columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
   private java.sql.Timestamp userCreatedAt;
 
-  public enum UserRole {
-    USER, MANAGER
+  public static Users createUser(UserFormDto dto, PasswordEncoder passwordEncoder) {
+    return Users.builder()
+      .userName(dto.getUserName())
+      .userEmail(dto.getUserEmail())
+      .userPassword(passwordEncoder.encode(dto.getUserPassword()))
+      .userNickname(dto.getUserNickname())
+      .userBirth(dto.getUserBirth())
+      .userRole(UserRole.USER)
+      .build();
   }
+
 }
