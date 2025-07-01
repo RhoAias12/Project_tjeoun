@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.sql.Timestamp;
 import java.time.LocalDate;
 
 @Entity
@@ -50,6 +51,7 @@ public class Users {
       .userPassword(passwordEncoder.encode(dto.getUserPassword()))
       .userNickname(dto.getUserNickname())
       .userBirth(dto.getUserBirth())
+      .userCreatedAt(new Timestamp(System.currentTimeMillis()))
       .userRole(UserRole.USER)
       .build();
   }
