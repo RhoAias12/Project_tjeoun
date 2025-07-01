@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -11,22 +11,7 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
-    <script>
-      document.querySelectorAll('.situation').forEach((el) => {
-        const text = el.textContent.trim();
-        if (text === '지원모집') {
-          el.classList.add('open');
-        } else if (text === '합격') {
-          el.classList.add('pass');
-        } else if (text === '지원마감') {
-          el.classList.add('closed');
-        } else if (text === '불합격') {
-          el.classList.add('fail');
-        }
-      });
-    </script>
-
-    <title>공고관리</title>
+    <title>회원관리</title>
   </head>
   <body>
     <!-- 헤더 -->
@@ -35,15 +20,15 @@
     <!-- 전체 컨테이너 -->
     <div class="tab-box">
       <div class="tab-inner">
-        <h2 class="mypage-title">공고관리</h2>
+        <h2 class="mypage-title">회원관리</h2>
 
         <!-- 검색 및 정렬 영역 -->
         <div class="search">
           <section class="search-bar">
-            <input type="text" placeholder="공고이름" />
-            <input type="text" placeholder="회사명" />
-            <input type="date" />
-            <input type="text" placeholder="지역" />
+            <input type="text" placeholder="이메일" />
+            <input type="text" placeholder="닉네임" />
+            <!-- <input type="date" />
+            <input type="text" placeholder="지역" /> -->
             <button type="button">검색</button>
           </section>
 
@@ -60,60 +45,39 @@
         <div class="apply-list">
           <div class="apply-card">
             <div class="apply-info">
-              <div class="job-title">공고명</div>
-              <div class="company-name">회사명</div>
+              <div class="job-title">이름</div>
+              <div class="company-name">닉네임</div>
             </div>
             <div class="apply-buttons">
-              <!-- <div class="situation">지원상태</div> -->
-              <div class="situation open">지원모집</div>
-              <!-- <div class="situation pass">합격</div>
-              <div class="situation closed">지원마감</div>
-              <div class="situation fail">불합격</div> -->
-
               <button class="cancel-btn">삭제</button>
             </div>
           </div>
 
           <div class="apply-card">
             <div class="apply-info">
-              <div class="job-title">공고명</div>
-              <div class="company-name">회사명</div>
+              <div class="job-title">이름</div>
+              <div class="company-name">닉네임</div>
             </div>
             <div class="apply-buttons">
-              <!-- <div class="situation">지원상태</div> -->
-              <!-- <div class="situation open">지원모집</div> -->
-              <div class="situation pass">합격</div>
-              <!-- <div class="situation closed">지원마감</div>
-              <div class="situation fail">불합격</div> -->
               <button class="cancel-btn">삭제</button>
             </div>
           </div>
 
           <div class="apply-card">
             <div class="apply-info">
-              <div class="job-title">공고명</div>
-              <div class="company-name">회사명</div>
+              <div class="job-title">이름</div>
+              <div class="company-name">닉네임</div>
             </div>
             <div class="apply-buttons">
-              <!-- <div class="situation">지원상태</div> -->
-              <!-- <div class="situation open">지원모집</div>
-              <div class="situation pass">합격</div> -->
-              <div class="situation closed">지원마감</div>
-              <!-- <div class="situation fail">불합격</div> -->
               <button class="cancel-btn">삭제</button>
             </div>
           </div>
           <div class="apply-card">
             <div class="apply-info">
-              <div class="job-title">공고명</div>
-              <div class="company-name">회사명</div>
+              <div class="job-title">이름</div>
+              <div class="company-name">닉네임</div>
             </div>
             <div class="apply-buttons">
-              <!-- <div class="situation">지원상태</div> -->
-              <!-- <div class="situation open">지원모집</div>
-              <div class="situation pass">합격</div>
-              <div class="situation closed">지원마감</div> -->
-              <div class="situation fail">불합격</div>
               <button class="cancel-btn">삭제</button>
             </div>
           </div>
