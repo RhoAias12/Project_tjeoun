@@ -19,6 +19,6 @@ public class HomeController {
   public String index(Model model) {
     List<Recruitment> jobs = repository.findAll();
     model.addAttribute("jobs", jobs);
-    return "index";
+    return "main";
   }
 }
