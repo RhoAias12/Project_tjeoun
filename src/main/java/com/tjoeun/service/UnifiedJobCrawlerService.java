@@ -228,7 +228,7 @@ public class UnifiedJobCrawlerService {
       driver.get("https://www.jobplanet.co.kr/job");
       Thread.sleep(3000);
 
-      for (int i = 0; i < 30; i++) {
+      for (int i = 0; i < 3; i++) {
         ((JavascriptExecutor) driver).executeScript("window.scrollTo(0, document.body.scrollHeight);");
         Thread.sleep(1000);
       }
@@ -240,7 +240,7 @@ public class UnifiedJobCrawlerService {
         if (href != null && !href.isEmpty()) links.add(href);
       }
 
-      for (int idx = 0; idx < Math.min(links.size(), 200); idx++) {
+      for (int idx = 0; idx < Math.min(links.size(), 10); idx++) {
         String link = links.get(idx);
         driver.get(link);
         Thread.sleep(2000);
