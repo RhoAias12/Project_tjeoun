@@ -1,0 +1,167 @@
+/* 제목 */
+.tab-box {
+  display: flex;
+  justify-content: center;
+  margin-top: 60px;
+  width: 100%;
+}
+
+.tab-inner {
+  width: 700px; /* ✅ .mypage-container와 같은 너비로 고정 */
+}
+
+.mypage-title {
+  font-size: 30px;
+  color: #444;
+  margin: 0 0 30px 0; /* 위는 없고 아래 간격만 약간 */
+  transform: translateY(4px); /* ✅ 시각적으로 살짝 내려주기 */
+  text-align: left;
+}
+
+.tab-buttons {
+  display: flex;
+  justify-content: flex-start; /* ✅ 왼쪽 정렬 */
+  gap: 20px;
+  margin-top: 20px;
+}
+
+/* 게시물 틀 (예전 것) */
+.post-box {
+  width: 80%;
+  height: 160px;
+  border: 1px solid #ccc;
+}
+
+/* 게시물 카드 리스트 */
+.resume-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 30px;
+}
+
+/* resume-card를 링크처럼 보이도록 스타일링 */
+.resume-card {
+  height: 130px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border: 1px solid #ccc;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  text-decoration: none; /* 링크 밑줄 제거 */
+  color: inherit; /* 텍스트 색상 상속 */
+  transition: background-color 0.2s ease;
+}
+.resume-card:hover {
+  background-color: #e6f3ff; /* 마우스 호버 시 색 변화 */
+}
+
+.resume-title {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+/* 삭제 버튼 */
+.delete-button {
+  padding: 6px 14px;
+  background-color: white;
+  border: 1px solid #999;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+.delete-button:hover {
+  background-color: #ffeded;
+  border-color: #f55;
+}
+
+/* 페이지네이션 전체 영역 */
+.pagination {
+  text-align: center;
+  margin-top: 30px;
+}
+
+/* 페이지네이션 리스트 */
+.pagination-list {
+  list-style: none;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 0;
+  margin: 20px 0 0 0; /* 🔹 위쪽 여백만 추가 */
+}
+
+/* 페이지 버튼 기본 스타일 */
+.page-btn {
+  display: inline-block;
+  padding: 4px 8px;
+  text-align: center;
+  color: #333;
+  text-decoration: none; /* ✅ 기본 밑줄 제거 */
+  font-size: 16px;
+  border: none;
+  background-color: transparent;
+  border-radius: 0;
+  cursor: pointer;
+}
+
+/* 마우스 오버 시 */
+.page-btn:hover {
+  color: #0085ff;
+  text-decoration: none;
+}
+
+/* 현재 선택된 페이지 */
+.page-btn.active {
+  color: #0085ff;
+  font-weight: bold;
+  text-decoration: none; /* 밑줄 생기게 하고 싶으면 : text-decoration: underline; */
+}
+
+/* 탭 버튼들 */
+.tab {
+  width: 160px;
+  padding: 10px 0;
+  font-size: 16px;
+  background-color: white;
+  color: #0085ff;
+  border: 1px solid #0085ff;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.tab:hover {
+  background-color: #0085ff;
+  color: white;
+}
+
+.tab1 {
+  width: 160px;
+  padding: 10px 0;
+  font-size: 16px;
+  background-color: #0085ff;
+  color: white;
+  border: 1px solid #0085ff;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.tab5 {
+  width: 80px;
+  padding: 10px 0;
+  font-size: 16px;
+  background-color: #0085ff;
+  color: white;
+  border: 1px solid #0085ff;
+  border-radius: 4px;
+  margin-top: 20px;
+  cursor: pointer;
+  display: block;
+  margin-left: auto; /* ✅ 오른쪽으로 자동 밀림 */
+  margin-top: 20px;
+}
+.tab5:hover {
+  background-color: white;
+  color: #0085ff;
+}

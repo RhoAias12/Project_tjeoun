@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" th:href="@{/css/main.css}" />
+    <link rel="stylesheet" th:href="@{/css/header.css}" />
+    <link rel="stylesheet" th:href="@{/css/footer.css}" />
+    <link rel="stylesheet" th:href="@{/css/member_care.css}" />
+    <!-- <script src="js/footer.js"></script> -->
+    <title>회원관리</title>
+  </head>
+  <body>
+    <!-- 헤더  -->
+    <div th:replace="include/header :: header"></div>
+
+    <div class="tab-box">
+      <div class="tab-inner">
+        <h2 class="mypage-title">회원관리</h2>
+        <div class="signup-container">
+          <form class="signup-form">
+            <!-- 이름 -->
+            <div class="form-group">
+              <label for="username">이름</label>
+              <input
+                type="text"
+                id="username"
+                name="username"
+                value="홍길동"
+                required
+              />
+            </div>
+
+            <!-- 이메일 -->
+            <div class="form-group">
+              <label for="email">이메일</label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value="hong03@naver.com"
+                required
+              />
+            </div>
+
+            <!-- 닉네임 -->
+            <div class="form-group">
+              <label for="nickname">닉네임</label>
+              <div class="input-wrapper">
+                <input
+                  type="text"
+                  id="nickname"
+                  name="nickname"
+                  value="홍익인간"
+                  required
+                />
+                <button type="button" class="check-btn">중복확인</button>
+              </div>
+            </div>
+
+            <!-- 비밀번호 -->
+            <div class="form-group">
+              <label for="password">비밀번호</label>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                placeholder="비밀번호"
+                required
+              />
+            </div>
+
+            <!-- 비밀번호 확인 -->
+            <div class="form-group">
+              <label for="password-confirm">비밀번호 확인</label>
+              <input
+                type="password"
+                id="password-confirm"
+                name="password-confirm"
+                placeholder="비밀번호 확인"
+                required
+              />
+            </div>
+
+            <!-- 생년월일: 2000년 2월 25일로 기본값 지정 -->
+            <div class="form-group">
+              <label for="birthdate">생년월일</label>
+              <input
+                type="date"
+                id="birthdate"
+                name="birthdate"
+                value="2000-02-25"
+                required
+              />
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="button-box">
+      <button type="submit" class="action-button">수정</button>
+      <button type="button" class="action-button">목록</button>
+    </div>
+    <!-- 푸터  -->
+    <div th:replace="include/footer :: footer"></div>
+  </body>
+</html>

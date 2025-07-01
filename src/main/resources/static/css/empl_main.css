@@ -1,0 +1,227 @@
+/* 공고 상세페이지용 empl_detail.css */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Arial', sans-serif;
+}
+
+.container {
+  max-width: 100%;
+  margin: 0 220px;
+  padding: 30px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+}
+
+.search {
+  max-width: 100%;
+  margin: 0 250px 0;
+  padding: 50px 0 0;
+  background-color: #fff;
+}
+
+.title {
+  margin: 0 220px;
+  padding: 30px 0 0;
+  max-width: 900px;
+  font-size: 32px;
+  font-weight: 500;
+}
+
+.page-title {
+  max-width: 900px;
+  margin: 30px 220px 10px;
+  padding: 0;
+}
+
+.page-title p {
+  font-size: 30px;
+  margin: 60px 0;
+  text-align: left;
+  font-weight: 600;
+}
+
+.search-bar {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 30px;
+}
+
+.search-bar input[type='text'],
+.search-bar input[type='date'] {
+  padding: 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 100%;
+}
+
+.search-bar button {
+  grid-column: span 2;
+  padding: 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  background-color: #0085ff;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.search-bar button:hover {
+  background-color: #006edc;
+}
+
+/* 검색창 및 정렬 */
+.search-sort {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.search-input {
+  width: 100%;
+  height: 60px;
+  padding: 8px 40px 8px 12px; /* 오른쪽 여백 확보 */
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.sort-select {
+  padding: 8px 15px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background-color: #fff;
+  cursor: pointer;
+}
+.search-wrapper {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  padding: 0 220px;
+  position: relative;
+  width: 100%; /* 요소 크기만큼만 너비 설정 */
+  margin: 0 auto;
+  gap: 12px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 8px 40px 8px 12px; /* 오른쪽 여백 확보 */
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.search-btn {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  color: #888;
+}
+
+.search-btn:hover {
+  color: #000;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 20px;
+  padding: 30px 220px;
+}
+
+.job-card {
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding: 16px;
+  text-align: center;
+  background-color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease-in-out;
+}
+
+.job-card:hover {
+  transform: translateY(-4px);
+}
+
+.job-logo {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+  margin-bottom: 12px;
+}
+
+.job-title {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.job-deadline {
+  font-size: 13px;
+  color: #777;
+}
+
+/* 페이지네이션 */
+.pagination {
+  text-align: center;
+  margin: 30px 0 50px 0;
+}
+
+.pagination-list {
+  list-style: none;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 0;
+  margin: 0;
+}
+
+.page-btn {
+  display: inline-block;
+  padding: 4px 8px;
+  color: #333;
+  text-decoration: none;
+  font-size: 16px;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+}
+
+.page-btn:hover {
+  color: #0085ff;
+}
+
+.page-btn.active {
+  color: #0085ff;
+  font-weight: bold;
+}
+
+/* 반응형 */
+@media (max-width: 768px) {
+  .card-grid {
+    padding: 20px;
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .card-grid {
+    grid-template-columns: 1fr;
+  }
+}
