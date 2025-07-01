@@ -16,126 +16,151 @@
       <p>마이페이지 &gt; 이력서</p>
     </div>
     <div class="container">
-      <form>
-        <table class="resume-table">
-          <!-- 첫 줄: 이미지 텍스트 -->
-          <tr>
-            <th class="img">이미지</th>
-            <td class="centered-cell"><p>개인정보</p></td>
-          </tr>
-
-          <!-- 둘째 줄: 왼쪽에 이미지 + 파일선택 / 오른쪽은 그대로 -->
-          <tr>
-            <th style="text-align: center">
-              <img id="preview" src="" alt="미리보기 없음" />
-
-              <input type="file" id="imageUpload" accept="image/*" />
-              <div id="fileName" style="margin-top: 4px"></div>
-            </th>
-            <!-- 오른쪽: 개인정보 입력 -->
-            <td>
-              <div class="form-group">
-                <label for="address">주소</label>
+        <form>
+            <table class="resume-table">
+                <!-- 첫 줄: 이미지 텍스트 -->
+                <tr>
+                    <th class="img">제목</th>
+                    <td class="centered-cell">
+                        <div class="form-group">
                 <textarea
                         id="address"
                         class="short-text"
-                        placeholder="주소를 입력해 주세요."
+                        placeholder="제목를 입력해 주세요."
                 >
+여러분들의 일개미가 되겠습니다! </textarea
+                >
+                        </div>
+                    </td>
+                </tr>
+
+                <!-- 둘째 줄: 왼쪽에 이미지 + 파일선택 / 오른쪽은 그대로 -->
+                <tr>
+                    <th style="text-align: center">
+                        <img id="preview" src="" alt="미리보기 없음" />
+
+                        <input type="file" id="imageUpload" accept="image/*" />
+                        <div id="fileName" style="margin-top: 4px"></div>
+                    </th>
+                    <!-- 오른쪽: 개인정보 입력 -->
+                    <td>
+                        <div class="form-group">
+                            <label class="thick">이름</label>
+                            <p class="readonly-box">홍길동</p>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="thick">이메일</label>
+                            <p class="readonly-box">honggildong@example.com</p>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="thick">생년월일</label>
+                            <p class="readonly-box">1995-07-01</p>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="address">주소</label>
+                            <textarea
+                                    id="address"
+                                    class="short-text"
+                                    placeholder="주소를 입력해 주세요."
+                            >
 서울특별시 성동구 성수동</textarea
-                >
-              </div>
+                            >
+                        </div>
 
-              <div class="form-group">
-                <label for="phone">전화번호</label>
-                <textarea
-                        id="phone"
-                        class="short-text"
-                        placeholder="전화번호를 입력해 주세요."
-                >
+                        <div class="form-group">
+                            <label for="phone">전화번호</label>
+                            <textarea
+                                    id="phone"
+                                    class="short-text"
+                                    placeholder="전화번호를 입력해 주세요."
+                            >
 010-1234-5678</textarea
-                >
-              </div>
+                            >
+                        </div>
 
-              <div class="form-group">
-                <label for="education">학력</label>
-                <textarea
-                        id="education"
-                        class="short-text"
-                        placeholder="학력을 입력해 주세요."
-                >
+                        <div class="form-group">
+                            <label for="education">학력</label>
+                            <textarea
+                                    id="education"
+                                    class="short-text"
+                                    placeholder="학력을 입력해 주세요."
+                            >
 서울대학교 컴퓨터공학과 졸업</textarea
-                >
-              </div>
+                            >
+                        </div>
 
-              <div class="form-group">
-                <label for="career">경력</label>
-                <textarea
-                        id="career"
-                        class="short-text1"
-                        placeholder="경력을 입력해 주세요."
-                >
+                        <div class="form-group">
+                            <label for="career">경력</label>
+                            <textarea
+                                    id="career"
+                                    class="short-text1"
+                                    placeholder="경력을 입력해 주세요."
+                            >
 2021 ~ 2024 (주)코드랩 백엔드 개발자</textarea
-                >
-              </div>
+                            >
+                        </div>
 
-              <div class="form-group">
-                <label for="award">수상이력</label>
-                <textarea
-                        id="award"
-                        class="short-text1"
-                        placeholder="수상이력을 입력해 주세요."
-                >
+                        <div class="form-group">
+                            <label for="award">수상이력</label>
+                            <textarea
+                                    id="award"
+                                    class="short-text1"
+                                    placeholder="수상이력을 입력해 주세요."
+                            >
 2023 SW창의력대회 최우수상 수상</textarea
-                >
-              </div>
-            </td>
-          </tr>
+                            >
+                        </div>
+                    </td>
+                </tr>
 
-          <tr>
-            <th><textarea placeholder="질문 1을 입력하세요."></textarea></th>
-            <td>
-              <div class="textarea-wrapper">
-                <textarea placeholder="내용을 입력하세요."></textarea>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <th><textarea placeholder="질문 2를 입력하세요."></textarea></th>
-            <td>
-              <div class="textarea-wrapper">
-                <textarea placeholder="내용을 입력하세요."></textarea>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <th><textarea placeholder="질문 3을 입력하세요."></textarea></th>
-            <td>
-              <div class="textarea-wrapper">
-                <textarea placeholder="내용을 입력하세요."></textarea>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <th><textarea placeholder="질문 4를 입력하세요."></textarea></th>
-            <td>
-              <div class="textarea-wrapper">
-                <textarea placeholder="내용을 입력하세요."></textarea>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <th class="link">
-              포트폴리오 링크를<br />
-              넣어주세요.
-            </th>
-            <td>
+                <tr>
+                    <th><textarea placeholder="질문 1을 입력하세요."></textarea></th>
+                    <td>
+                        <div class="textarea-wrapper">
+                            <textarea placeholder="내용을 입력하세요."></textarea>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <th><textarea placeholder="질문 2를 입력하세요."></textarea></th>
+                    <td>
+                        <div class="textarea-wrapper">
+                            <textarea placeholder="내용을 입력하세요."></textarea>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <th><textarea placeholder="질문 3을 입력하세요."></textarea></th>
+                    <td>
+                        <div class="textarea-wrapper">
+                            <textarea placeholder="내용을 입력하세요."></textarea>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <th><textarea placeholder="질문 4를 입력하세요."></textarea></th>
+                    <td>
+                        <div class="textarea-wrapper">
+                            <textarea placeholder="내용을 입력하세요."></textarea>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="link">
+                        포트폴리오 링크를<br />
+                        넣어주세요.
+                    </th>
+                    <td>
               <textarea
                       placeholder="예: https://github.com/yourname/portfolio"
               ></textarea>
-            </td>
-          </tr>
-        </table>
-      </form>
+                    </td>
+                </tr>
+            </table>
+        </form>
     </div>
     <div class="button-group">
       <button type="button">취소</button>

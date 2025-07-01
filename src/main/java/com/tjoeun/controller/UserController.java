@@ -59,7 +59,7 @@ public class UserController {
   // 로그인 에러
   @GetMapping("/login/error")
   public String loginError(Model model) {
-    model.addAttribute("loginErrorMsg", "이메일 또는 비밀번호를 확인해주세요.");
+    model.addAttribute("loginErrorMsg", "이메일 또는 비밀번호를 확인해주세요");
     return "user/login";
   }
 }
