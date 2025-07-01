@@ -6,11 +6,12 @@
   <link rel="stylesheet" th:href="@{/css/header.css}" />
   <link rel="stylesheet" th:href="@{/css/signup.css}" />
   <title>회원가입</title>
-
   <style>
     .fieldError {
-      color: red;
+      color: blue;
       font-size: 0.9em;
+      margin-top: 2px;
+      margin-bottom: 8px;
     }
   </style>
 </head>
@@ -19,29 +20,37 @@
 
 <div class="signup-container">
   <h2>회원가입</h2>
+  <form th:action="@{/user/signup}" method="post" th:object="${userFormDto}"
+        onsubmit="return validateForm()" class="signup-form" novalidate>
 
-  <form th:action="@{/user/signup}" method="post" th:object="${userFormDto}" onsubmit="return validateForm()" class="signup-form">
-
+    <!-- 이름 -->
     <input type="text" th:field="*{userName}" placeholder="이름" />
     <p th:if="${#fields.hasErrors('userName')}" th:errors="*{userName}" class="fieldError"></p>
 
+    <!-- 이메일 -->
     <div class="input-wrapper">
       <input type="email" th:field="*{userEmail}" id="userEmail" placeholder="이메일" />
       <button type="button" class="check-btn" onclick="checkEmail()">중복확인</button>
     </div>
     <p th:if="${#fields.hasErrors('userEmail')}" th:errors="*{userEmail}" class="fieldError"></p>
+    <p id="emailMessage" class="fieldError"></p>
 
+    <!-- 닉네임 -->
     <div class="input-wrapper">
       <input type="text" th:field="*{userNickname}" id="userNickname" placeholder="닉네임" />
       <button type="button" class="check-btn" onclick="checkNickname()">중복확인</button>
     </div>
     <p th:if="${#fields.hasErrors('userNickname')}" th:errors="*{userNickname}" class="fieldError"></p>
+    <p id="nicknameMessage" class="fieldError"></p>
 
+    <!-- 비밀번호 -->
     <input type="password" th:field="*{userPassword}" id="userPassword" placeholder="비밀번호" />
     <p th:if="${#fields.hasErrors('userPassword')}" th:errors="*{userPassword}" class="fieldError"></p>
 
+    <!-- 비밀번호 확인 -->
     <input type="password" id="confirmPassword" placeholder="비밀번호 확인" />
 
+    <!-- 생년월일 -->
     <input type="date" th:field="*{userBirth}" placeholder="생년월일" />
     <p th:if="${#fields.hasErrors('userBirth')}" th:errors="*{userBirth}" class="fieldError"></p>
 
@@ -56,34 +65,38 @@
 
   async function checkEmail() {
     const email = document.getElementById("userEmail").value.trim();
+    const msg = document.getElementById("emailMessage");
     if (!email) {
-      alert("이메일을 입력해주세요.");
+      msg.textContent = "이메일을 입력해주세요.";
+      emailChecked = false;
       return;
     }
     const res = await fetch(`/api/user/check-email?email=${email}`);
     const data = await res.json();
     if (data.exists) {
-      alert("이미 사용 중인 이메일입니다.");
+      msg.textContent = "이미 존재하는 이메일입니다.";
       emailChecked = false;
     } else {
-      alert("사용 가능한 이메일입니다.");
+      msg.textContent = "사용 가능한 이메일입니다.";
       emailChecked = true;
     }
   }
 
   async function checkNickname() {
     const nickname = document.getElementById("userNickname").value.trim();
+    const msg = document.getElementById("nicknameMessage");
     if (!nickname) {
-      alert("닉네임을 입력해주세요.");
+      msg.textContent = "닉네임을 입력해주세요.";
+      nicknameChecked = false;
       return;
     }
     const res = await fetch(`/api/user/check-nickname?nickname=${nickname}`);
     const data = await res.json();
     if (data.exists) {
-      alert("이미 사용 중인 닉네임입니다.");
+      msg.textContent = "이미 존재하는 닉네임입니다.";
       nicknameChecked = false;
     } else {
-      alert("사용 가능한 닉네임입니다.");
+      msg.textContent = "사용 가능한 닉네임입니다.";
       nicknameChecked = true;
     }
   }
@@ -91,16 +104,17 @@
   function validateForm() {
     const pw = document.getElementById("userPassword").value;
     const pwConfirm = document.getElementById("confirmPassword").value;
-    if (pw !== pwConfirm) {
-      alert("비밀번호가 일치하지 않습니다.");
-      return false;
-    }
+
     if (!emailChecked) {
       alert("이메일 중복 확인을 해주세요.");
       return false;
     }
     if (!nicknameChecked) {
       alert("닉네임 중복 확인을 해주세요.");
+      return false;
+    }
+    if (pw !== pwConfirm) {
+      alert("비밀번호가 일치하지 않습니다.");
       return false;
     }
     return true;
