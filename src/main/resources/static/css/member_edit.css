@@ -1,0 +1,237 @@
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  margin: 0;
+  padding: 0;
+  /* background-color: #; */
+}
+
+/* 회원가입 박스 */
+.mypage-mainBox {
+  justify-content: center;
+}
+
+.mypage-container {
+  position: relative;
+  width: 700px;
+  margin: 60px auto 0;
+  padding: 30px;
+  border: 1px solid #ddd;
+  background-color: #ffffff;
+  border-radius: 10px;
+  padding-bottom: 80px;
+  overflow: hidden;
+}
+
+/* 제목 */
+.tab-box {
+  display: flex;
+  justify-content: center;
+  margin-top: 60px;
+  width: 100%;
+}
+
+.tab-inner {
+  width: 700px; /* ✅ .mypage-container와 같은 너비로 고정 */
+}
+
+.mypage-title {
+  font-size: 30px;
+  color: #444;
+  margin: 0 0 10px 0; /* 위는 없고 아래 간격만 약간 */
+  transform: translateY(4px); /* ✅ 시각적으로 살짝 내려주기 */
+  text-align: left;
+}
+
+.tab-buttons {
+  display: flex;
+  justify-content: flex-start; /* ✅ 왼쪽 정렬 */
+  gap: 20px;
+}
+
+/* 회원가입 박스 */
+.signup-container {
+  width: 700px;
+  margin: 60px auto 0;
+  padding: 30px;
+  border: 1px solid #ddd;
+  background-color: #ffffff;
+  border-radius: 10px;
+}
+
+/* 제목 */
+.tab-box {
+  display: flex;
+  justify-content: center;
+  margin-top: 60px;
+  width: 100%;
+}
+
+.tab-inner {
+  width: 700px;
+}
+
+.mypage-title {
+  font-size: 30px;
+  color: #444;
+  margin: 0 0 30px 0;
+  transform: translateY(4px);
+  text-align: left;
+}
+
+/* 폼 */
+.signup-form {
+  text-align: center;
+}
+
+/* ✅ form-group: label+input 묶음 */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 70%;
+  margin: 0 auto 16px auto; /* 중앙 + 아래 간격 */
+}
+
+.form-group label {
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+/* ✅ 일반 input (form-group 안) */
+.form-group input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  box-sizing: border-box;
+  font-size: 14px;
+  border-radius: 8px;
+}
+
+/* ✅ 아이디 + 중복확인 버튼 통합 input-wrapper */
+.input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.input-wrapper input {
+  width: 100%;
+  padding: 10px 100px 10px 14px; /* 오른쪽 버튼 공간 */
+  border: 1px solid #ccc;
+  background-color: white;
+  font-size: 14px;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
+/** 중복 확인 버튼 **/
+.input-wrapper .check-btn {
+  position: absolute;
+  width: 100px;
+  top: 50%;
+  right: 1px;
+  transform: translateY(-50%);
+  padding: 10px 16px;
+  background-color: #0085ff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  height: 100%;
+  cursor: pointer;
+}
+
+.input-wrapper .check-btn:hover {
+  background-color: white;
+  border: 1px solid #0085ff;
+  color: #0085ff;
+}
+
+/* 버튼 박스 */
+.button-box {
+  display: flex;
+  justify-content: flex-end;
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 20px 0 0 20px;
+}
+/* 회원정보수정, 이력서관리, 지원현황, 스크랩 div */
+.tab-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+/* 수정/목록 버튼 공통 */
+.action-button {
+  width: 200px;
+  padding: 10px 0;
+  font-size: 20px;
+  /* font-weight: bold; */
+  background-color: #0085ff;
+  border: 1px solid #0085ff;
+  color: white;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+/* 호버 효과 */
+.action-button:hover {
+  background-color: white;
+  color: #0085ff;
+}
+
+/* 버튼 */
+.button-box {
+  display: flex;
+  justify-content: flex-end; /* 오른쪽 정렬 */
+  width: 70%; /* 폼 input 너비와 동일하게 맞춤 */
+  margin: 0 auto; /* 중앙 기준 정렬 (flex-end는 내부 정렬) */
+  margin-top: 20px;
+}
+
+.action-button {
+  width: 150px;
+  padding: 10px 0;
+  font-size: 16px;
+  background-color: #0085ff;
+  border: 1px solid #0085ff;
+  color: white;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: 0.3s;
+}
+
+.action-button:hover {
+  background-color: white;
+  color: #0085ff;
+}
+
+/* 회원정보수정, 이력서관리, 지원현황, 스크랩 버튼 */
+.tab {
+  width: 160px;
+  padding: 10px 0;
+  font-size: 16px;
+  background-color: white;
+  color: #0085ff;
+  border: 1px solid #0085ff;
+  border-radius: 4px;
+}
+.tab:hover {
+  background-color: #0085ff;
+  color: white;
+}
+
+.tab1 {
+  width: 160px;
+  padding: 10px 0;
+  font-size: 16px;
+  background-color: #0085ff;
+  color: white;
+  border: 1px solid #0085ff;
+  border-radius: 4px;
+  cursor: pointer;
+}

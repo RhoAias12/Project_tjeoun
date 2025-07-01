@@ -1,0 +1,206 @@
+/* 공통 박스 */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Noto Sans KR', sans-serif;
+}
+
+.page-title {
+  flex: 1 0 auto;
+  max-width: 1200px;
+  width: 100%;
+  margin: 30px auto;
+  padding: 30px 0;
+}
+
+.container {
+  flex: 1 0 auto;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  background-color: #fff;
+}
+
+/* 제목 */
+.page-title p {
+  font-size: 30px;
+  margin: 0;
+  text-align: left;
+}
+
+/* 사진 미리보기 */
+#preview {
+  width: 113px;
+  height: 151px;
+  object-fit: cover;
+  display: none;
+  margin: 0 auto 8px auto;
+  border: 1px solid #ccc;
+}
+
+/* 테이블 기본 */
+.resume-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.resume-table th,
+.resume-table td {
+  border: 1px solid #ccc;
+  padding: 12px;
+  vertical-align: top;
+}
+
+.resume-table th {
+  background-color: #f0f0f0;
+  width: 25%;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.resume-table th p {
+  margin: 0;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.resume-table td p.content {
+  padding: 10px 0;
+}
+
+.centered-cell {
+  text-align: center;
+  vertical-align: middle;
+}
+
+/* 파일 선택 input */
+input[type='file'] {
+  display: block;
+  margin: 10px auto 0;
+  font-size: 14px;
+}
+
+#fileName {
+  margin-top: 4px;
+  font-size: 12px;
+}
+
+/* ✅ textarea 공통 */
+textarea {
+  width: 100%;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  padding: 10px;
+  line-height: 1.4;
+  border-radius: 4px;
+  resize: vertical;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.short-text {
+  height: 40px;
+  resize: none;
+  margin-bottom: 10px;
+  margin-top: 5px; /*주소, 전화번호, 최종학력 input 사이 간격*/
+}
+
+/* 경력, 수상이력*/
+.short-text1 {
+  margin-bottom: 10px;
+  margin-top: 5px; /*주소, 전화번호, 최종학력 등 input 사이 간격*/
+}
+
+textarea:not(.short-text) {
+  height: 100px;
+}
+
+.question-textarea {
+  width: 250px;
+  height: 80px;
+  margin-top: 10px;
+}
+
+.answer-textarea {
+  height: 200px;
+}
+
+.readonly-box {
+  width: 100%;
+  height: 40px;
+  padding: 8px 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #fff;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  margin-bottom: 8px;
+}
+
+/* ✅ 이미지 컬럼 */
+.img {
+  width: 100%;
+  height: auto;
+}
+
+/* 버튼 그룹 */
+.button-group {
+  flex: 1 0 auto;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 30px 0;
+  text-align: right;
+}
+
+.button-group button {
+  padding: 10px 20px;
+  font-size: 14px;
+  cursor: pointer;
+  border: 1px solid #0085ff;
+  background-color: white;
+  color: #0085ff;
+  border-radius: 6px;
+  transition: all 0.2s ease-in-out;
+}
+
+.button-group button:hover {
+  background-color: #0085ff;
+  color: white;
+}
+
+/* ✅ 반응형 */
+@media (max-width: 768px) {
+  .container {
+    padding: 20px;
+  }
+
+  .resume-table th,
+  .resume-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .resume-table th {
+    background-color: transparent;
+    font-weight: bold;
+    margin-top: 20px;
+  }
+
+  .resume-table td {
+    padding-top: 5px;
+  }
+
+  .button-group {
+    text-align: center;
+  }
+}

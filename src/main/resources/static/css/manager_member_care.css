@@ -1,0 +1,177 @@
+/* 제목 */
+.tab-box {
+  display: flex;
+  justify-content: center;
+  margin-top: 60px;
+  width: 100%;
+}
+
+.tab-inner {
+  width: 700px;
+}
+
+.mypage-title {
+  font-size: 30px;
+  color: #444;
+  margin: 0 0 30px 0;
+  transform: translateY(4px);
+  text-align: left;
+}
+
+/* 지원현황 카드 리스트 */
+.apply-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 90px;
+}
+
+/* 개별 카드 */
+.apply-card {
+  height: 130px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border: 1px solid #ccc;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+}
+
+/* 공고명 + 회사명 왼쪽 */
+.apply-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.job-title {
+  font-weight: bold;
+  font-size: 15px;
+}
+
+.company-name {
+  font-size: 14px;
+  color: #555;
+}
+
+/* 오른쪽 버튼 두 개 */
+.apply-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+/* 지원취소 버튼 */
+.cancel-btn:hover {
+  background-color: #ffeded;
+  border-color: #f55;
+}
+
+/* 지원상태 버튼*/
+.status-btn:hover {
+  background-color: rgba(85, 144, 255, 0.2);
+  border-color: #5590ff;
+}
+
+.status-btn,
+.cancel-btn {
+  padding: 6px 14px;
+  background-color: white;
+  border: 1px solid #999;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+/* 페이지네이션 전체 영역 */
+.pagination {
+  text-align: center;
+  margin-top: 30px;
+}
+
+/* 페이지네이션 리스트 */
+.pagination-list {
+  list-style: none;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 0;
+  margin: 0px 0 0 0;
+}
+
+/* 페이지 버튼 기본 스타일 */
+.page-btn {
+  display: inline-block;
+  padding: 4px 8px;
+  text-align: center;
+  color: #333;
+  text-decoration: none;
+  font-size: 16px;
+  border: none;
+  background-color: transparent;
+  border-radius: 0;
+  cursor: pointer;
+}
+
+.page-btn:hover {
+  color: #0085ff;
+}
+
+.page-btn.active {
+  color: #0085ff;
+  font-weight: bold;
+}
+
+/* 검색창 및 정렬 */
+.search-sort {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.search-input {
+  width: 100%;
+  height: 60px;
+  padding: 8px 40px 8px 12px; /* 오른쪽 여백 확보 */
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.sort-select {
+  padding: 8px 15px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background-color: #fff;
+  cursor: pointer;
+}
+.search-wrapper {
+  position: relative;
+  width: 80%;
+}
+
+.search-input {
+  width: 100%;
+  padding: 8px 40px 8px 12px; /* 오른쪽 여백 확보 */
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.search-btn {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  color: #888;
+}
+
+.search-btn:hover {
+  color: #000;
+}
