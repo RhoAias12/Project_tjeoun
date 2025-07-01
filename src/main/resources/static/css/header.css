@@ -50,3 +50,8 @@ body {
     gap: 1vw;
   }
 }
+a {
+  color: inherit;       /* 부모 색상 따라감 */
+  text-decoration: none; /* 밑줄 제거 */
+  cursor: pointer;       /* 마우스 커서 손가락 모양 */
+}
