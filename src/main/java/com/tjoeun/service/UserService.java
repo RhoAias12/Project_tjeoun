@@ -41,4 +41,12 @@ public class UserService implements UserDetailsService {
       .roles(user.getUserRole().toString())
       .build();
   }
+
+  public boolean emailExists(String email) {
+    return userRepository.findByUserEmail(email) != null;
+  }
+
+  public boolean nicknameExists(String nickname) {
+    return userRepository.findByUserNickname(nickname) != null;
+  }
 }

@@ -52,10 +52,6 @@ public class UserController {
   public String loginForm() {
     return "user/login";
   }
-    @GetMapping("/apply_status")
-    public String applyStatusPage() {
-        return "user/apply_status";
-    }
 
   // 로그인 에러
   @GetMapping("/login/error")
@@ -63,8 +59,4 @@ public class UserController {
     model.addAttribute("loginErrorMsg", "이메일 또는 비밀번호를 확인해주세요.");
     return "user/login";
   }
-    @GetMapping("/scrap")
-    public String scrapPage() {
-        return "user/scrap";
-    }
 }
