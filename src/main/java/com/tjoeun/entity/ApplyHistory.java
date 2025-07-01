@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.sql.Timestamp;
+import java.util.Arrays;
 
 @Entity
 @Table(name = "apply_history")
@@ -33,7 +34,25 @@ public class ApplyHistory {
   private Timestamp apply;
 
   public enum ApplyStatus {
-    접수, 마감, 합격, 불합격
+    SUBMITTED("접수중"),
+    FINALIZED("합격"),
+    REJECTED("불합격");
+
+    private final String display;
+
+    ApplyStatus(String display) {
+      this.display = display;
+    }
+
+    public String getDisplay() {
+      return display;
+    }
+
+    public static ApplyStatus fromDisplay(String display) {
+      return Arrays.stream(values())
+        .filter(v -> v.display.equals(display))
+        .findFirst()
+        .orElseThrow(() -> new IllegalArgumentException("Unknown display value: " + display));
+    }
   }
 }
-

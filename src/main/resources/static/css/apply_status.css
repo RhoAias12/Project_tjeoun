@@ -78,9 +78,9 @@
   gap: 6px;
 }
 /* 지원취소 버튼 */
-.cancel-btn:hover {
-  background-color: #ffeded;
-  border-color: #f55;
+.react-btn:hover {
+  background-color: #D9E5FF;
+  border-color: #6799FF;
 }
 
 /* 지원상태 버튼*/
@@ -90,7 +90,7 @@
 }
 
 .status-btn,
-.cancel-btn {
+.react-btn {
   padding: 6px 14px;
   background-color: white;
   border: 1px solid #999;
