@@ -29,7 +29,7 @@ public class SecurityConfig {
       .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
       .authorizeHttpRequests(auth -> auth
         .requestMatchers("/css/**", "/js/**", "/images/**", "/static/**").permitAll()
-        .requestMatchers("/", "/user/signup", "/user/login", "/user/login/error").permitAll()
+        .requestMatchers("/", "/user/signup", "/user/login","/api/user/**", "/user/login/error").permitAll()
         .requestMatchers("/admin/**").hasRole("ADMIN")
         .anyRequest().authenticated()
       )
