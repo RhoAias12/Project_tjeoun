@@ -18,8 +18,5 @@ public class EmplController {
         return "empl/empl_detail";
     }
 
-    @GetMapping("/empl_modify")
-    public String emplModifyPage() {
-        return "empl/empl_modify";
-    }
+
 }
