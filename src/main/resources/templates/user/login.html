@@ -1,36 +1,31 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="ko">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="/js/main.js"></script>
-  <link rel="stylesheet" href="/page/css/login.css" />
-  <title>로그인</title>
-</head>
-<body>
-<div id="header"></div>
-
-<div class="signup-container">
-  <p>로그인</p>
-
-  <form method="post" action="/user/login" class="signup-form">
-    <input type="text" name="userEmail" placeholder="이메일" required />
-    <input type="password" name="password" placeholder="비밀번호" required />
-
-    <div class="search">
-      <a href="#">아이디 찾기</a> | <a href="#">비밀번호 찾기</a>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="js/main.js"></script>
+    <!-- <script src="js/footer.js"></script> -->
+    <link rel="stylesheet" th:href="@{/css/header.css}" />
+    <link rel="stylesheet" th:href="@{/css/login.css}" />
+    <title>로그인</title>
+  </head>
+  <body>
+    <!-- 헤더가 삽입될 위치 -->
+    <div th:replace="include/header :: header"></div>
+    <div class="signup-container">
+      <p>로그인</p>
+      <form class="signup-form">
+        <input type="email" placeholder="이메일" required />
+        <input type="password" placeholder="비밀번호" required />
+        <div class="search">
+          <a href="#">아이디 찾기</a> | <a href="#">비밀번호 찾기</a>
+        </div>
+        <div class="button-group">
+          <button type="submit">로그인</button>
+          <button type="button">회원가입</button>
+        </div>
+      </form>
     </div>
-
-    <p th:if="${loginErrorMsg}" th:text="${loginErrorMsg}" style="color:red;"></p>
-
-    <div class="button-group">
-      <button type="submit">로그인</button>
-      <button type="button" onclick="location.href='/user/signup'">회원가입</button>
-    </div>
-
-    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-  </form>
-</div>
-
-</body>
+    <!-- <div id="footer"></div> -->
+  </body>
 </html>

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>이력서 수정페이지</title>
+      <link rel="stylesheet" th:href="@{/css/main.css}" />
+      <link rel="stylesheet" th:href="@{/css/header.css}" />
+      <link rel="stylesheet" th:href="@{/css/footer.css}" />
+      <link rel="stylesheet" th:href="@{/css/react.css}" />
+    <script defer src="../../../../../../final_project/front/js/main.js"></script>
+  </head>
+  <body>
+    <div th:replace="include/header :: header"></div>
+    <div class="page-title">
+        <p>마이페이지 &gt; 이력서</p>
+    </div>
+    <div class="container">
+        <form>
+            <table class="resume-table">
+                <!-- 첫 줄: 이미지 텍스트 -->
+                <tr>
+                    <!-- 왼쪽: 이미지 + 파일 선택 -->
+                    <th style="text-align: center">
+                        <img id="preview" src="" alt="미리보기 없음" />
+                        <input type="file" id="imageUpload" accept="image/*" />
+                        <div id="fileName" style="margin-top: 4px"></div>
+                    </th>
+
+                    <!-- 오른쪽: 개인정보 입력 -->
+                    <td>
+                        <div class="form-group">
+                            <label for="address">주소</label>
+                            <textarea
+                                    id="address"
+                                    class="short-text"
+                                    placeholder="주소를 입력해 주세요."
+                            >
+서울특별시 성동구 성수동</textarea
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="phone">전화번호</label>
+                            <textarea
+                                    id="phone"
+                                    class="short-text"
+                                    placeholder="전화번호를 입력해 주세요."
+                            >
+010-1234-5678</textarea
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="education">최종 학력</label>
+                            <textarea
+                                    id="education"
+                                    class="short-text"
+                                    placeholder="최종 학력을 입력해 주세요."
+                            >
+서울대학교 컴퓨터공학과 졸업</textarea
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="career">경력</label>
+                            <textarea
+                                    id="career"
+                                    class="short-text1"
+                                    placeholder="경력을 입력해 주세요."
+                            >
+2021 ~ 2024 (주)코드랩 백엔드 개발자</textarea
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="award">수상이력</label>
+                            <textarea
+                                    id="award"
+                                    class="short-text1"
+                                    placeholder="수상이력을 입력해 주세요."
+                            >
+2023 SW창의력대회 최우수상 수상</textarea
+                            >
+                        </div>
+                    </td>
+                </tr>
+
+                <tr>
+                    <th>
+                        <div class="question">
+                            <p>질문1.</p>
+                            <textarea class="question-textarea">
+본인 소개 부탁드립니다.</textarea
+                            >
+                        </div>
+                    </th>
+                    <td>
+              <textarea class="answer-textarea">
+안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
+안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
+안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
+안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
+안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
+안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
+안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
+안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
+안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
+안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
+    </textarea
+    >
+                    </td>
+                </tr>
+
+                <tr>
+                    <th>
+                        <div class="question">
+                            <p>질문1.</p>
+                            <textarea class="question-textarea">
+본인 소개 부탁드립니다.</textarea
+                            >
+                        </div>
+                    </th>
+                    <td>
+              <textarea class="answer-textarea">
+안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
+안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
+안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
+안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
+안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
+안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
+안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
+안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
+안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
+안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
+    </textarea
+    >
+                    </td>
+                </tr>
+
+                <tr>
+                    <th>
+                        <div class="question">
+                            <p>질문1.</p>
+                            <textarea class="question-textarea">
+본인 소개 부탁드립니다.</textarea
+                            >
+                        </div>
+                    </th>
+                    <td>
+              <textarea class="answer-textarea">
+안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
+안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
+안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
+안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
+안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
+안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
+안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
+안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
+안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
+안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
+    </textarea
+    >
+                    </td>
+                </tr>
+
+                <tr>
+                    <th>
+                        <div class="question">
+                            <p>질문1.</p>
+                            <textarea class="question-textarea">
+본인 소개 부탁드립니다.</textarea
+                            >
+                        </div>
+                    </th>
+                    <td>
+              <textarea class="answer-textarea">
+안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
+안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
+안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
+안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
+안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
+안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
+안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
+안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
+안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
+안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
+    </textarea
+    >
+                    </td>
+                </tr>
+
+                <tr>
+                    <th class="link">
+                        포트폴리오 링크를<br />
+                        넣어주세요.
+                    </th>
+                    <td>
+              <textarea
+                      placeholder="예: https://github.com/yourname/portfolio"
+              ></textarea>
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+    <div class="button-group">
+        <button type="button">취소</button>
+        <button type="submit">수정</button>
+    </div>
+    <div th:replace="include/footer :: footer"></div>
+  </body>
+</html>

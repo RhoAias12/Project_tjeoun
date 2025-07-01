@@ -1,0 +1,94 @@
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+.signup-container {
+  width: 700px;
+  margin: 180px auto;
+  padding: 20px;
+  border: 1px solid #ddd;
+  background-color: #ffffff;
+  border-radius: 10px;
+}
+
+.signup-container h2 {
+  font-size: 16px;
+  margin-bottom: 20px;
+  color: #444;
+  text-align: center;
+}
+
+.signup-form {
+  text-align: center;
+  height: 60%;
+}
+
+/* 기존 input */
+.signup-form input {
+  width: 70%;
+  padding: 10px;
+  margin-bottom: 12px;
+  border: 1px solid #ccc;
+  background-color: white;
+  box-sizing: border-box;
+  font-size: 14px;
+  border-radius: 8px;
+}
+
+/* 가입 버튼 */
+.signup-form button {
+  width: 70%;
+  padding: 10px;
+  background-color: #0085ff;
+  border: 1px solid #0085ff;
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
+  border-radius: 8px;
+  margin-top: 12px;
+}
+
+.signup-form button:hover {
+  background-color: white;
+  color: #0085ff;
+}
+
+/* ✅ 아이디 + 중복확인 버튼 통합 input 스타일 */
+.input-wrapper {
+  position: relative;
+  width: 70%;
+  margin: 0 auto;
+}
+
+.input-wrapper input {
+  width: 100%;
+  padding: 10px 100px 10px 14px; /* 오른쪽 버튼 공간 확보 */
+  border: 1px solid #ccc;
+  background-color: white;
+  font-size: 14px;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
+.input-wrapper .check-btn {
+  position: absolute;
+  width: 100px;
+  top: 14%;
+  right: 1px;
+  transform: translateY(-50%);
+  padding: 10px 16px;
+  background-color: #0085ff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  height: 75%;
+  cursor: pointer;
+}
+
+.input-wrapper .check-btn:hover {
+  background-color: white;
+  border: 1px solid #ccc;
+}

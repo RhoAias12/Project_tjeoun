@@ -1,0 +1,194 @@
+/* 공고 수정 페이지 전용 CSS */
+
+/* 기본 설정 */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Arial', sans-serif;
+}
+
+.container {
+  max-width: 100%;
+  margin: 0px 20%;
+  padding: 30px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+}
+
+.page-title {
+  max-width: 900px;
+  margin: 30px 20% 10px;
+  padding: 0;
+}
+
+.page-title p {
+  font-size: 30px;
+  margin: 60px 0;
+  text-align: left;
+  font-weight: 600;
+}
+
+.job-info {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  border: 1px solid #ccc;
+  padding: 20px;
+  margin-bottom: 30px;
+  gap: 20px;
+}
+
+.job-info .info-left {
+  word-break: break-word;
+}
+
+.job-info .info-left .title input {
+  font-size: 18px;
+  font-weight: bold;
+  border: 1px solid #ccc;
+  padding: 6px 8px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.job-info .info-left .company input {
+  font-size: 15px;
+  border: 1px solid #ccc;
+  padding: 6px 8px;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 8px;
+}
+
+.job-info .meta span {
+  font-size: 13px;
+  margin-right: 10px;
+  color: #555;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 8px;
+}
+
+.job-info .meta input[type='text'],
+.job-info .meta input[type='date'] {
+  font-size: 13px;
+  border: 1px solid #ccc;
+  padding: 4px 6px;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.job-info .info-right {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+}
+
+.job-info .logo {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+  border: 1px solid #ccc;
+  background-color: #fff;
+}
+
+.logo-label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: #333;
+}
+
+#logoUpload {
+  display: block;
+  margin: 0 auto;
+  width: 100px;
+  text-align: center;
+}
+
+#logoPreview {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  display: block;
+}
+
+.job-desc h3 {
+  font-size: 18px;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.job-desc textarea {
+  width: 100%;
+  height: 200px;
+  font-size: 16px;
+  line-height: 1.6;
+  padding: 10px;
+  resize: vertical;
+  border: 1px solid #ccc;
+  margin-bottom: 20px;
+  white-space: pre-line;
+  background: #fff;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.button-group {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin: 0 220px;
+  padding: 30px 0;
+  flex-wrap: wrap;
+}
+
+.button-group button {
+  padding: 10px 20px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.button-group button:hover {
+  background-color: #0085ff;
+  color: white;
+  border-color: #0085ff;
+}
+
+/* 반응형 */
+@media (max-width: 768px) {
+  .container,
+  .button-group {
+    margin: 0 10px;
+    padding: 20px;
+  }
+
+  .page-title {
+    margin: 20px 10px 10px;
+    padding: 0;
+  }
+
+  .job-info {
+    grid-template-columns: 1fr;
+  }
+
+  .job-info .logo {
+    margin-top: 20px;
+  }
+
+  .button-group {
+    justify-content: center;
+  }
+}
