@@ -47,108 +47,61 @@
          </div>
 
          <div class="card-grid">
-           <div class="job-card">
-             <img src="/images/tjoeun.jpg" alt="회사 로고" class="job-logo" />
-             <h3 class="job-title">[인텔리전스랩스그룹] 데이터 분석가</h3>
-             <p class="job-deadline">마감일: 2025-12-31</p>
-           </div>
-           <div class="job-card">
-             <img src="/images/tjoeun.jpg" alt="회사 로고" class="job-logo" />
-             <h3 class="job-title">[인텔리전스랩스그룹] 데이터 분석가</h3>
-             <p class="job-deadline">마감일: 2025-12-31</p>
-           </div>
-           <div class="job-card">
-             <img src="/images/tjoeun.jpg" alt="회사 로고" class="job-logo" />
-             <h3 class="job-title">[인텔리전스랩스그룹] 데이터 분석가</h3>
-             <p class="job-deadline">마감일: 2025-12-31</p>
-           </div>
-           <div class="job-card">
-             <img src="/images/tjoeun.jpg" alt="회사 로고" class="job-logo" />
-             <h3 class="job-title">[인텔리전스랩스그룹] 데이터 분석가</h3>
-             <p class="job-deadline">마감일: 2025-12-31</p>
-           </div>
-           <div class="job-card">
-             <img src="/images/tjoeun.jpg" alt="회사 로고" class="job-logo" />
-             <h3 class="job-title">[인텔리전스랩스그룹] 데이터 분석가</h3>
-             <p class="job-deadline">마감일: 2025-12-31</p>
-           </div>
-           <div class="job-card">
-             <img src="/images/tjoeun.jpg" alt="회사 로고" class="job-logo" />
-             <h3 class="job-title">[인텔리전스랩스그룹] 데이터 분석가</h3>
-             <p class="job-deadline">마감일: 2025-12-31</p>
-           </div>
-           <div class="job-card">
-             <img src="/images/tjoeun.jpg" alt="회사 로고" class="job-logo" />
-             <h3 class="job-title">[인텔리전스랩스그룹] 데이터 분석가</h3>
-             <p class="job-deadline">마감일: 2025-12-31</p>
-           </div>
-           <div class="job-card">
-             <img src="/images/tjoeun.jpg" alt="회사 로고" class="job-logo" />
-             <h3 class="job-title">[인텔리전스랩스그룹] 데이터 분석가</h3>
-             <p class="job-deadline">마감일: 2025-12-31</p>
-           </div>
-           <div class="job-card">
-             <img src="/images/tjoeun.jpg" alt="회사 로고" class="job-logo" />
-             <h3 class="job-title">[인텔리전스랩스그룹] 데이터 분석가</h3>
-             <p class="job-deadline">마감일: 2025-12-31</p>
-           </div>
-           <div class="job-card">
-             <img src="/images/tjoeun.jpg" alt="회사 로고" class="job-logo" />
-             <h3 class="job-title">[인텔리전스랩스그룹] 데이터 분석가</h3>
-             <p class="job-deadline">마감일: 2025-12-31</p>
-           </div>
-           <div class="job-card">
-             <img src="/images/tjoeun.jpg" alt="회사 로고" class="job-logo" />
-             <h3 class="job-title">[인텔리전스랩스그룹] 데이터 분석가</h3>
-             <p class="job-deadline">마감일: 2025-12-31</p>
-           </div>
-           <div class="job-card">
-             <img src="/images/tjoeun.jpg" alt="회사 로고" class="job-logo" />
-             <h3 class="job-title">[인텔리전스랩스그룹] 데이터 분석가</h3>
-             <p class="job-deadline">마감일: 2025-12-31</p>
-           </div>
-           <div class="job-card">
-             <img src="/images/tjoeun.jpg" alt="회사 로고" class="job-logo" />
-             <h3 class="job-title">[인텔리전스랩스그룹] 데이터 분석가</h3>
-             <p class="job-deadline">마감일: 2025-12-31</p>
-           </div>
-           <div class="job-card">
-             <img src="/images/tjoeun.jpg" alt="회사 로고" class="job-logo" />
-             <h3 class="job-title">[인텔리전스랩스그룹] 데이터 분석가</h3>
-             <p class="job-deadline">마감일: 2025-12-31</p>
-           </div>
-           <div class="job-card">
-             <img src="/images/tjoeun.jpg" alt="회사 로고" class="job-logo" />
-             <h3 class="job-title">[인텔리전스랩스그룹] 데이터 분석가</h3>
-             <p class="job-deadline">마감일: 2025-12-31</p>
-           </div>
-           <div class="job-card">
-             <img src="/images/tjoeun.jpg" alt="회사 로고" class="job-logo" />
-             <h3 class="job-title">[인텔리전스랩스그룹] 데이터 분석가</h3>
-             <p class="job-deadline">마감일: 2025-12-31</p>
-           </div>
-           <div class="job-card">
-             <img src="/images/tjoeun.jpg" alt="회사 로고" class="job-logo" />
-             <h3 class="job-title">[인텔리전스랩스그룹] 데이터 분석가</h3>
-             <p class="job-deadline">마감일: 2025-12-31</p>
+           <div class="job-card" th:each="job : ${jobPage.content}">
+             <a th:href="@{'/empl/empl_detail/' + ${job.recruitmentIdx}}">
+               <img th:src="${job.logoUrl}" alt="회사 로고" class="job-logo" />
+               <h3 class="job-title" th:text="${job.title}">공고 제목</h3>
+               <p class="job-deadline"
+                  th:text="${#strings.startsWith(job.deadline.toString(), '9999') ? '상시채용' : '마감일: ' + job.deadline}">
+               </p>
+
+             </a>
            </div>
          </div>
 
+
+         <!-- 페이지네이션 -->
+<!--         <div class="pagination">-->
+<!--           <ul class="pagination-list">-->
+<!--             <li><a href="#" class="page-btn">〈</a></li>-->
+<!--             <li><a href="#" class="page-btn active">1</a></li>-->
+<!--             <li><a href="#" class="page-btn">2</a></li>-->
+<!--             <li><a href="#" class="page-btn">3</a></li>-->
+<!--             <li><a href="#" class="page-btn">4</a></li>-->
+<!--             <li><a href="#" class="page-btn">5</a></li>-->
+<!--             <li><a href="#" class="page-btn">〉</a></li>-->
+<!--           </ul>-->
+<!--         </div>-->
+<!--       </div>-->
+<!--     </div>-->
+
+         <!-- 공고 리스트 반복 -->
          <!-- 페이지네이션 -->
          <div class="pagination">
            <ul class="pagination-list">
-             <li><a href="#" class="page-btn">〈</a></li>
-             <li><a href="#" class="page-btn active">1</a></li>
-             <li><a href="#" class="page-btn">2</a></li>
-             <li><a href="#" class="page-btn">3</a></li>
-             <li><a href="#" class="page-btn">4</a></li>
-             <li><a href="#" class="page-btn">5</a></li>
-             <li><a href="#" class="page-btn">〉</a></li>
+             <!-- 이전 페이지 버튼 -->
+             <li th:if="${jobPage.hasPrevious()}">
+               <a th:href="@{/empl/empl_main(page=${jobPage.number - 1})}" class="page-btn">〈</a>
+             </li>
+
+             <!-- 페이지 번호 10개씩 반복 -->
+             <li th:each="i : ${#numbers.sequence(startPage, endPage)}">
+               <a th:href="@{/empl/empl_main(page=${i})}"
+                  th:text="${i + 1}"
+                  th:class="'page-btn' + (${jobPage.number} == ${i} ? ' active' : '')">
+               </a>
+             </li>
+
+             <!-- 다음 페이지 버튼 -->
+             <li th:if="${jobPage.hasNext()}">
+               <a th:href="@{/empl/empl_main(page=${jobPage.number + 1})}" class="page-btn">〉</a>
+             </li>
            </ul>
          </div>
-       </div>
-     </div>
 
-     <div th:replace="include/footer :: footer"></div>
+
+
+
+         <div th:replace="include/footer :: footer"></div>
   </body>
 </html>
