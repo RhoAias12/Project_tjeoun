@@ -10,18 +10,22 @@ import java.time.LocalDate;
 public class UserFormDto {
 
   @NotBlank(message = "이름은 필수 입력 값입니다.")
+  @Size(min = 2, max = 10, message = "이름은 2~10글자 사이로 입력해주세요.")
+  @Pattern(regexp = "^[가-힣a-zA-Z]+$", message = "이름은 특수문자와 숫자를 포함할 수 없습니다.")
   private String userName;
 
-  @NotEmpty(message = "이메일은 필수 입력 값입니다.")
+  @NotBlank(message = "이메일은 필수 입력 값입니다.")
   @Email(message = "이메일 형식으로 입력해주세요.")
   private String userEmail;
 
-  @NotEmpty(message = "비밀번호는 필수 입력 값입니다.")
-  @Size(min=8, max=16, message = "비밀번호는 8자 이상, 16자 이하로 입력해주세요.")
-  private String userPassword;
-
-  @NotEmpty(message = "닉네임은 필수 입력 값입니다.")
+  @NotBlank(message = "닉네임은 필수 입력 값입니다.")
+  @Size(min = 2, max = 20, message = "닉네임은 2~20글자 사이로 입력해주세요.")
   private String userNickname;
+
+  @NotBlank(message = "비밀번호는 필수 입력 값입니다.")
+  @Size(min = 4, max = 16, message = "비밀번호는 4~16글자 사이로 입력해주세요.")
+  @Pattern(regexp = "^[a-zA-Z0-9]*$", message = "비밀번호는 한글과 특수문자를 포함할 수 없습니다.")
+  private String userPassword;
 
   @NotNull(message = "생년월일은 필수 입력 값입니다.")
   private LocalDate userBirth;

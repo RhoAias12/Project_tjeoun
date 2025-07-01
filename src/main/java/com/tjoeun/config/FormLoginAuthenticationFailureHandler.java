@@ -14,6 +14,6 @@ public class FormLoginAuthenticationFailureHandler implements AuthenticationFail
   public void onAuthenticationFailure(HttpServletRequest request,
                                       HttpServletResponse response,
                                       AuthenticationException exception) throws IOException, ServletException {
-    response.sendRedirect("/users/login/error");  // 로그인 실패 시 이동할 경로
+    response.sendRedirect("/user/login/error");  // 로그인 실패 시 이동할 경로
   }
 }

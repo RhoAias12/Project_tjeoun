@@ -10,84 +10,55 @@
     <title>지원현황</title>
   </head>
   <body>
-    <!-- 헤더 -->
-    <div th:replace="include/header :: header"></div>
+  <!-- 헤더 -->
+  <div th:replace="include/header :: header"></div>
 
+  <!-- 전체 컨테이너 -->
+  <div class="tab-box">
+    <div class="tab-inner">
+      <h2 class="mypage-title">마이페이지</h2>
 
-    <!-- 전체 컨테이너 -->
-    <div class="tab-box">
-      <div class="tab-inner">
-        <h2 class="mypage-title">마이페이지</h2>
+      <!-- 탭 버튼 -->
+      <div class="tab-buttons">
+        <button class="tab" onclick="location.href='/mypage/member_modify'">회원정보수정</button>
+        <button class="tab" onclick="location.href='/mypage/react_list'">이력서관리</button>
+        <button class="tab1" onclick="location.href='/mypage/apply_status'">지원현황</button>
+        <button class="tab" onclick="location.href='/mypage/scrap'">스크랩</button>
+      </div>
 
-        <!-- 탭 버튼 -->
-        <div class="tab-buttons">
-          <button class="tab">회원정보수정</button>
-          <button class="tab">이력서관리</button>
-          <button class="tab1">지원현황</button>
-          <button class="tab">스크랩</button>
-        </div>
-
-        <!-- 게시물 리스트 -->
-        <div class="apply-list">
-          <div class="apply-card">
-            <div class="apply-info">
-              <div class="job-title">공고명</div>
-              <div class="company-name">회사명</div>
-            </div>
-            <div class="apply-buttons">
-              <div class="situation">지원상태</div>
-              <button class="cancel-btn">지원취소</button>
+      <!-- 게시물 리스트 -->
+      <div class="apply-list" th:if="${historyList != null}">
+        <div class="apply-card" th:each="history : ${historyList}">
+          <div class="apply-info">
+            <div class="job-title" th:text="${history.recruitment.title}">공고명</div>
+            <div class="company-name" th:text="${history.recruitment.company}">회사명</div>
+          </div>
+          <div class="apply-buttons">
+            <div class="situation" th:text="${history.status.display}">지원상태</div>
+            <div class="react-btn">
+              <a th:href="@{/resume/detail/{id}(id=${history.optionalIdx})}">지원 이력서</a>
             </div>
           </div>
-
-          <div class="apply-card">
-            <div class="apply-info">
-              <div class="job-title">공고명</div>
-              <div class="company-name">회사명</div>
-            </div>
-            <div class="apply-buttons">
-              <div class="situation">지원상태</div>
-              <button class="cancel-btn">지원취소</button>
-            </div>
-          </div>
-
-          <div class="apply-card">
-            <div class="apply-info">
-              <div class="job-title">공고명</div>
-              <div class="company-name">회사명</div>
-            </div>
-            <div class="apply-buttons">
-              <div class="situation">지원상태</div>
-              <button class="cancel-btn">지원취소</button>
-            </div>
-          </div>
-          <div class="apply-card">
-            <div class="apply-info">
-              <div class="job-title">공고명</div>
-              <div class="company-name">회사명</div>
-            </div>
-            <div class="apply-buttons">
-              <div class="situation">지원상태</div>
-              <button class="cancel-btn">지원취소</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- 페이지네이션 -->
-        <div class="pagination">
-          <ul class="pagination-list">
-            <li><a href="#" class="page-btn">〈</a></li>
-            <li><a href="#" class="page-btn active">1</a></li>
-            <li><a href="#" class="page-btn">2</a></li>
-            <li><a href="#" class="page-btn">3</a></li>
-            <li><a href="#" class="page-btn">4</a></li>
-            <li><a href="#" class="page-btn">5</a></li>
-            <li><a href="#" class="page-btn">〉</a></li>
-          </ul>
         </div>
       </div>
+
+      <!-- 페이지네이션 (예시용, 실제 페이징 처리 로직 필요 시 추가 구현) -->
+      <div class="pagination">
+        <ul class="pagination-list">
+          <li><a href="#" class="page-btn">〈</a></li>
+          <li><a href="#" class="page-btn active">1</a></li>
+          <li><a href="#" class="page-btn">2</a></li>
+          <li><a href="#" class="page-btn">3</a></li>
+          <li><a href="#" class="page-btn">4</a></li>
+          <li><a href="#" class="page-btn">5</a></li>
+          <li><a href="#" class="page-btn">〉</a></li>
+        </ul>
+      </div>
     </div>
-    <!-- 푸터 -->
-    <div th:replace="include/footer :: footer"></div>
+  </div>
+
+  <!-- 푸터 -->
+  <div th:replace="include/footer :: footer"></div>
   </body>
+
 </html>

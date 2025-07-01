@@ -20,6 +20,20 @@
             <table class="resume-table">
                 <!-- 첫 줄: 이미지 텍스트 -->
                 <tr>
+                    <th class="img">제목</th>
+                    <td class="centered-cell">
+                        <div class="form-group">
+                <textarea
+                        id="address"
+                        class="short-text"
+                        placeholder="제목를 입력해 주세요."
+                >
+여러분들의 일개미가 되겠습니다! </textarea
+                >
+                        </div>
+                    </td>
+                </tr>
+                <tr>
                     <!-- 왼쪽: 이미지 + 파일 선택 -->
                     <th style="text-align: center">
                         <img id="preview" src="" alt="미리보기 없음" />
@@ -29,6 +43,39 @@
 
                     <!-- 오른쪽: 개인정보 입력 -->
                     <td>
+                        <div class="form-group">
+                            <label for="name" class="thick">이름</label>
+                            <textarea
+                                    id="name"
+                                    class="short-text"
+                                    placeholder="이름을 입력해 주세요."
+                            >
+홍길동</textarea
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email" class="thick">이메일</label>
+                            <textarea
+                                    id="email"
+                                    class="short-text"
+                                    placeholder="이메일을 입력해 주세요."
+                            >
+honggildong@example.com</textarea
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="birth" class="thick">생년월일</label>
+                            <textarea
+                                    id="birth"
+                                    class="short-text"
+                                    placeholder="생년월일을 입력해 주세요."
+                            >
+1995-07-01</textarea
+                            >
+                        </div>
+
                         <div class="form-group">
                             <label for="address">주소</label>
                             <textarea
@@ -52,11 +99,11 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="education">최종 학력</label>
+                            <label for="education">학력</label>
                             <textarea
                                     id="education"
                                     class="short-text"
-                                    placeholder="최종 학력을 입력해 주세요."
+                                    placeholder="학력을 입력해 주세요."
                             >
 서울대학교 컴퓨터공학과 졸업</textarea
                             >
