@@ -18,13 +18,5 @@ public class UserController {
         return "user/signup";
     }
 
-    @GetMapping("/apply_status")
-    public String applyStatusPage() {
-        return "user/apply_status";
-    }
 
-    @GetMapping("/scrap")
-    public String scrapPage() {
-        return "user/scrap";
-    }
 }
