@@ -1,17 +1,17 @@
-<header id="head">
+<header id="head" xmlns:th="http://www.w3.org/1999/xhtml">
   <div class="menu left">
     <span class="logo">
       <img src="/images/tjoeun.jpg" alt="로고" />
     </span>
-    <span><a>채용공고</a></span>
-    <span><a>마이페이지</a></span>
-    <span><a>회원관리</a></span>
-    <span><a>공고관리</a></span>
+    <span><a th:href="@{/empl/empl_main}">채용공고</a></span>
+    <span><a th:href="@{/mypage/scrap}">마이페이지</a></span>
+    <span><a th:href="@{/admin/member_list}">회원관리</a></span>
+    <span><a th:href="@{/admin/recruit_list}">공고관리</a></span>
   </div>
   <div class="menu right">
-    <span><a>로그인</a></span>
-    <span><a>로그아웃</a></span>
-    <span><a>회원가입</a></span>
+    <span><a th:href="@{/user/login}">로그인</a></span>
+    <span><a th:href="@{/user/logout}">로그아웃</a></span> <!-- 로그아웃 경로는 컨트롤러에 맞게 조정 필요 -->
+    <span><a th:href="@{/user/signup}">회원가입</a></span>
   </div>
 </header>
 <link rel="stylesheet" href="css/header.css" />
