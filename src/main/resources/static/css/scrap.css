@@ -1,0 +1,198 @@
+.tab-box {
+  display: flex;
+  justify-content: center;
+  margin-top: 60px;
+  width: 100%;
+}
+
+.tab-inner {
+  width: 700px;
+}
+
+.mypage-title {
+  font-size: 30px;
+  color: #444;
+  margin-bottom: 30px;
+  transform: translateY(4px);
+  text-align: left;
+}
+
+.tab-buttons {
+  display: flex;
+  justify-content: flex-start;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.apply-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 90px;
+}
+
+/* 카드 전체 */
+.apply-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border: 1px solid #ccc;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  height: 130px;
+}
+
+/* 왼쪽: 공고명/회사명 */
+.apply-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.job-title {
+  font-weight: bold;
+  font-size: 15px;
+}
+
+.company-name {
+  font-size: 14px;
+  color: #555;
+}
+
+/* 오른쪽: 마감일 + 버튼 */
+.apply-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: space-between;
+  height: 100%;
+}
+
+.deadline {
+  font-size: 14px;
+  padding: 4px 10px;
+  /* border: 1px solid #999; */
+  border-radius: 4px;
+  color: #0085ff;
+  font-weight: bold;
+}
+
+.apply-action {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.heart {
+  font-size: 25px;
+  color: #ccc;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.bookmark-icon {
+  font-size: 24px;
+  color: #999;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+.bookmark-icon.active {
+  color: rgb(255, 220, 20);
+}
+
+.apply-btn {
+  padding: 6px 14px;
+  font-size: 14px;
+  background-color: white;
+  border: 1px solid #999;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.apply-btn:hover {
+  background-color: rgba(85, 144, 255, 0.2);
+  border-color: #5590ff;
+}
+
+/* 페이지네이션 */
+.pagination {
+  text-align: center;
+  margin-top: 30px;
+}
+
+.pagination-list {
+  list-style: none;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 0;
+  margin: 0;
+}
+
+.page-btn {
+  display: inline-block;
+  padding: 4px 8px;
+  color: #333;
+  text-decoration: none;
+  font-size: 16px;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+}
+
+.page-btn:hover {
+  color: #0085ff;
+}
+
+.page-btn.active {
+  color: #0085ff;
+  font-weight: bold;
+}
+
+/* 탭 버튼들 */
+.tab {
+  width: 160px;
+  padding: 10px 0;
+  font-size: 16px;
+  background-color: white;
+  color: #0085ff;
+  border: 1px solid #0085ff;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.tab:hover {
+  background-color: #0085ff;
+  color: white;
+}
+
+.tab1 {
+  width: 160px;
+  padding: 10px 0;
+  font-size: 16px;
+  background-color: #0085ff;
+  color: white;
+  border: 1px solid #0085ff;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.tab5 {
+  width: 80px;
+  padding: 10px 0;
+  font-size: 16px;
+  background-color: #0085ff;
+  color: white;
+  border: 1px solid #0085ff;
+  border-radius: 4px;
+  margin-top: 20px;
+  cursor: pointer;
+  display: block;
+  margin-left: auto;
+}
+
+.tab5:hover {
+  background-color: white;
+  color: #0085ff;
+}

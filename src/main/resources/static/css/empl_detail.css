@@ -1,0 +1,301 @@
+/* 공고 상세페이지용 empl_detail.css */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Arial', sans-serif;
+}
+
+.container {
+  max-width: 100%;
+  margin: 0 220px;
+  padding: 30px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+}
+
+.search {
+  max-width: 100%;
+  margin: 30px 220px 0;
+  padding: 30px;
+  background-color: #fff;
+}
+
+.page-title {
+  max-width: 900px;
+  margin: 30px 220px 10px;
+  padding: 0;
+}
+
+.page-title p {
+  font-size: 30px;
+  margin: 60px 0;
+  text-align: left;
+  font-weight: 600;
+}
+
+.search-bar {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 30px;
+}
+
+.search-bar input[type='text'],
+.search-bar input[type='date'] {
+  padding: 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 100%;
+}
+
+.search-bar button {
+  grid-column: span 2;
+  padding: 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  background-color: #0085ff;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.search-bar button:hover {
+  background-color: #006edc;
+}
+
+.job-info {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  border: 1px solid #ccc;
+  padding: 20px;
+  margin-bottom: 30px;
+  gap: 20px;
+}
+
+.job-info .info-left {
+  word-break: break-word;
+}
+
+.job-info .info-left .title {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 5px;
+  line-height: 1.5;
+}
+
+.job-info .info-left .company {
+  font-size: 15px;
+  margin-bottom: 8px;
+}
+
+.job-info .meta span {
+  font-size: 13px;
+  margin-right: 10px;
+  color: #555;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.job-info .info-right {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.job-info .logo {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+  border: 1px solid #ccc;
+  background-color: #fff;
+}
+
+.logo-label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: #333;
+}
+
+#logoUpload {
+  margin-bottom: 10px;
+}
+
+#logoPreview {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  display: block;
+}
+
+.job-desc h3 {
+  font-size: 18px;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.job-desc p {
+  font-size: 16px;
+  line-height: 1.6;
+  margin: 0;
+  padding-bottom: 20px;
+  white-space: pre-line;
+}
+
+.job-desc textarea {
+  width: 100%;
+  height: 200px;
+  font-size: 16px;
+  line-height: 1.6;
+  padding: 10px;
+  resize: vertical;
+  border: 1px solid #ccc;
+  margin-bottom: 20px;
+  white-space: pre-line;
+  background: #fff;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.job-info input[type='text'],
+.job-info input[type='date'] {
+  font-family: 'Arial', sans-serif;
+  font-size: 14px;
+  padding: 6px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #fff;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.job-info .title input {
+  font-size: 18px;
+  font-weight: bold;
+  border: 1px solid #ccc;
+  width: 100%;
+}
+
+.job-info .company input {
+  font-size: 15px;
+  border: 1px solid #ccc;
+  padding: 6px 8px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.job-info .meta input[type='text'],
+.job-info .meta input[type='date'] {
+  font-size: 13px;
+  width: auto;
+  display: inline-block;
+  margin-right: 10px;
+  border: 1px solid #ccc;
+  padding: 4px 6px;
+  border-radius: 4px;
+}
+
+/* 버튼 그룹 내부 버튼 스타일 통일 */
+.button-group {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin: 0 220px;
+  padding: 30px 0;
+  flex-wrap: wrap;
+}
+
+/* 공통 버튼 스타일 */
+.button-group button {
+  padding: 10px 20px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s ease-in-out;
+}
+
+.button-group button:hover {
+  background-color: #0085ff;
+  color: white;
+  border-color: #0085ff;
+}
+
+.bookmark-icon {
+  width: 40px;
+  height: 40px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  border-radius: 4px;
+  color: #999;
+  cursor: pointer;
+  transition: color 0.3s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+  box-sizing: border-box;
+  vertical-align: middle;
+  line-height: 1;
+}
+
+.bookmark-icon i {
+  font-size: 22px;
+  width: 1.25em;
+  text-align: center;
+  line-height: 1;
+}
+
+/* 아이콘 활성화 시 색상 변경 */
+.bookmark-icon.active {
+  color: rgb(255, 220, 20);
+}
+
+@media (max-width: 768px) {
+  .container,
+  .search,
+  .button-group {
+    margin: 0 10px;
+    padding: 20px;
+  }
+
+  .page-title {
+    margin: 20px 10px 10px;
+    padding: 0;
+  }
+
+  .search-bar {
+    grid-template-columns: 1fr;
+  }
+
+  .search-bar button {
+    grid-column: span 1;
+  }
+
+  .job-info {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .job-info .logo {
+    margin-top: 20px;
+  }
+
+  .button-group {
+    justify-content: center;
+  }
+}

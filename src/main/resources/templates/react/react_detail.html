@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>이력서 상세페이지</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}" />
+    <link rel="stylesheet" th:href="@{/css/header.css}" />
+    <link rel="stylesheet" th:href="@{/css/footer.css}" />
+    <link rel="stylesheet" th:href="@{/css/react.css}" />
+    <script defer src="js/main.js"></script>
+  </head>
+  <body>
+    <div th:replace="include/header :: header"></div>
+    <div class="page-title">
+      <p>마이페이지 &gt; 이력서</p>
+    </div>
+    <div class="container">
+      <form>
+        <table class="resume-table">
+          <tr>
+            <th class="img">이미지</th>
+            <td class="centered-cell"><p>개인정보</p></td>
+          </tr>
+
+          <!-- 둘째 줄: 왼쪽에 이미지 + 파일선택 / 오른쪽은 그대로 -->
+          <tr>
+            <th style="text-align: center">
+              <img id="preview" src="" alt="미리보기 없음" />
+
+              <img class="img" src="/images/가나디.jpg" />
+            </th>
+            <td>
+              <p class="readonly-box">서울특별시 성동구 성수동</p>
+              <p class="readonly-box">010-1234-5678</p>
+              <p class="readonly-box">서울대학교 컴퓨터공학과 졸업</p>
+              <p class="readonly-box">2021 ~ 2024 (주)코드랩 백엔드 개발자</p>
+              <p class="readonly-box">2023 SW창의력대회 최우수상 수상</p>
+            </td>
+          </tr>
+          <tr>
+            <th>
+              <div class="question">
+                <p>질문1.</p>
+                <p>본인 소개 부탁드립니다.</p>
+              </div>
+            </th>
+            <td>
+              <p class="content">
+                안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
+                안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고
+                먹고싶습니다.안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고
+                먹고싶습니다.안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고
+                먹고싶습니다.안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고
+                먹고싶습니다.안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고
+                먹고싶습니다.안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고
+                먹고싶습니다.안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고
+                먹고싶습니다.안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고
+                먹고싶습니다.안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고
+                먹고싶습니다.
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <th>
+              <div class="question">
+                <p>질문1.</p>
+                <p>본인 소개 부탁드립니다.</p>
+              </div>
+            </th>
+            <td>
+              <p class="content">
+                안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
+                안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고
+                먹고싶습니다.안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고
+                먹고싶습니다.안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고
+                먹고싶습니다.안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고
+                먹고싶습니다.안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고
+                먹고싶습니다.안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고
+                먹고싶습니다.안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고
+                먹고싶습니다.안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고
+                먹고싶습니다.안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고
+                먹고싶습니다.
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <th>
+              <div class="question">
+                <p>질문1.</p>
+                <p>본인 소개 부탁드립니다.</p>
+              </div>
+            </th>
+            <td>
+              <p class="content">
+                안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
+                안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고
+                먹고싶습니다.안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고
+                먹고싶습니다.안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고
+                먹고싶습니다.안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고
+                먹고싶습니다.안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고
+                먹고싶습니다.안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고
+                먹고싶습니다.안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고
+                먹고싶습니다.안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고
+                먹고싶습니다.안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고
+                먹고싶습니다.
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <th>
+              <div class="question">
+                <p>질문1.</p>
+                <p>본인 소개 부탁드립니다.</p>
+              </div>
+            </th>
+            <td>
+              <p class="content">
+                안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
+                안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고
+                먹고싶습니다.안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고
+                먹고싶습니다.안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고
+                먹고싶습니다.안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고
+                먹고싶습니다.안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고
+                먹고싶습니다.안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고
+                먹고싶습니다.안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고
+                먹고싶습니다.안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고
+                먹고싶습니다.안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고
+                먹고싶습니다.
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <th class="link">
+              포트폴리오 링크를<br />
+              넣어주세요.
+            </th>
+            <td>
+              <p class="content">https://github.com/yourname/portfolio</p>
+            </td>
+          </tr>
+        </table>
+      </form>
+    </div>
+    <div class="button-group">
+      <button type="button">삭제</button>
+      <button type="submit">수정</button>
+    </div>
+    <div th:replace="include/footer :: footer"></div>
+  </body>
+</html>

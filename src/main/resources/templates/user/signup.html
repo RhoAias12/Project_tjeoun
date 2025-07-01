@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="js/main.js"></script>
+    <!-- <script src="js/footer.js"></script> -->
+    <link rel="stylesheet" th:href="@{/css/header.css}" />
+    <link rel="stylesheet" th:href="@{/css/signup.css}" />
+    <title>회원가입</title>
+  </head>
+  <body>
+    <!-- 헤더가 삽입될 위치 -->
+    <div th:replace="include/header :: header"></div>
+    <div class="signup-container">
+      <h2>회원가입</h2>
+      <form class="signup-form">
+        <input type="text" placeholder="이름" required />
+        <div class="input-wrapper">
+          <input type="text" placeholder="이메일" required />
+          <button type="button" class="check-btn">중복확인</button>
+        </div>
+        <div class="input-wrapper">
+          <input type="text" placeholder="닉네임" required />
+          <button type="button" class="check-btn">중복확인</button>
+        </div>
+        <input type="password" placeholder="비밀번호" required />
+        <input type="password" placeholder="비밀번호 확인" required />
+        <input type="date" placeholder="생년월일" required />
+        <button type="submit" id="submit">회원가입</button>
+      </form>
+    </div>
+    <!-- <div id="footer"></div> -->
+  </body>
+</html>

@@ -1,0 +1,52 @@
+/* 공통 초기화 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+}
+
+#head {
+  width: 100%;
+  background-color: #fff;
+  border-bottom: 1px solid #ccc;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 40px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.menu {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 2vw;
+  font-size: clamp(12px, 1.2vw, 18px); /* 화면 크기에 따라 유동적 폰트 */
+}
+
+.menu.left .logo {
+  font-weight: bold;
+  color: #00c73c;
+  font-size: clamp(14px, 1.6vw, 20px);
+  margin-right: 2vw;
+}
+.logo img {
+  height: 32px; /* 또는 원하는 높이로 조절: 24px, 40px 등 */
+  width: auto; /* 비율 유지 */
+  object-fit: contain;
+}
+
+/* 작은 화면에서도 한 줄 유지 */
+@media (max-width: 500px) {
+  #head {
+    padding: 8px 12px;
+  }
+  .menu {
+    gap: 1vw;
+  }
+}
