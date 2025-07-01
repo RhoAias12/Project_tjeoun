@@ -1,84 +1,74 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" th:href="@{/css/main.css}" />
     <link rel="stylesheet" th:href="@{/css/header.css}" />
     <link rel="stylesheet" th:href="@{/css/footer.css}" />
-    <link rel="stylesheet" th:href="@{/css/manager_list_care.css}" />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    />
-    <title>회원관리</title>
+    <link rel="stylesheet" th:href="@{/css/apply_status.css}" />
+    <title>지원현황</title>
   </head>
   <body>
     <!-- 헤더 -->
     <div th:replace="include/header :: header"></div>
 
+
     <!-- 전체 컨테이너 -->
     <div class="tab-box">
       <div class="tab-inner">
-        <h2 class="mypage-title">회원관리</h2>
+        <h2 class="mypage-title">마이페이지</h2>
 
-        <!-- 검색 및 정렬 영역 -->
-        <div class="search">
-          <section class="search-bar">
-            <input type="text" placeholder="이메일" />
-            <input type="text" placeholder="닉네임" />
-            <!-- <input type="date" />
-            <input type="text" placeholder="지역" /> -->
-            <button type="button">검색</button>
-          </section>
-
-          <div class="sort-wrapper">
-            <select class="sort-select">
-              <option value="latest">최신순</option>
-              <option value="oldest">오래된순</option>
-              <option value="company">회사명순</option>
-            </select>
-          </div>
+        <!-- 탭 버튼 -->
+        <div class="tab-buttons">
+          <button class="tab">회원정보수정</button>
+          <button class="tab">이력서관리</button>
+          <button class="tab1">지원현황</button>
+          <button class="tab">스크랩</button>
         </div>
 
         <!-- 게시물 리스트 -->
         <div class="apply-list">
           <div class="apply-card">
             <div class="apply-info">
-              <div class="job-title">이름</div>
-              <div class="company-name">닉네임</div>
+              <div class="job-title">공고명</div>
+              <div class="company-name">회사명</div>
             </div>
             <div class="apply-buttons">
-              <button class="cancel-btn">삭제</button>
+              <div class="situation">지원상태</div>
+              <button class="cancel-btn">지원취소</button>
             </div>
           </div>
 
           <div class="apply-card">
             <div class="apply-info">
-              <div class="job-title">이름</div>
-              <div class="company-name">닉네임</div>
+              <div class="job-title">공고명</div>
+              <div class="company-name">회사명</div>
             </div>
             <div class="apply-buttons">
-              <button class="cancel-btn">삭제</button>
+              <div class="situation">지원상태</div>
+              <button class="cancel-btn">지원취소</button>
             </div>
           </div>
 
           <div class="apply-card">
             <div class="apply-info">
-              <div class="job-title">이름</div>
-              <div class="company-name">닉네임</div>
+              <div class="job-title">공고명</div>
+              <div class="company-name">회사명</div>
             </div>
             <div class="apply-buttons">
-              <button class="cancel-btn">삭제</button>
+              <div class="situation">지원상태</div>
+              <button class="cancel-btn">지원취소</button>
             </div>
           </div>
           <div class="apply-card">
             <div class="apply-info">
-              <div class="job-title">이름</div>
-              <div class="company-name">닉네임</div>
+              <div class="job-title">공고명</div>
+              <div class="company-name">회사명</div>
             </div>
             <div class="apply-buttons">
-              <button class="cancel-btn">삭제</button>
+              <div class="situation">지원상태</div>
+              <button class="cancel-btn">지원취소</button>
             </div>
           </div>
         </div>
