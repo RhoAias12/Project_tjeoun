@@ -1,5 +1,6 @@
 package com.tjoeun.service;
 
+import com.tjoeun.dto.FavoriteDTO;
 import com.tjoeun.dto.UserFormDto;
 import com.tjoeun.entity.ApplyHistory;
 import com.tjoeun.entity.Favorite;
@@ -72,23 +73,32 @@ public class MyPageService {
 
 
   @Transactional
-  public void deleteScrap(String userEmail, Long recruitmentIdx) {
-    Users user = userRepository.findByUserEmail(userEmail);
-    if (user == null) {
-      throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
-    }
+  public void deleteScrap(FavoriteDTO favoriteDTO) {
+    Users user = userRepository.findById(favoriteDTO.getUserIdx())
+      .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
-    Recruitment recruitment = recruitmentRepository.findById(recruitmentIdx)
+    Recruitment recruitment = recruitmentRepository.findById(favoriteDTO.getRecruitmentIdx())
       .orElseThrow(() -> new IllegalArgumentException("공고를 찾을 수 없습니다."));
 
     favoriteRepository.deleteByUserAndRecruitment(user, recruitment);
   }
 
-  public List<Favorite> getFavorites(String userEmail) {
+  public List<FavoriteDTO> getFavorites(String userEmail) {
     Users user = userRepository.findByUserEmail(userEmail);
     if (user == null) {
       throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
     }
-    return favoriteRepository.findByUser(user);
+
+    List<Favorite> favorites = favoriteRepository.findByUser(user);
+
+    return favorites.stream().map(favorite -> FavoriteDTO.builder()
+      .favoriteIdx(favorite.getFavoriteIdx())
+      .userIdx(favorite.getUser().getUserIdx())
+      .recruitmentIdx(favorite.getRecruitment().getRecruitmentIdx())
+      .title(favorite.getRecruitment().getTitle())
+      .company(favorite.getRecruitment().getCompany())
+      .deadline(favorite.getRecruitment().getDeadline())
+      .build()
+    ).toList();
   }
 }
