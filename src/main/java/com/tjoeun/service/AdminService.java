@@ -1,6 +1,7 @@
 package com.tjoeun.service;
 
 import com.tjoeun.dto.UserFormDto;
+import com.tjoeun.dto.UserListDto;
 import com.tjoeun.entity.Users;
 import com.tjoeun.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
