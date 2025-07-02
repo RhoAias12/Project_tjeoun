@@ -193,15 +193,21 @@ body {
 }
 
 .page-btn {
-  display: inline-block;
-  padding: 4px 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px; /* 조금 더 안정된 여백 */
   color: #333;
   text-decoration: none;
   font-size: 16px;
   border: none;
   background-color: transparent;
   cursor: pointer;
+  line-height: 1;               /* 줄 간격 통일 */
+  vertical-align: middle;       /* 아이콘과 숫자 정렬 */
+  border-radius: 4px;           /* 선택사항: 깔끔하게 둥글게 */
 }
+
 
 .page-btn:hover {
   color: #0085ff;
