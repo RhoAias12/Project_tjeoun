@@ -261,7 +261,7 @@ body {
 }
 
 /* 아이콘 활성화 시 색상 변경 */
-.bookmark-icon.active {
+.bookmark-icon.active i {
   color: rgb(255, 220, 20);
 }
 

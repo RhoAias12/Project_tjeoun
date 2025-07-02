@@ -36,64 +36,35 @@
             <select class="sort-select">
               <option value="latest">최신순</option>
               <option value="oldest">오래된순</option>
-              <option value="company">회사명순</option>
             </select>
           </div>
         </div>
 
         <!-- 게시물 리스트 -->
-        <div class="apply-list">
-          <div class="apply-card">
+        <div class="apply-list" th:if="${userList}">
+          <!-- userList를 돌면서 각 회원 출력 -->
+          <div class="apply-card" th:each="user : ${userList}">
             <div class="apply-info">
-              <div class="job-title">이름</div>
-              <div class="company-name">닉네임</div>
+              <!-- 상세페이지 이동 링크 (userIdx 파라미터 포함) -->
+              <a th:href="@{'/admin/member_modify'(userIdx=${user.userIdx})}"
+                 style="text-decoration:none; color:inherit; display:block;">
+                <div class="job-title" th:text="${user.userEmail}">이메일</div>
+                <div class="company-name" th:text="${user.userNickname}">닉네임</div>
+              </a>
             </div>
             <div class="apply-buttons">
-              <button class="cancel-btn">삭제</button>
-            </div>
-          </div>
-
-          <div class="apply-card">
-            <div class="apply-info">
-              <div class="job-title">이름</div>
-              <div class="company-name">닉네임</div>
-            </div>
-            <div class="apply-buttons">
-              <button class="cancel-btn">삭제</button>
-            </div>
-          </div>
-
-          <div class="apply-card">
-            <div class="apply-info">
-              <div class="job-title">이름</div>
-              <div class="company-name">닉네임</div>
-            </div>
-            <div class="apply-buttons">
-              <button class="cancel-btn">삭제</button>
-            </div>
-          </div>
-          <div class="apply-card">
-            <div class="apply-info">
-              <div class="job-title">이름</div>
-              <div class="company-name">닉네임</div>
-            </div>
-            <div class="apply-buttons">
-              <button class="cancel-btn">삭제</button>
+              <form th:action="@{/admin/member_list/delete}" method="post" style="display:inline;"
+                    onsubmit="return confirm('정말 삭제하시겠습니까?');">
+                <input type="hidden" name="userIdx" th:value="${user.userIdx}" />
+                <button type="submit" class="cancel-btn">삭제</button>
+              </form>
             </div>
           </div>
         </div>
 
         <!-- 페이지네이션 -->
-        <div class="pagination">
-          <ul class="pagination-list">
-            <li><a href="#" class="page-btn">〈</a></li>
-            <li><a href="#" class="page-btn active">1</a></li>
-            <li><a href="#" class="page-btn">2</a></li>
-            <li><a href="#" class="page-btn">3</a></li>
-            <li><a href="#" class="page-btn">4</a></li>
-            <li><a href="#" class="page-btn">5</a></li>
-            <li><a href="#" class="page-btn">〉</a></li>
-          </ul>
+        <div th:replace="fragments/pagination :: fragment
+      (${userPage}, ${startPage}, ${endPage}, '/admin/member_list')">
         </div>
       </div>
     </div>

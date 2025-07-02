@@ -31,31 +31,23 @@
         <div class="apply-card" th:each="history : ${historyList}">
           <div class="apply-info">
             <div class="job-title">
-              <a th:href="@{/recruitment/detail/{id}(id=${history.recruitment.recruitmentIdx})}"
-                 th:text="${history.recruitment.title}">공고명</a>
+              <a th:href="@{/recruitment/detail/{id}(id=${history.applyHistoryId})}"
+                 th:text="${history.recruitmentTitle}">공고명</a>
             </div>
-            <div class="company-name" th:text="${history.recruitment.company}">회사명</div>
+            <div class="company-name" th:text="${history.recruitmentCompany}">회사명</div>
           </div>
           <div class="apply-buttons">
-            <div class="situation" th:text="${history.status.display}">지원상태</div>
+            <div class="situation" th:text="${history.statusDisplay}">지원상태</div>
             <div class="react-btn">
-              <a th:href="@{/resume/detail/{id}(id=${history.optionalIdx})}">지원 이력서</a>
+              <a th:href="@{/resume/detail/{id}(id=${history.resumeId})}">지원 이력서</a>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- 페이지네이션 (예시용, 실제 페이징 처리 로직 필요 시 추가 구현) -->
-      <div class="pagination">
-        <ul class="pagination-list">
-          <li><a href="#" class="page-btn">〈</a></li>
-          <li><a href="#" class="page-btn active">1</a></li>
-          <li><a href="#" class="page-btn">2</a></li>
-          <li><a href="#" class="page-btn">3</a></li>
-          <li><a href="#" class="page-btn">4</a></li>
-          <li><a href="#" class="page-btn">5</a></li>
-          <li><a href="#" class="page-btn">〉</a></li>
-        </ul>
+      <!-- 페이지네이션  -->
+      <div th:replace="fragments/pagination :: fragment
+        (${jobPage}, ${startPage}, ${endPage}, '/mypage/apply_status')">
       </div>
     </div>
   </div>

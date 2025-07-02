@@ -55,5 +55,4 @@ public class Users {
       .userRole(UserRole.USER)
       .build();
   }
-
 }

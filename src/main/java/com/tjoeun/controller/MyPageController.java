@@ -1,16 +1,14 @@
 package com.tjoeun.controller;
 
+import com.tjoeun.dto.ApplyHistoryDTO;
+import com.tjoeun.dto.FavoriteDTO;
 import com.tjoeun.dto.ResumeDto;
 import com.tjoeun.dto.UserFormDto;
 import com.tjoeun.entity.*;
 import com.tjoeun.repository.*;
-import com.tjoeun.service.FavoriteService;
 import com.tjoeun.service.MyPageService;
 import com.tjoeun.service.UserService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -128,25 +126,45 @@ public class MyPageController {
 
 
     @GetMapping("/apply_status")
-    public String applyStatus(Model model, Principal principal) {
-        List<ApplyHistory> historyList = myPageService.getApplyHistoryList(principal.getName());
-        model.addAttribute("historyList", historyList);
+    public String applyStatus(@RequestParam(defaultValue = "1") int page,
+                              @PageableDefault(size = 10) Pageable pageable,
+                              Model model,
+                              Principal principal) {
+
+        String email = principal.getName();
+
+        Pageable correctedPageable = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
+
+        Page<ApplyHistoryDTO> historyPage = myPageService.getPagedApplyHistories(email, correctedPageable);
+
+        PaginationUtil.setPaging(model, historyPage, "/mypage/apply_status");
+
+        model.addAttribute("historyList", historyPage.getContent());
+
         return "mypage/apply_status";
     }
 
     @GetMapping("/scrap")
-    public String scrapPage(Model model, Principal principal) {
-        List<Favorite> favorites = myPageService.getFavorites(principal.getName());
-        model.addAttribute("favorites", favorites);
+    public String scrapPage(@RequestParam(defaultValue = "1") int page,
+                            @PageableDefault(size = 8) Pageable pageable,
+                            Model model,
+                            Principal principal) {
+
+        String email = principal.getName();
+        Pageable correctedPageable = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
+        Page<FavoriteDTO> jobPage = myPageService.getPagedFavorites(email, correctedPageable);
+
+        model.addAttribute("favorites", jobPage.getContent());
+        PaginationUtil.setPaging(model, jobPage, "/mypage/scrap");
 
         return "mypage/scrap";
     }
 
-    @DeleteMapping("/scrap/{recruitmentIdx}")
+    @DeleteMapping("/scrap")
     @ResponseBody
     @Transactional
-    public ResponseEntity<?> deleteScrap(@PathVariable Long recruitmentIdx, Principal principal) {
-        myPageService.deleteScrap(principal.getName(), recruitmentIdx);
+    public ResponseEntity<?> deleteScrap(@RequestBody FavoriteDTO favoriteDTO) {
+        myPageService.deleteScrap(favoriteDTO);
         return ResponseEntity.ok().build();
     }
 }
