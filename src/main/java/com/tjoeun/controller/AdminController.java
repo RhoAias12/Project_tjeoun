@@ -3,6 +3,7 @@ package com.tjoeun.controller;
 import com.tjoeun.dto.UserFormDto;
 import com.tjoeun.dto.UserListDto;
 import com.tjoeun.service.AdminService;
+import com.tjoeun.service.UserService;
 import jakarta.validation.Valid;
 
 import lombok.RequiredArgsConstructor;
@@ -10,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -22,6 +24,10 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @RequestMapping("/admin")
 public class AdminController {
     private final AdminService adminService;
+    private final UserService userService;
+    private final PasswordEncoder passwordEncoder;
+
+
 
     //회원리스트+페이지네이션
     @GetMapping("/member_list")
@@ -55,23 +61,19 @@ public class AdminController {
 
     //회원상세수정
     @PostMapping("/member_modify/{userIdx}")
-    public String updateMember(@PathVariable("userIdx") Integer userIdx,
-                               @ModelAttribute("userFormDto") @Valid UserFormDto userFormDto,
-                               BindingResult bindingResult,
-                               RedirectAttributes redirectAttributes,
-                               Model model) {
-        if (bindingResult.hasErrors()) {
-            return "admin/ad_member_modify";
-        }
+    public String updateUser(@PathVariable("userIdx") Integer userIdx,
+                             @ModelAttribute("userFormDto") UserFormDto dto,
+                             BindingResult bindingResult,
+                             Model model) {
         try {
-            adminService.updateUserInfo(userIdx, userFormDto);
-            redirectAttributes.addFlashAttribute("success", true);
-            return "redirect:/admin/member_modify?userIdx=" + userIdx + "&success";
-        } catch (IllegalStateException e) {
-            model.addAttribute("errorMessage", e.getMessage());
-            return "admin/ad_member_modify";
+            adminService.updateUser(userIdx, dto, bindingResult, model);
+            return "redirect:/admin/member_modify/" + userIdx + "?success";
+        } catch (IllegalArgumentException e) {
+            model.addAttribute("error", e.getMessage());
+            return "admin/member_modify";
         }
     }
+
 
     @GetMapping("/recruit_list")
     public String recruitList() {
