@@ -1,15 +1,11 @@
 package com.tjoeun.service;
 
-import com.tjoeun.dto.UserListDto;
 import com.tjoeun.entity.Users;
 import com.tjoeun.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
