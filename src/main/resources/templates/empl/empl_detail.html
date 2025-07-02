@@ -1,88 +1,119 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>공고 상세페이지</title>
-    <link rel="stylesheet" th:href="@{/css/main.css}" />
-    <link rel="stylesheet" th:href="@{/css/header.css}" />
-    <link rel="stylesheet" th:href="@{/css/footer.css}" />
-    <link rel="stylesheet" th:href="@{/css/empl_detail.css}" />
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>공고 상세페이지</title>
 
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-    />
-    <script defer src="js/main.js"></script>
+  <!-- ✅ CSRF 토큰 -->
+  <meta name="_csrf" th:content="${_csrf.token}" />
+  <meta name="_csrf_header" th:content="${_csrf.headerName}" />
 
-    <script>
-      function toggleBookmark(button) {
-        const icon = button.querySelector('i'); // 내부 아이콘 찾아서
-        icon.classList.toggle('fa-regular');
-        icon.classList.toggle('fa-solid');
-        button.classList.toggle('active'); // 버튼 배경색/테두리용 active는 여기에
+  <!-- ✅ CSS -->
+  <link rel="stylesheet" th:href="@{/css/main.css}" />
+  <link rel="stylesheet" th:href="@{/css/header.css}" />
+  <link rel="stylesheet" th:href="@{/css/footer.css}" />
+  <link rel="stylesheet" th:href="@{/css/empl_detail.css}" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+
+<body>
+<div th:replace="include/header :: header"></div>
+
+<div class="search">
+  <section class="search-bar">
+    <input type="text" placeholder="공고이름" />
+    <input type="text" placeholder="회사명" />
+    <input type="date" />
+    <input type="text" placeholder="지역" />
+    <button type="button">검색</button>
+  </section>
+</div>
+
+<div class="container">
+  <section class="job-info">
+    <div class="info-left">
+      <div class="title" th:text="${job.title}">공고 제목</div>
+      <div class="company" th:text="${job.company}">회사명</div>
+      <div class="meta">
+          <span class="deadline"
+                th:text="${#strings.startsWith(job.deadline.toString(), '9999') ? '상시채용' : '마감일: ' + job.deadline}">
+          </span>
+        <span><p>|</p></span>
+        <span class="region" th:text="'지역: ' + ${job.location}">지역</span>
+      </div>
+    </div>
+    <div class="info-right">
+      <img th:src="${job.logoUrl}" alt="회사 로고" class="logo" />
+    </div>
+  </section>
+
+  <section class="job-desc">
+    <h3>요구사항</h3>
+    <p th:text="${job.qualifications}" style="white-space: pre-wrap;"></p>
+
+    <h3>주요업무</h3>
+    <p th:text="${job.responsibilities}" style="white-space: pre-wrap;"></p>
+
+    <h3>복지 및 혜택</h3>
+    <p th:text="${job.benefits}" style="white-space: pre-wrap;"></p>
+
+    <h3>연봉</h3>
+    <p th:text="${job.salary}" style="white-space: pre-wrap;"></p>
+  </section>
+</div>
+
+<div class="button-group">
+  <button
+          type="button"
+          class="bookmark-icon"
+          th:classappend="${isFavorited} ? ' active' : ''"
+          onclick="toggleBookmark(this)"
+          th:attr="data-id=${job.recruitmentIdx}"
+  >
+    <i class="fa-bookmark"
+       th:classappend="${isFavorited} ? ' fa-solid' : ' fa-regular'"></i>
+  </button>
+
+  <button type="button">지원하기</button>
+  <button type="button">목록보기</button>
+</div>
+
+<div th:replace="include/footer :: footer"></div>
+
+<!-- ✅ JS는 body 끝에 넣기 -->
+<script>
+  function toggleBookmark(button) {
+    const recruitmentId = button.getAttribute("data-id");
+    const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute("content");
+    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute("content");
+
+    fetch('/favorite/toggle', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        [csrfHeader]: csrfToken
+      },
+      body: new URLSearchParams({ recruitmentId })
+    })
+    .then(response => response.text())
+    .then(result => {
+      const icon = button.querySelector('i');
+      icon.classList.remove('fa-regular', 'fa-solid');
+      icon.classList.add(result === 'favorited' ? 'fa-solid' : 'fa-regular');
+      if (result === 'favorited') {
+        button.classList.add('active');  // ⭐ 노란색 아이콘용 클래스
+        button.title = '스크랩됨';
+      } else {
+        button.classList.remove('active');
+        button.title = '스크랩';
       }
-    </script>
-  </head>
-  <body>
-    <div th:replace="include/header :: header"></div>
-    <div class="search">
-      <section class="search-bar">
-        <input type="text" placeholder="공고이름" />
-        <input type="text" placeholder="회사명" />
-        <input type="date" />
-        <input type="text" placeholder="지역" />
-        <button type="button">검색</button>
-      </section>
-    </div>
-
-    <div class="container">
-      <section class="job-info">
-        <div class="info-left">
-          <div class="title" th:text="${job.title}">공고 제목</div>
-          <div class="company" th:text="${job.company}">회사명</div>
-          <div class="meta">
-            <span class="deadline"
-                  th:text="${#strings.startsWith(job.deadline.toString(), '9999') ? '상시채용' : '마감일: ' + job.deadline}">
-            </span>
-            <span><p>|</p></span>
-            <span class="region" th:text="'지역: ' + ${job.location}">지역</span>
-          </div>
-        </div>
-        <div class="info-right">
-          <img th:src="${job.logoUrl}" alt="회사 로고" class="logo" />
-        </div>
-      </section>
-
-      <section class="job-desc">
-        <h3>요구사항</h3>
-        <p th:text="${job.qualifications}" style="white-space: pre-wrap;"></p>
-
-
-        <h3>주요업무</h3>
-        <p th:text="${job.responsibilities}" style="white-space: pre-wrap;"></p>
-
-        <h3>복지 및 혜택</h3>
-        <p th:text="${job.benefits}" style="white-space: pre-wrap;"></p>
-
-        <h3>연봉</h3>
-        <p th:text="${job.salary}" style="white-space: pre-wrap;"></p>
-      </section>
-    </div>
-
-    <div class="button-group">
-      <button
-              type="button"
-              class="bookmark-icon"
-              onclick="toggleBookmark(this)"
-      >
-        <i class="fa-bookmark fa-regular fa-fw"></i>
-      </button>
-
-      <button type="button">지원하기</button>
-      <button type="button">목록보기</button>
-    </div>
-
-    <div th:replace="include/footer :: footer"></div>
-  </body>
+    })
+    .catch(err => {
+      console.error('스크랩 처리 중 오류:', err);
+      alert('스크랩 처리 중 오류가 발생했습니다.');
+    });
+  }
+</script>
+</body>
 </html>
