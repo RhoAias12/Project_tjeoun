@@ -4,14 +4,12 @@ import com.tjoeun.entity.Favorite;
 import com.tjoeun.entity.Recruitment;
 import com.tjoeun.entity.Users;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.security.core.userdetails.User;
 
-import java.lang.reflect.Member;
-import java.util.Optional;
+import java.util.List;
 
-public interface FavoriteRepository extends JpaRepository<Favorite, Long> {
-    boolean existsByUserAndRecruitment(Users user, Recruitment recruitment);
-    Optional<Favorite> findByUserAndRecruitment(Users user, Recruitment recruitment);
-    void deleteByUserAndRecruitment(Users user, Recruitment recruitment);
 
+public interface FavoriteRepository extends JpaRepository<Favorite, Integer> {
+  List<Favorite> findByUser(Users user);
+  void deleteByUserAndRecruitment(Users user, Recruitment recruitment);
 }
+
