@@ -1,17 +1,17 @@
 package com.tjoeun.controller;
 
-import com.tjoeun.dto.UserListDto;
-import com.tjoeun.service.AdminService;
-import com.tjoeun.service.UserService;
+import com.tjoeun.dto.UserFormDto;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-
-import java.util.List;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 
 @Controller
@@ -21,9 +21,17 @@ public class AdminController {
     private final AdminService adminService;
 
     @GetMapping("/member_list")
-    public String memberList(Model model) {
-        List<UserListDto> userList = adminService.getAllUsers();
-        model.addAttribute("userList", userList);
+    public String memberList(@RequestParam(defaultValue = "1") int page,
+                             @PageableDefault(size = 10) Pageable pageable,
+                             Model model) {
+
+        Pageable correctedPageable = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
+        Page<UserListDto> userPage = adminService.getPagedUsers(correctedPageable);
+
+        com.tjoeun.util.PaginationUtil.setPaging(model, userPage, "/admin/member_list");
+
+        model.addAttribute("userList", userPage.getContent());
+        model.addAttribute("userPage", userPage);
         return "admin/member_list";
     }
     @PostMapping("/member_list/delete")
@@ -34,9 +42,31 @@ public class AdminController {
 
 
     @GetMapping("/member_modify")
-    public String memberModify() {
+    public String memberModify(@RequestParam("userIdx") Integer userIdx, Model model) {
+        UserFormDto dto = adminService.getUserFormDtoById(userIdx);
+        model.addAttribute("userFormDto", dto);
         return "admin/ad_member_modify";
     }
+
+    @PostMapping("/member_modify")
+    public String updateMember(@ModelAttribute("userFormDto") @Valid UserFormDto userFormDto,
+                               BindingResult bindingResult,
+                               RedirectAttributes redirectAttributes,
+                               @RequestParam("userIdx") Integer userIdx,
+                               Model model) {
+        if (bindingResult.hasErrors()) {
+            return "admin/member_modify";
+        }
+        try {
+            adminService.updateUserInfo(userIdx, userFormDto);
+            redirectAttributes.addFlashAttribute("success", true);
+            return "redirect:/admin/member_modify?userIdx=" + userIdx + "&success";
+        } catch (IllegalStateException e) {
+            model.addAttribute("errorMessage", e.getMessage());
+            return "admin/member_modify";
+        }
+    }
+
 
     @GetMapping("/recruit_list")
     public String recruitList() {
