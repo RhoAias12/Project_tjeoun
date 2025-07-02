@@ -33,18 +33,27 @@
          </div>
 
          <!-- 검색 및 정렬 영역 -->
+         <<form method="get" action="/empl/empl_main" id="sortForm">
          <div class="search-sort">
            <div class="search-wrapper">
-             <select class="sort-select">
-               <option value="latest">최신순</option>
-               <option value="oldest">오래된순</option>
+
+             <!-- 정렬기준: 최신순 / 오래된순 -->
+             <select class="sort-select" name="dateSort">
+               <option value="latest" th:selected="${dateSort == 'latest'}">최신순</option>
+               <option value="oldest" th:selected="${dateSort == 'oldest'}">오래된순</option>
              </select>
-             <select class="sort-select">
-               <option value="latest">스크랩 순</option>
-               <option value="latest">마감일 순</option>
+
+             <!-- 정렬기준: 스크랩순 / 마감일순 -->
+             <select class="sort-select" name="customSort" onchange="document.getElementById('sortForm').submit()">
+               <option value="" th:selected="${customSort == null or customSort == ''}">전체</option>
+               <option value="scrapOnly" th:selected="${customSort == 'scrapOnly'}">스크랩 순</option>
+               <option value="deadline" th:selected="${customSort == 'deadline'}">마감일 순</option>
              </select>
+
            </div>
          </div>
+       </form>
+
 
          <div class="card-grid">
            <div class="job-card" th:each="job : ${jobPage.content}">
@@ -75,9 +84,10 @@
 <!--       </div>-->
 <!--     </div>-->
 
-         <div th:replace="fragments/pagination :: fragment
-            (${jobPage}, ${startPage}, ${endPage}, '/empl/empl_main')">
+         <div th:replace="fragments/pagination :: fragment(${jobPage},
+             ${startPage}, ${endPage}, '/empl/empl_main', ${customSort})">
          </div>
+
 
 
 
