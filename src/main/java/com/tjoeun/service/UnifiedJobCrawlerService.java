@@ -451,7 +451,7 @@ public class UnifiedJobCrawlerService {
   }
 
   private List<Recruitment> preprocessJobs(List<Recruitment> jobs) {
-    String defaultLogo = "/images/logos/logo.jpg";
+    String defaultLogo = "/images/tjoeun.jpg";
     return jobs.stream()
       // 그 외는 기존처럼 기본값 세팅
       .peek(job -> {
