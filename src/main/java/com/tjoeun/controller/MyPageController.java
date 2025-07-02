@@ -9,6 +9,8 @@ import com.tjoeun.repository.ApplyHistoryRepository;
 import com.tjoeun.repository.FavoriteRepository;
 import com.tjoeun.repository.RecruitmentRepository;
 import com.tjoeun.repository.UserRepository;
+import com.tjoeun.service.FavoriteService;
+import com.tjoeun.service.MyPageService;
 import com.tjoeun.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +38,7 @@ public class MyPageController {
 
     private final ApplyHistoryRepository applyHistoryRepository;
     private final UserRepository userRepository;
+    private final MyPageService myPageService;
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
     private final FavoriteRepository favoriteRepository;
@@ -115,29 +118,14 @@ public class MyPageController {
 
     @GetMapping("/apply_status")
     public String applyStatus(Model model, Principal principal) {
-        String email = principal.getName();
-        Users user = userRepository.findByUserEmail(email);
-
-        if (user == null) {
-            throw new IllegalArgumentException("로그인한 사용자를 찾을 수 없습니다.");
-        }
-
-        List<ApplyHistory> historyList = applyHistoryRepository.findByUser_UserIdx(user.getUserIdx());
-
+        List<ApplyHistory> historyList = myPageService.getApplyHistoryList(principal.getName());
         model.addAttribute("historyList", historyList);
         return "mypage/apply_status";
     }
 
     @GetMapping("/scrap")
     public String scrapPage(Model model, Principal principal) {
-        String email = principal.getName();
-        Users user = userRepository.findByUserEmail(email);
-
-        if (user == null) {
-            throw new IllegalArgumentException("로그인한 사용자를 찾을 수 없습니다.");
-        }
-
-        List<Favorite> favorites = favoriteRepository.findByUser(user);
+        List<Favorite> favorites = myPageService.getFavorites(principal.getName());
         model.addAttribute("favorites", favorites);
 
         return "mypage/scrap";
@@ -147,14 +135,7 @@ public class MyPageController {
     @ResponseBody
     @Transactional
     public ResponseEntity<?> deleteScrap(@PathVariable Long recruitmentIdx, Principal principal) {
-        String email = principal.getName();
-        Users user = userRepository.findByUserEmail(email);
-
-        Recruitment recruitment = recruitmentRepository.findById(recruitmentIdx)
-          .orElseThrow(() -> new IllegalArgumentException("공고를 찾을 수 없습니다."));
-
-        favoriteRepository.deleteByUserAndRecruitment(user, recruitment);
-
+        myPageService.deleteScrap(principal.getName(), recruitmentIdx);
         return ResponseEntity.ok().build();
     }
 }
