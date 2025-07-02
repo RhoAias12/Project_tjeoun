@@ -1,14 +1,19 @@
 package com.tjoeun.controller;
 
 import com.tjoeun.entity.ApplyHistory;
+import com.tjoeun.entity.Favorite;
+import com.tjoeun.entity.Recruitment;
 import com.tjoeun.entity.Users;
 import com.tjoeun.repository.ApplyHistoryRepository;
+import com.tjoeun.repository.FavoriteRepository;
+import com.tjoeun.repository.RecruitmentRepository;
 import com.tjoeun.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.List;
@@ -20,6 +25,8 @@ public class MyPageController {
 
     private final ApplyHistoryRepository applyHistoryRepository;
     private final UserRepository userRepository;
+    private final FavoriteRepository favoriteRepository;
+    private final RecruitmentRepository recruitmentRepository;
 
     @GetMapping("/member_modify")
     public String memberModifyPage() {
@@ -62,8 +69,32 @@ public class MyPageController {
     }
 
     @GetMapping("/scrap")
-    public String scrap() {
+    public String scrapPage(Model model, Principal principal) {
+        String email = principal.getName();
+        Users user = userRepository.findByUserEmail(email);
+
+        if (user == null) {
+            throw new IllegalArgumentException("로그인한 사용자를 찾을 수 없습니다.");
+        }
+
+        List<Favorite> favorites = favoriteRepository.findByUser(user);
+        model.addAttribute("favorites", favorites);
+
         return "mypage/scrap";
     }
 
+    @DeleteMapping("/scrap/{recruitmentIdx}")
+    @ResponseBody
+    @Transactional
+    public ResponseEntity<?> deleteScrap(@PathVariable Long recruitmentIdx, Principal principal) {
+        String email = principal.getName();
+        Users user = userRepository.findByUserEmail(email);
+
+        Recruitment recruitment = recruitmentRepository.findById(recruitmentIdx)
+          .orElseThrow(() -> new IllegalArgumentException("공고를 찾을 수 없습니다."));
+
+        favoriteRepository.deleteByUserAndRecruitment(user, recruitment);
+
+        return ResponseEntity.ok().build();
+    }
 }
