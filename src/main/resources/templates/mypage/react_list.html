@@ -32,29 +32,10 @@
 
         <!-- 게시물 리스트 -->
         <div class="resume-list">
-          <a href="#" class="resume-card">
-            <span class="resume-title">이력서 1</span>
-            <button class="delete-button" onclick="event.stopPropagation();">
-              삭제
-            </button>
-          </a>
-          <a href="#" class="resume-card">
-            <span class="resume-title">이력서 2</span>
-            <button class="delete-button" onclick="event.stopPropagation();">
-              삭제
-            </button>
-          </a>
-          <a href="#" class="resume-card">
-            <span class="resume-title">이력서 3</span>
-            <button class="delete-button" onclick="event.stopPropagation();">
-              삭제
-            </button>
-          </a>
-          <a href="#" class="resume-card">
-            <span class="resume-title">이력서 4</span>
-            <button class="delete-button" onclick="event.stopPropagation();">
-              삭제
-            </button>
+          <!-- 이력서 리스트에 대해 반복 -->
+          <a th:each="resume : ${resumes}" th:href="@{/mypage/react_detail/{id}(id=${resume.resumeIdx})}" class="resume-card">
+            <span class="resume-title" th:text="${resume.title}">이력서 제목</span>
+            <button class="delete-button" onclick="event.stopPropagation();">삭제</button>
           </a>
         </div>
 

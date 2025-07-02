@@ -9,6 +9,23 @@
     <link rel="stylesheet" th:href="@{/css/footer.css}" />
     <link rel="stylesheet" th:href="@{/css/react.css}" />
     <script defer src="js/main.js"></script>
+
+    <!-- 이미지 미리보기 -->
+    <script>
+      function previewImage(event) {
+          const file = event.target.files[0];
+          const reader = new FileReader();
+          reader.onload = function (e) {
+              const preview = document.getElementById('preview');
+              preview.src = e.target.result;
+          };
+          if (file) {
+              reader.readAsDataURL(file);
+              document.getElementById('fileName').innerText = file.name;
+          }
+      }
+    </script>
+
   </head>
   <body>
     <div th:replace="include/header :: header"></div>
@@ -19,11 +36,12 @@
       <form>
         <table class="resume-table">
           <!-- 첫 줄: 이미지 텍스트 -->
+          <!-- 제목 -->
           <tr>
             <th scope="row">제목</th>
             <td class="centered-cell">
               <div class="form-group">
-                <p class="readonly-box1">여러분들의 일개미가 되겠습니다!</p>
+                <p class="readonly-box1" th:text="${resume.title}">제목</p>
               </div>
             </td>
           </tr>
@@ -31,8 +49,8 @@
           <tr>
             <!-- 왼쪽: 이미지 + 파일 선택 -->
             <th style="text-align: center">
-              <img id="preview" src="" alt="미리보기 없음" />
-              <input type="file" id="imageUpload" accept="image/*" />
+              <img id="preview" th:src="@{${resume.img}}" alt="미리보기 없음" />
+              <input type="file" id="imageUpload" accept="image/*" onchange="previewImage(event)" />
               <div id="fileName" style="margin-top: 4px"></div>
             </th>
 
@@ -40,53 +58,52 @@
             <td>
               <div class="form-group">
                 <label class="thick">이름</label>
-                <p class="readonly-box1">홍길동</p>
+                <p class="readonly-box1" th:text="${resume.user.userName}">이름</p>
               </div>
 
               <div class="form-group">
                 <label class="thick">이메일</label>
-                <p class="readonly-box1">honggildong@example.com</p>
+                <p class="readonly-box1" th:text="${resume.user.userEmail}">이메일</p>
               </div>
 
               <div class="form-group">
                 <label class="thick">생년월일</label>
-                <p class="readonly-box1">1995-07-01</p>
+                <p class="readonly-box1" th:text="${#temporals.format(resume.user.userBirth, 'yyyy-MM-dd')}">1995-07-01</p>
               </div>
 
               <div class="form-group">
                 <label>주소</label>
-                <p class="readonly-box1">서울특별시 성동구 성수동</p>
+                <p class="readonly-box1" th:text="${resume.address}">주소</p>
               </div>
 
               <div class="form-group">
                 <label>전화번호</label>
-                <p class="readonly-box1">010-1234-5678</p>
+                <p class="readonly-box1" th:text="${resume.phoneNum}">전화번호</p>
               </div>
 
               <div class="form-group">
                 <label>학력</label>
-                <p class="readonly-box1">서울대학교 컴퓨터공학과 졸업</p>
+                <p class="readonly-box1" th:text="${resume.education}">학력</p>
               </div>
 
               <div class="form-group">
                 <label>스킬</label>
-                <p class="readonly-box1">python, SQL</p>
+                <p class="readonly-box1" th:text="${resume.ability}">스킬</p>
               </div>
 
               <div class="form-group">
                 <label>경력</label>
-                <p class="readonly-box1">
-                  2021 ~ 2024 (주)코드랩 백엔드 개발자
-                </p>
+                <p class="readonly-box1" th:text="${resume.antecedents}">경력</p>
               </div>
 
               <div class="form-group">
                 <label>수상이력</label>
-                <p class="readonly-box1">2023 SW창의력대회 최우수상 수상</p>
+                <p class="readonly-box1" th:text="${resume.awards}">수상이력</p>
               </div>
             </td>
           </tr>
 
+          <!-- 질문 1 -->
           <tr>
             <th>
               <div class="question">
@@ -95,103 +112,31 @@
               </div>
             </th>
             <td>
-              <p class="content">
-                안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-                안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-                안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-                안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-                안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-                안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-                안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-                안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-                안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-                안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-              </p>
+              <p class="content" th:text="${resume.context}">내용</p>
             </td>
           </tr>
 
-          <tr>
-            <th>
-              <div class="question">
-                <p>질문1.</p>
-                <p>본인 소개 부탁드립니다.</p>
-              </div>
-            </th>
-            <td>
-              <p class="content">
-                안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-                안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-                안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-                안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-                안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-                안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-                안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-                안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-                안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-                안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-              </p>
-            </td>
-          </tr>
-
-          <tr>
-            <th>
-              <div class="question">
-                <p>질문1.</p>
-                <p>본인 소개 부탁드립니다.</p>
-              </div>
-            </th>
-            <td>
-              <p class="content">
-                안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-                안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-                안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-                안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-                안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-                안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-                안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-                안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-                안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-                안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-              </p>
-            </td>
-          </tr>
-
-          <tr>
-            <th>
-              <div class="question">
-                <p>질문1.</p>
-                <p>본인 소개 부탁드립니다.</p>
-              </div>
-            </th>
-            <td>
-              <p class="content">
-                안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-                안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-                안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-                안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-                안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-                안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-                안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-                안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-                안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-                안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-              </p>
-            </td>
-          </tr>
-
+          <!-- 포트폴리오 링크 -->
           <tr>
             <th class="link">포트폴리오 링크를<br />넣어주세요.</th>
             <td>
-              <p class="content">https://github.com/yourname/portfolio</p>
+              <p class="content" th:text="${resume.img}">포트폴리오 링크</p>
             </td>
           </tr>
         </table>
       </form>
     </div>
+
     <div class="button-group">
-      <button type="button">삭제</button>
-      <button type="submit">수정</button>
+      <form th:action="@{/mypage/react_delete/{id}(id=${resume.resumeIdx})}" method="post" onsubmit="return confirm('정말 삭제하시겠습니까?');">
+        <button type="submit">삭제</button>
+      </form>
+
+      <form th:action="@{/mypage/react_modify/{id}(id=${resume.resumeIdx})}" method="post">
+        <button type="submit">수정</button>
+      </form>
     </div>
+
     <div th:replace="include/footer :: footer"></div>
   </body>
 </html>

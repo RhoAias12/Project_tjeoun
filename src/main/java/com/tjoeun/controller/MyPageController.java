@@ -62,9 +62,23 @@ public class MyPageController {
     }
 
     @GetMapping("/react_list")
-    public String reactList() {
-        return "mypage/react_list";
+    public String reactList(Model model, Principal principal) {
+        // 로그인한 사용자 가져오기
+        String email = principal.getName();
+        Users user = userRepository.findByUserEmail(email);
+        if (user == null) {
+            throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
+        }
+
+        // 해당 사용자의 이력서 목록을 가져오기
+        List<Resume> resumes = resumeRepository.findByUser(user);
+
+        // 모델에 이력서 목록 추가
+        model.addAttribute("resumes", resumes);
+
+        return "mypage/react_list"; // react_list 페이지로 이동
     }
+
     // 이력서 저장
     @PostMapping("/mypage/react_write")
     public String saveResume(@ModelAttribute("resumeDto") @Valid ResumeDto resumeDto, BindingResult bindingResult, Principal principal) {
@@ -110,6 +124,55 @@ public class MyPageController {
     public String reactModify() {
         return "mypage/react_modify";
     }
+
+    // 이력서 수정
+    @PostMapping("/mypage/react_modify/{id}")
+    public String modifyResume(@PathVariable Long id, @ModelAttribute("resumeDto") @Valid ResumeDto resumeDto, BindingResult bindingResult, Principal principal) {
+        if (bindingResult.hasErrors()) {
+            return "mypage/react_modify"; // 수정 에러가 있으면 수정 페이지로 돌아감
+        }
+
+        // 로그인된 사용자 정보 가져오기
+        String email = principal.getName();
+        Users user = userRepository.findByUserEmail(email);
+        if (user == null) {
+            throw new IllegalArgumentException("로그인한 사용자를 찾을 수 없습니다.");
+        }
+
+        // 해당 이력서를 DB에서 가져오기
+        Resume resume = resumeRepository.findById(id)
+          .orElseThrow(() -> new IllegalArgumentException("해당 이력서를 찾을 수 없습니다."));
+
+        // ResumeDto에서 받은 값으로 이력서 수정
+        resume.setTitle(resumeDto.getTitle());
+        resume.setContext(resumeDto.getContext());
+        resume.setAddress(resumeDto.getAddress());
+        resume.setPhoneNum(resumeDto.getPhoneNum());
+        resume.setEducation(resumeDto.getEducation());
+        resume.setAbility(resumeDto.getAbility());
+        resume.setAntecedents(resumeDto.getAntecedents());
+        resume.setAwards(resumeDto.getAwards());
+        resume.setImg(resumeDto.getImg()); // 이미지 처리
+
+        // 수정된 이력서 DB에 저장
+        resumeRepository.save(resume);
+
+        // 수정 후 이력서 목록 페이지로 리다이렉트
+        return "redirect:/mypage/react_list";
+    }
+
+    // 이력서 삭제
+    @PostMapping("/mypage/react_delete/{id}")
+    public String deleteResume(@PathVariable Long id) {
+        Resume resume = resumeRepository.findById(id)
+          .orElseThrow(() -> new IllegalArgumentException("해당 이력서를 찾을 수 없습니다."));
+
+        resumeRepository.delete(resume);
+
+        // 삭제 후 이력서 목록 페이지로 리다이렉트
+        return "redirect:/mypage/react_list";
+    }
+
 
     @GetMapping("/react_detail")
     public String reactDetail() {
