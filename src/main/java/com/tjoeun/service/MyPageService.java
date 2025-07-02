@@ -1,5 +1,6 @@
 package com.tjoeun.service;
 
+import com.tjoeun.dto.ApplyHistoryDTO;
 import com.tjoeun.dto.FavoriteDTO;
 import com.tjoeun.dto.UserFormDto;
 import com.tjoeun.entity.ApplyHistory;
@@ -28,12 +29,22 @@ public class MyPageService {
   private final UserRepository userRepository;
   private final ApplyHistoryRepository applyHistoryRepository;
 
-  public List<ApplyHistory> getApplyHistoryList(String email) {
+  public List<ApplyHistoryDTO> getApplyHistoryList(String email) {
     Users user = userRepository.findByUserEmail(email);
     if (user == null) {
       throw new IllegalArgumentException("로그인한 사용자를 찾을 수 없습니다.");
     }
-    return applyHistoryRepository.findByUser_UserIdx(user.getUserIdx());
+
+    List<ApplyHistory> historyList = applyHistoryRepository.findByUser_UserIdx(user.getUserIdx());
+
+    return historyList.stream().map(history -> ApplyHistoryDTO.builder()
+        .applyHistoryId(history.getOptionalIdx())
+        .statusDisplay(history.getStatus().getDisplay())
+        .recruitmentTitle(history.getRecruitment().getTitle())
+        .recruitmentCompany(history.getRecruitment().getCompany())
+        .resumeId(history.getOptionalIdx())
+        .build())
+      .toList();
   }
 
   @Transactional(readOnly = true)

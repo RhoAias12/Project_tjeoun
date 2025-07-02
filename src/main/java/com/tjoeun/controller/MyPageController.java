@@ -1,16 +1,13 @@
 package com.tjoeun.controller;
 
+import com.tjoeun.dto.ApplyHistoryDTO;
 import com.tjoeun.dto.FavoriteDTO;
 import com.tjoeun.dto.UserFormDto;
 import com.tjoeun.entity.*;
 import com.tjoeun.repository.*;
-import com.tjoeun.service.FavoriteService;
 import com.tjoeun.service.MyPageService;
 import com.tjoeun.service.UserService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -31,13 +28,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MyPageController {
 
-    private final ApplyHistoryRepository applyHistoryRepository;
-    private final UserRepository userRepository;
     private final MyPageService myPageService;
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
-    private final FavoriteRepository favoriteRepository;
-    private final RecruitmentRepository recruitmentRepository;
     private final ResumeRepository resumeRepository;
 
     @GetMapping("/member_modify")
@@ -90,7 +83,7 @@ public class MyPageController {
 
     @GetMapping("/apply_status")
     public String applyStatus(Model model, Principal principal) {
-        List<ApplyHistory> historyList = myPageService.getApplyHistoryList(principal.getName());
+        List<ApplyHistoryDTO> historyList = myPageService.getApplyHistoryList(principal.getName());
         model.addAttribute("historyList", historyList);
         return "mypage/apply_status";
     }
