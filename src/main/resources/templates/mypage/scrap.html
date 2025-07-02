@@ -3,6 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
     <link rel="stylesheet" th:href="@{/css/main.css}" />
     <link rel="stylesheet" th:href="@{/css/header.css}" />
     <link rel="stylesheet" th:href="@{/css/footer.css}" />
@@ -20,7 +22,33 @@
         element.classList.toggle('fa-solid');
         element.classList.toggle('active');
       }
+
+      function deleteScrap(recruitmentIdx) {
+      const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+      const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
+      fetch(`/mypage/scrap/${recruitmentIdx}`, {
+        method: 'DELETE',
+        headers: {
+          [csrfHeader]: csrfToken
+        }
+      })
+      .then(response => {
+        if (response.ok) {
+          document.getElementById('card-' + recruitmentIdx).remove();
+        } else {
+          alert("삭제 실패");
+        }
+      });
+    }
     </script>
+
+    <style>
+      .gray-text {
+        color: gray;
+      }
+    </style>
+
   </head>
   <body>
     <!-- 헤더 -->
@@ -40,74 +68,30 @@
         </div>
 
         <div class="apply-list">
-          <div class="apply-card">
+          <div class="apply-card" th:each="favorite : ${favorites}" th:id="'card-' + ${favorite.recruitment.recruitmentIdx}">
             <div class="apply-info">
-              <div class="job-title">공고명</div>
-              <div class="company-name">회사명</div>
-            </div>
-            <div class="apply-side">
-              <span class="deadline">마감일<br />2025.06.28</span>
-              <div class="apply-action">
-                <i
-                        class="fa-regular fa-bookmark bookmark-icon"
-                        onclick="toggleBookmark(this)"
-                ></i>
-                <button class="apply-btn">지원하기</button>
+              <div class="job-title">
+                <a th:href="@{/recruit/detail/{id}(id=${favorite.recruitment.recruitmentIdx})}"
+                   th:text="${favorite.recruitment.title}">공고명</a>
               </div>
-            </div>
-          </div>
-
-          <div class="apply-card">
-            <div class="apply-info">
-              <div class="job-title">공고명</div>
-              <div class="company-name">회사명</div>
+              <div class="company-name" th:text="${favorite.recruitment.company}">회사명</div>
             </div>
             <div class="apply-side">
-              <span class="deadline">마감일<br />2025.07.25</span>
+              <span class="deadline"
+                    th:classappend="${favorite.recruitment.deadline.isBefore(T(java.time.LocalDate).now())} ? 'gray-text'"
+                    th:utext="'마감일<br/>' + ${#temporals.format(favorite.recruitment.deadline, 'yyyy.MM.dd')}">마감일</span>
               <div class="apply-action">
-                <i
-                        class="fa-regular fa-bookmark bookmark-icon"
-                        onclick="toggleBookmark(this)"
-                ></i>
-                <button class="apply-btn">지원하기</button>
-              </div>
-            </div>
-          </div>
-
-          <div class="apply-card">
-            <div class="apply-info">
-              <div class="job-title">공고명</div>
-              <div class="company-name">회사명</div>
-            </div>
-            <div class="apply-side">
-              <span class="deadline">마감일<br />2025.07.29</span>
-              <div class="apply-action">
-                <i
-                        class="fa-regular fa-bookmark bookmark-icon"
-                        onclick="toggleBookmark(this)"
-                ></i>
-                <button class="apply-btn">지원하기</button>
-              </div>
-            </div>
-          </div>
-
-          <div class="apply-card">
-            <div class="apply-info">
-              <div class="job-title">공고명</div>
-              <div class="company-name">회사명</div>
-            </div>
-            <div class="apply-side">
-              <span class="deadline">마감일<br />2025.07.30</span>
-              <div class="apply-action">
-                <i
-                        class="fa-regular fa-bookmark bookmark-icon"
-                        onclick="toggleBookmark(this)"
-                ></i>
-                <button class="apply-btn">지원하기</button>
+                <i class="fa-bookmark bookmark-icon fa-solid active"
+                   th:onclick="deleteScrap([[${favorite.recruitment.recruitmentIdx}]])">
+                </i>
+                <a th:href="@{/recruit/apply/{id}(id=${favorite.recruitment.recruitmentIdx})}">
+                  <button class="apply-btn">지원하기</button>
+                </a>
               </div>
             </div>
           </div>
         </div>
+
 
         <!-- 페이지네이션 -->
         <div class="pagination">
