@@ -1,6 +1,8 @@
 package com.tjoeun.repository;
 
 import com.tjoeun.entity.Recruitment;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -13,5 +15,8 @@ public interface JobPostingRepository extends JpaRepository<Recruitment, Long> {
 
   // 중복 공고 확인용 메서드 추가
   boolean existsByTitleAndCompanyAndDeadline(String title, String company, LocalDate deadline);
+
+  // 페이징 메서드
+  Page<Recruitment> findAll(Pageable pageable);
 
 }

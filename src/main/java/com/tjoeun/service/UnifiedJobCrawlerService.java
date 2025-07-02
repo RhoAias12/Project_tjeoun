@@ -40,7 +40,7 @@ public class UnifiedJobCrawlerService {
   private JobPostingRepository repository;
 
   private final String logoSaveDir = "src/main/resources/static/images/logos/";
-  @Scheduled(cron = "0 08 11 * * *", zone = "Asia/Seoul")
+  @Scheduled(cron = "0 06 15 * * *", zone = "Asia/Seoul")
 //  @Scheduled(fixedDelay = 10000) // 10초마다 실행
   public void runCrawler() {
     List<Recruitment> allJobs = new ArrayList<>();
