@@ -45,7 +45,8 @@
 
              <!-- 정렬기준: 스크랩순 / 마감일순 -->
              <select class="sort-select" name="customSort" onchange="document.getElementById('sortForm').submit()">
-               <option value="scrap" th:selected="${customSort == 'scrap'}">스크랩 순</option>
+               <option value="" th:selected="${customSort == null or customSort == ''}">전체</option>
+               <option value="scrapOnly" th:selected="${customSort == 'scrapOnly'}">스크랩 순</option>
                <option value="deadline" th:selected="${customSort == 'deadline'}">마감일 순</option>
              </select>
 
@@ -83,9 +84,10 @@
 <!--       </div>-->
 <!--     </div>-->
 
-         <div th:replace="fragments/pagination :: fragment
-            (${jobPage}, ${startPage}, ${endPage}, '/empl/empl_main')">
+         <div th:replace="fragments/pagination :: fragment(${jobPage},
+             ${startPage}, ${endPage}, '/empl/empl_main', ${customSort})">
          </div>
+
 
 
 

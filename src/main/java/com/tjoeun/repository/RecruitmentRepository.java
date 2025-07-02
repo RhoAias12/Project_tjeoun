@@ -11,5 +11,7 @@ public interface RecruitmentRepository extends JpaRepository<Recruitment, Long> 
     @Query("SELECT r FROM Recruitment r JOIN r.favorites f GROUP BY r HAVING COUNT(f) > 0 ORDER BY COUNT(f) DESC")
     Page<Recruitment> findOnlyFavorited(Pageable pageable);
 
+    Page<Recruitment> findAllByOrderByDeadlineAsc(Pageable pageable);
+
 
 }

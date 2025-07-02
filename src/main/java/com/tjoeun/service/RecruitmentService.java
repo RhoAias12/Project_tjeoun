@@ -44,6 +44,11 @@ public class RecruitmentService {
                 .map(this::convertToDTO);
     }
 
+    public Page<RecruitmentDTO> getPostsSortedByDeadline(Pageable pageable) {
+        return recruitmentRepository.findAllByOrderByDeadlineAsc(pageable)
+                .map(this::convertToDTO);
+    }
+
 
 
 
