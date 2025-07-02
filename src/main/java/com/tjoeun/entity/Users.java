@@ -2,7 +2,6 @@ package com.tjoeun.entity;
 
 import com.tjoeun.constant.UserRole;
 import com.tjoeun.dto.UserFormDto;
-import com.tjoeun.dto.UserListDto;
 import com.tjoeun.repository.UserRepository;
 import jakarta.persistence.*;
 import lombok.*;

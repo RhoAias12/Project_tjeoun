@@ -45,31 +45,23 @@
         </div>
       </div>
 
-      <!-- 페이지네이션 -->
+      <!-- 페이지네이션 (예시용, 실제 페이징 처리 로직 필요 시 추가 구현) -->
       <div class="pagination" th:if="${jobPage.totalPages > 1}">
         <ul class="pagination-list">
-
-          <!-- 이전 페이지 버튼 -->
           <li th:if="${jobPage.hasPrevious()}">
             <a th:href="@{${url}(page=${jobPage.number - 1})}" class="page-btn">〈</a>
           </li>
 
-          <!-- 페이지 번호 리스트 -->
           <li th:each="i : ${#numbers.sequence(startPage + 1, endPage + 1)}"
               th:classappend="${i - 1 == jobPage.number} ? 'active'">
-            <a th:href="@{${url}(page=${i - 1})}"
-               class="page-btn"
-               th:text="${i}">1</a>
+            <a th:href="@{${url}(page=${i - 1})}" class="page-btn" th:text="${i}">1</a>
           </li>
 
-          <!-- 다음 페이지 버튼 -->
           <li th:if="${jobPage.hasNext()}">
             <a th:href="@{${url}(page=${jobPage.number + 1})}" class="page-btn">〉</a>
           </li>
-
         </ul>
       </div>
-
     </div>
   </div>
 
