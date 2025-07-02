@@ -47,18 +47,7 @@ public class MyPageController {
     @GetMapping("/member_modify")
     public String showMemberModifyForm(Model model, Principal principal) {
         String email = principal.getName();
-        Users user = userRepository.findByUserEmail(email);
-        if (user == null) {
-            throw new IllegalArgumentException("로그인한 사용자를 찾을 수 없습니다.");
-        }
-
-        UserFormDto dto = new UserFormDto();
-        dto.setUserName(user.getUserName());
-        dto.setUserEmail(user.getUserEmail());
-        dto.setUserNickname(user.getUserNickname());
-        dto.setUserBirth(user.getUserBirth());
-        dto.setUserPassword("");
-
+        UserFormDto dto = myPageService.getUserFormDto(email);
         model.addAttribute("userFormDto", dto);
         return "mypage/member_modify";
     }
@@ -68,32 +57,8 @@ public class MyPageController {
                                BindingResult bindingResult,
                                Principal principal,
                                Model model) {
-        if (bindingResult.hasErrors()) {
-            return "mypage/member_modify";
-        }
-
         String email = principal.getName();
-        Users user = userRepository.findByUserEmail(email);
-
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
-        }
-
-        if (!dto.getUserNickname().equals(user.getUserNickname()) &&
-          userService.nicknameExists(dto.getUserNickname())) {
-            model.addAttribute("nicknameError", "이미 사용 중인 닉네임입니다.");
-            return "mypage/member_modify";
-        }
-
-        if (dto.getUserPassword() != null && !dto.getUserPassword().isBlank()) {
-            user.setUserPassword(passwordEncoder.encode(dto.getUserPassword()));
-        }
-
-        user.setUserNickname(dto.getUserNickname());
-
-        userRepository.save(user);
-
-        return "redirect:/mypage/member_modify?success";
+        return myPageService.updateUser(dto, email, bindingResult, model, passwordEncoder, userService);
     }
 
     @GetMapping("/react_list")
