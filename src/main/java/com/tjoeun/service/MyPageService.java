@@ -1,5 +1,6 @@
 package com.tjoeun.service;
 
+import com.tjoeun.dto.UserFormDto;
 import com.tjoeun.entity.ApplyHistory;
 import com.tjoeun.entity.Favorite;
 import com.tjoeun.entity.Recruitment;
@@ -9,8 +10,11 @@ import com.tjoeun.repository.FavoriteRepository;
 import com.tjoeun.repository.RecruitmentRepository;
 import com.tjoeun.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 
 import java.util.List;
 
@@ -30,6 +34,42 @@ public class MyPageService {
     }
     return applyHistoryRepository.findByUser_UserIdx(user.getUserIdx());
   }
+
+  @Transactional(readOnly = true)
+  public UserFormDto getUserFormDto(String email) {
+    Users user = userRepository.findByUserEmail(email);
+    if (user == null) {
+      throw new IllegalArgumentException("로그인한 사용자를 찾을 수 없습니다.");
+    }
+
+    UserFormDto dto = new UserFormDto();
+    dto.setUserName(user.getUserName());
+    dto.setUserEmail(user.getUserEmail());
+    dto.setUserNickname(user.getUserNickname());
+    dto.setUserBirth(user.getUserBirth());
+    dto.setUserPassword("");
+    return dto;
+  }
+
+  @Transactional
+  public String updateUser(UserFormDto dto, String email, BindingResult bindingResult, Model model, PasswordEncoder passwordEncoder, UserService userService) {
+    Users user = userRepository.findByUserEmail(email);
+    if (user == null) {
+      throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
+    }
+    if (!dto.getUserNickname().equals(user.getUserNickname()) &&
+      userService.nicknameExists(dto.getUserNickname())) {
+      model.addAttribute("nicknameError", "이미 사용 중인 닉네임입니다.");
+      return "mypage/member_modify";
+    }
+    if (dto.getUserPassword() != null && !dto.getUserPassword().isBlank()) {
+      user.setUserPassword(passwordEncoder.encode(dto.getUserPassword()));
+    }
+    user.setUserNickname(dto.getUserNickname());
+    userRepository.save(user);
+    return "redirect:/mypage/member_modify?success";
+  }
+
 
   @Transactional
   public void deleteScrap(String userEmail, Long recruitmentIdx) {
