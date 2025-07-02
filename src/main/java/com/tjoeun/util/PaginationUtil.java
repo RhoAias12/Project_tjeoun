@@ -14,7 +14,6 @@ public class PaginationUtil {
         int endPage = Math.min(startPage + 9, totalPages - 1);
 
         // model에 속성 등록
-        model.addAttribute("jobPage", page);
         model.addAttribute("startPage", startPage);
         model.addAttribute("endPage", endPage);
         model.addAttribute("url", url);  // 페이징 링크에 사용할 base URL

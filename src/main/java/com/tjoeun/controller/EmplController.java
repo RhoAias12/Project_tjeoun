@@ -32,20 +32,33 @@ public class EmplController {
 
     // 채용 공고 메인 페이지 (전체 리스트 출력 + 페이징 처리)
     @GetMapping("/empl_main")
-    public String emplMainPage(@RequestParam(defaultValue = "1") int page,
+    public String emplMainPage(@RequestParam(defaultValue = "0") int page,
+                               @RequestParam(required = false) String customSort,
                                @PageableDefault(size = 25) Pageable pageable,
                                Model model) {
 
-        // 1. 전체 채용 리스트 (화면에 실제 출력할 리스트)
+        int pageIndex = Math.max(0, page - 1);
+        Pageable correctedPageable = PageRequest.of(page, pageable.getPageSize(), pageable.getSort());
+
+        // 전체 리스트 전달
         List<RecruitmentDTO> jobList = recruitmentService.getAllPosts();
         model.addAttribute("jobList", jobList);
 
-        // 2. 페이지네이션 전용 page 객체 (UI 페이지네이션 구성용)
-        Pageable correctedPageable = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
-        Page<RecruitmentDTO> jobPage = recruitmentService.getPagedPosts(correctedPageable);
+        //  정렬 기준에 따라 페이징 처리된 jobPage 생성
+        Page<RecruitmentDTO> jobPage;
+        if ("scrapOnly".equals(customSort)) {
+            jobPage = recruitmentService.getOnlyFavorited(correctedPageable);
+        } else if ("deadline".equals(customSort)) {
+            jobPage = recruitmentService.getPostsSortedByDeadline(correctedPageable);
+        } else {
+            jobPage = recruitmentService.getPagedPosts(correctedPageable);
+        }
 
-        // 3. 페이징 정보 + URL 설정
+        // jobPage 기준으로 페이징 정보 설정
         PaginationUtil.setPaging(model, jobPage, "/empl/empl_main");
+
+        model.addAttribute("jobPage", jobPage);
+        model.addAttribute("customSort", customSort);
 
         return "empl/empl_main";
     }
