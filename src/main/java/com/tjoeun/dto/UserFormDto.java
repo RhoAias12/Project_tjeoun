@@ -23,7 +23,7 @@ public class UserFormDto {
   private String userNickname;
 
   @NotBlank(message = "비밀번호는 필수 입력 값입니다.")
-  @Size(min = 4, max = 16, message = "비밀번호는 4~16글자 사이로 입력해주세요.")
+  @Size(min = 8, max = 16, message = "비밀번호는 8~16글자 사이로 입력해주세요.")
   @Pattern(regexp = "^[a-zA-Z0-9]*$", message = "비밀번호는 한글과 특수문자를 포함할 수 없습니다.")
   private String userPassword;
 
