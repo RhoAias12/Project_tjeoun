@@ -1,112 +1,184 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <link rel="stylesheet" th:href="@{/css/main.css}" />
-      <link rel="stylesheet" th:href="@{/css/header.css}" />
-      <link rel="stylesheet" th:href="@{/css/footer.css}" />
-      <link rel="stylesheet" th:href="@{/css/member_edit.css}" />
     <title>회원정보수정</title>
-  </head>
-  <body>
-    <!-- 헤더 -->
-    <div th:replace="include/header :: header"></div>
-    <div class="tab-box">
-        <div class="tab-inner">
-            <h2 class="mypage-title">마이페이지</h2>
-            <div class="tab-buttons">
-              <button class="tab1" onclick="location.href='/mypage/member_modify'">회원정보수정</button>
-              <button class="tab" onclick="location.href='/mypage/react_list'">이력서관리</button>
-              <button class="tab" onclick="location.href='/mypage/apply_status'">지원현황</button>
-              <button class="tab" onclick="location.href='/mypage/scrap'">스크랩</button>
-            </div>
+    <link rel="stylesheet" th:href="@{/css/main.css}" />
+    <link rel="stylesheet" th:href="@{/css/header.css}" />
+    <link rel="stylesheet" th:href="@{/css/footer.css}" />
+    <link rel="stylesheet" th:href="@{/css/member_edit.css}" />
+    <style>
+        .fieldError {
+          color: blue;
+          font-size: 0.9em;
+          margin-top: 2px;
+          margin-bottom: 8px;
+        }
+    </style>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        let originalNickname = /*[[${userFormDto.userNickname}]]*/ '';
+        let nicknameChecked = false;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const nicknameInput = document.getElementById("nickname");
+            nicknameInput.addEventListener("input", () => {
+                nicknameChecked = false;
+                document.getElementById("nicknameMessage").textContent = "";
+            });
+
+            if (window.location.search.includes("success")) {
+                alert("회원정보가 성공적으로 수정되었습니다.");
+                history.replaceState(null, null, window.location.pathname);
+            }
+        });
+
+        function checkNickname() {
+            const nickname = document.getElementById("nickname").value.trim();
+            const msg = document.getElementById("nicknameMessage");
+
+            if (!nickname) {
+                msg.textContent = "닉네임을 입력해주세요.";
+                nicknameChecked = false;
+                return;
+            }
+            if (nickname.length < 2 || nickname.length > 20) {
+                msg.textContent = "닉네임은 2~20글자 사이로 입력해주세요.";
+                nicknameChecked = false;
+                return;
+            }
+
+            fetch(`/api/user/check-nickname?nickname=${encodeURIComponent(nickname)}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.exists) {
+                        msg.textContent = "이미 존재하는 닉네임입니다.";
+                        nicknameChecked = false;
+                    } else {
+                        msg.textContent = "사용 가능한 닉네임입니다.";
+                        nicknameChecked = true;
+                    }
+                })
+                .catch(err => {
+                    alert("닉네임 확인 중 오류 발생");
+                    nicknameChecked = false;
+                });
+        }
+
+        function validateForm() {
+            const nickname = document.getElementById("nickname").value.trim();
+            const password = document.getElementById("password").value;
+            const passwordConfirm = document.getElementById("password-confirm").value;
+            const msg = document.getElementById("nicknameMessage");
+
+            // 닉네임 길이 체크
+            if (nickname.length < 2 || nickname.length > 20) {
+                alert("닉네임은 2~20글자 사이로 입력해주세요.");
+                return false;
+            }
+
+            if (nickname !== originalNickname && !nicknameChecked) {
+                alert("닉네임 중복 확인을 해주세요.");
+                return false;
+            }
+
+            if (password || passwordConfirm) {
+                // 한글, 특수문자 체크 (한글은 \uAC00-\uD7A3 범위)
+                const hangulOrSpecial = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]|[~!@#$%^&*()_+|<>?:{}]/;
+                if (hangulOrSpecial.test(password)) {
+                    alert("비밀번호는 한글과 일부 특수문자를 포함할 수 없습니다.");
+                    return false;
+                }
+
+                if (password.length < 4 || password.length > 16) {
+                    alert("비밀번호는 4~16자 사이여야 합니다.");
+                    return false;
+                }
+
+                if (password !== passwordConfirm) {
+                    alert("비밀번호가 일치하지 않습니다.");
+                    return false;
+                }
+            }
+            return true;
+        }
+        /*]]>*/
+    </script>
+</head>
+
+<body>
+<!-- 헤더 -->
+<div th:replace="include/header :: header"></div>
+
+<div class="tab-box">
+    <div class="tab-inner">
+        <h2 class="mypage-title">마이페이지</h2>
+        <div class="tab-buttons">
+            <button class="tab1" onclick="location.href='/mypage/member_modify'">회원정보수정</button>
+            <button class="tab" onclick="location.href='/mypage/react_list'">이력서관리</button>
+            <button class="tab" onclick="location.href='/mypage/apply_status'">지원현황</button>
+            <button class="tab" onclick="location.href='/mypage/scrap'">스크랩</button>
         </div>
     </div>
+</div>
 
-    <div class="signup-container">
-        <form class="signup-form">
-            <!-- 이름 -->
-            <div class="form-group">
-                <label for="username">이름</label>
-                <input
-                        type="text"
-                        id="username"
-                        name="username"
-                        value="홍길동"
-                        required
-                />
-            </div>
+<div class="signup-container">
+    <form class="signup-form" th:action="@{/mypage/member_modify}" th:object="${userFormDto}" method="post" onsubmit="return validateForm()">
 
-            <!-- 이메일 -->
-            <div class="form-group">
-                <label for="email">이메일</label>
-                <input
-                        type="email"
-                        id="email"
-                        name="email"
-                        value="hong03@naver.com"
-                        required
-                />
-            </div>
+        <!-- 이름 -->
+        <div class="form-group">
+            <label for="username">이름</label>
+            <input type="text" id="username" th:field="*{userName}" readonly />
+        </div>
 
-            <!-- 닉네임 -->
-            <div class="form-group">
-                <label for="nickname">닉네임</label>
-                <div class="input-wrapper">
-                    <input
-                            type="text"
-                            id="nickname"
-                            name="nickname"
-                            value="홍익인간"
-                            required
-                    />
-                    <button type="button" class="check-btn">중복확인</button>
-                </div>
-            </div>
+        <!-- 이메일 -->
+        <div class="form-group">
+            <label for="email">이메일</label>
+            <input type="email" id="email" th:field="*{userEmail}" readonly />
+        </div>
 
-            <!-- 비밀번호 -->
-            <div class="form-group">
-                <label for="password">비밀번호</label>
-                <input
-                        type="password"
-                        id="password"
-                        name="password"
-                        placeholder="비밀번호"
-                        required
-                />
+        <!-- 닉네임 -->
+        <div class="form-group">
+            <label for="nickname">닉네임</label>
+            <div class="input-wrapper">
+                <input type="text" id="nickname" th:field="*{userNickname}" required />
+                <button type="button" class="check-btn" onclick="checkNickname()">중복확인</button>
             </div>
+            <p class="fieldError" th:if="${#fields.hasErrors('userNickname')}" th:errors="*{userNickname}"></p>
+            <p id="nicknameMessage" class="fieldError"></p>
+        </div>
 
-            <!-- 비밀번호 확인 -->
-            <div class="form-group">
-                <label for="password-confirm">비밀번호 확인</label>
-                <input
-                        type="password"
-                        id="password-confirm"
-                        name="password-confirm"
-                        placeholder="비밀번호 확인"
-                        required
-                />
-            </div>
+        <!-- 비밀번호 -->
+        <div class="form-group">
+            <label for="password">비밀번호</label>
+            <input type="password" id="password" th:field="*{userPassword}" placeholder="비밀번호 입력 (변경 시에만)" />
+            <p class="fieldError" th:if="${#fields.hasErrors('userPassword')}" th:errors="*{userPassword}"></p>
+        </div>
 
-            <!-- 생년월일: 2000년 2월 25일로 기본값 지정 -->
-            <div class="form-group">
-                <label for="birthdate">생년월일</label>
-                <input
-                        type="date"
-                        id="birthdate"
-                        name="birthdate"
-                        value="2000-02-25"
-                        required
-                />
-            </div>
-        </form>
-    </div>
-    <div class="button-box">
-        <button type="submit" class="action-button">수정</button>
-    </div>
-    <!-- 푸터 -->
-    <div th:replace="include/footer :: footer"></div>
-  </body>
-  </body>
+        <!-- 비밀번호 확인 -->
+        <div class="form-group">
+            <label for="password-confirm">비밀번호 확인</label>
+            <input type="password" id="password-confirm" placeholder="비밀번호 확인" />
+        </div>
+
+        <!-- 생년월일 -->
+        <div class="form-group">
+            <label for="birthdate">생년월일</label>
+            <input type="text"
+                   id="birthdate"
+                   name="userBirth"
+                   th:value="${#temporals.format(userFormDto.userBirth, 'yyyy-MM-dd')}"
+                   readonly />
+        </div>
+
+        <div class="button-box">
+            <button type="submit" class="action-button">수정</button>
+        </div>
+    </form>
+</div>
+
+<!-- 푸터 -->
+<div th:replace="include/footer :: footer"></div>
+</body>
 </html>
