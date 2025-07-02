@@ -58,10 +58,9 @@ public class MyPageController {
 
     @GetMapping("/react_list")
     public String reactList() {
-
-
         return "mypage/react_list";
     }
+
 
     @GetMapping("/react_write")
     public String reactWrite() {
@@ -80,10 +79,16 @@ public class MyPageController {
 
     @GetMapping("/react_detail/{id}")
     public String reactDetail(@PathVariable Long id, Model model) {
+        // id가 null인지 체크
+        if (id == null) {
+            throw new IllegalArgumentException("해당 이력서를 찾을 수 없습니다.");
+        }
+
         Resume resume = resumeRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("해당 이력서를 찾을 수 없습니다."));
         model.addAttribute("resume", resume);
         return "mypage/react_detail";
     }
+
 
 
 
