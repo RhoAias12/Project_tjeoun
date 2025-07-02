@@ -1,13 +1,7 @@
 package com.tjoeun.controller;
 
-import com.tjoeun.entity.ApplyHistory;
-import com.tjoeun.entity.Favorite;
-import com.tjoeun.entity.Recruitment;
-import com.tjoeun.entity.Users;
-import com.tjoeun.repository.ApplyHistoryRepository;
-import com.tjoeun.repository.FavoriteRepository;
-import com.tjoeun.repository.RecruitmentRepository;
-import com.tjoeun.repository.UserRepository;
+import com.tjoeun.entity.*;
+import com.tjoeun.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -27,6 +21,7 @@ public class MyPageController {
     private final UserRepository userRepository;
     private final FavoriteRepository favoriteRepository;
     private final RecruitmentRepository recruitmentRepository;
+    private final ResumeRepository resumeRepository;
 
     @GetMapping("/member_modify")
     public String memberModifyPage() {
@@ -52,6 +47,15 @@ public class MyPageController {
     public String reactDetail() {
         return "mypage/react_detail";
     }
+
+    @GetMapping("/react_detail/{id}")
+    public String reactDetail(@PathVariable Long id, Model model) {
+        Resume resume = resumeRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("해당 이력서를 찾을 수 없습니다."));
+        model.addAttribute("resume", resume);
+        return "mypage/react_detail";
+    }
+
+
 
     @GetMapping("/apply_status")
     public String applyStatus(Model model, Principal principal) {
