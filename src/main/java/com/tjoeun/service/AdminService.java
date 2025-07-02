@@ -67,12 +67,11 @@ public class AdminService {
     userRepository.save(user);
   }
   public Page<UserListDto> getPagedUsers(Pageable pageable) {
-    // Users -> UserListDto 변환해서 Page로 반환
-    return userRepository.findAll(pageable)
-      .map(user -> new UserListDto(
-        user.getUserIdx(),
-        user.getUserEmail(),
-        user.getUserNickname()
-      ));
+    Page<Users> userPage = userRepository.findAll(pageable);
+    return userPage.map(user -> new UserListDto(
+      user.getUserIdx(),
+      user.getUserEmail(),
+      user.getUserNickname()
+    ));
   }
 }

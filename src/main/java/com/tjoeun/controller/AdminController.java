@@ -2,10 +2,9 @@ package com.tjoeun.controller;
 
 import com.tjoeun.dto.UserFormDto;
 import com.tjoeun.dto.UserListDto;
+import com.tjoeun.service.AdminService;
 import jakarta.validation.Valid;
 
-import com.tjoeun.service.AdminService;
-import com.tjoeun.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
