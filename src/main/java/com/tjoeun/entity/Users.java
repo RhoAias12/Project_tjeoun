@@ -2,12 +2,16 @@ package com.tjoeun.entity;
 
 import com.tjoeun.constant.UserRole;
 import com.tjoeun.dto.UserFormDto;
+import com.tjoeun.dto.UserListDto;
+import com.tjoeun.repository.UserRepository;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "users")
@@ -55,5 +59,4 @@ public class Users {
       .userRole(UserRole.USER)
       .build();
   }
-
 }
