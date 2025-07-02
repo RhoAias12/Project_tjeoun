@@ -1,5 +1,6 @@
 package com.tjoeun.controller;
 
+import com.tjoeun.dto.ResumeDto;
 import com.tjoeun.dto.UserFormDto;
 import com.tjoeun.entity.*;
 import com.tjoeun.repository.*;
@@ -60,12 +61,46 @@ public class MyPageController {
     public String reactList() {
         return "mypage/react_list";
     }
+    // 이력서 저장
+    @PostMapping("/mypage/react_write")
+    public String saveResume(@ModelAttribute("resumeDto") @Valid ResumeDto resumeDto, BindingResult bindingResult, Principal principal) {
+        if (bindingResult.hasErrors()) {
+            return "mypage/react_write"; // 에러가 있으면 작성 페이지로 다시 돌아감
+        }
+
+        // 로그인된 사용자 정보 가져오기
+        String email = principal.getName();
+        Users user = userRepository.findByUserEmail(email);
+
+        if (user == null) {
+            throw new IllegalArgumentException("로그인한 사용자를 찾을 수 없습니다.");
+        }
+
+        // ResumeDto에서 Resume 엔티티로 변환하여 저장
+        Resume resume = new Resume();
+        resume.setUser(user);
+        resume.setTitle(resumeDto.getTitle());
+        resume.setContext(resumeDto.getContext());
+        resume.setAddress(resumeDto.getAddress());
+        resume.setPhoneNum(resumeDto.getPhoneNum());
+        resume.setEducation(resumeDto.getEducation());
+        resume.setAbility(resumeDto.getAbility());
+        resume.setAntecedents(resumeDto.getAntecedents());
+        resume.setAwards(resumeDto.getAwards());
+        resume.setImg(resumeDto.getImg());  // 이미지 처리 추가
+
+        // DB에 저장
+        resumeRepository.save(resume);
+
+        return "redirect:/mypage/react_list"; // 저장 후 이력서 리스트로 리다이렉트
+    }
 
 
     @GetMapping("/react_write")
     public String reactWrite() {
         return "mypage/react_write";
     }
+
 
     @GetMapping("/react_modify")
     public String reactModify() {
