@@ -1,6 +1,6 @@
 package com.tjoeun.controller;
 
-import com.tjoeun.dto.UserListDto;
+
 import com.tjoeun.service.AdminService;
 import com.tjoeun.service.UserService;
 import lombok.RequiredArgsConstructor;
