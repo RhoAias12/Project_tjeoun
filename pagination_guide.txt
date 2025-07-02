@@ -1,0 +1,108 @@
+[페이징 처리를 위한 공통 코드]
+
+1. com/tjoeun/util/PaginationUtil : PaginationUtil 클래스를 별도로 생성하였습니다.
+
+2. resources/templates/fragments/pagination.html : view 단 페이지 네이션 처리 코드입니다.
+
+3. css 는 웬만하면 안 깨질텐데 혹시라도 깨지면 해당 html 에 적용된 css파일에서 아래 코드랑 비교해 주세요!
+
+/* 페이지네이션 */
+.pagination {
+  text-align: center;
+  margin: 30px 0 50px 0;
+}
+
+.pagination-list {
+  list-style: none;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 0;
+  margin: 0;
+}
+
+.page-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px; /* 조금 더 안정된 여백 */
+  color: #333;
+  text-decoration: none;
+  font-size: 16px;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  line-height: 1;               /* 줄 간격 통일 */
+  vertical-align: middle;       /* 아이콘과 숫자 정렬 */
+  border-radius: 4px;           /* 선택사항: 깔끔하게 둥글게 */
+}
+
+
+.page-btn:hover {
+  color: #0085ff;
+}
+
+.page-btn.active {
+  color: #0085ff;
+  font-weight: bold;
+}
+
+===================================================================================
+
+[위 코드 적용 예시]
+
+1. controller 
+
+    @GetMapping("/empl_main")
+    public String emplMainPage(@RequestParam(defaultValue = "1") int page,
+                               @PageableDefault(size = 25) Pageable pageable,
+                               Model model) {                                                   => 3개 파라미터 필수 
+
+        // 1. 전체 채용 리스트 (화면에 실제 출력할 리스트)                                => 1번은 무시하세요
+        List<RecruitmentDTO> jobList = recruitmentService.getAllPosts();
+        model.addAttribute("jobList", jobList);  
+
+        // 2. 페이지네이션 전용 page 객체 (UI 페이지네이션 구성용)                     => 2번 전체 필요
+        Pageable correctedPageable = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
+        Page<RecruitmentDTO> jobPage = recruitmentService.getPagedPosts(correctedPageable);
+
+        // 3. 페이징 정보 + URL 설정                                                           => 3번 전체 필요  
+        PaginationUtil.setPaging(model, jobPage, "/empl/empl_main");                       !! /empl/empl_main !! 여기 경로 해당 페이지에 맞게 수정
+
+        return "empl/empl_main";
+    }
+
+
+2. html 
+
+페이지 네이션 부분 아래 코드로 덮어써주세요. !! /empl/empl_main !! 이 부분 또한 해당 페이지에 맞게 수정
+
+<!-- 공고 리스트 반복 -->
+<div th:replace="fragments/pagination :: fragment
+      (${jobPage}, ${startPage}, ${endPage}, '/empl/empl_main')">
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

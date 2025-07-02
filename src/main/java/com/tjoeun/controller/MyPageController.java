@@ -64,6 +64,8 @@ public class MyPageController {
 
     @GetMapping("/react_list")
     public String reactList() {
+
+
         return "mypage/react_list";
     }
 
