@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -92,24 +93,37 @@ public class MyPageController {
 
 
     @GetMapping("/apply_status")
-    public String applyStatus(@RequestParam(defaultValue = "0") int page,
-                              @RequestParam(defaultValue = "10") int size,
+    public String applyStatus(@RequestParam(defaultValue = "1") int page,
+                              @PageableDefault(size = 10) Pageable pageable,
                               Model model,
                               Principal principal) {
 
-        Pageable pageable = PageRequest.of(page, size);
-        Page<ApplyHistoryDTO> historyPage = myPageService.getApplyHistoryPage(principal.getName(), pageable);
+        String email = principal.getName();
+
+        Pageable correctedPageable = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
+
+        Page<ApplyHistoryDTO> historyPage = myPageService.getPagedApplyHistories(email, correctedPageable);
+
+        PaginationUtil.setPaging(model, historyPage, "/mypage/apply_status");
 
         model.addAttribute("historyList", historyPage.getContent());
-        PaginationUtil.setPaging(model, historyPage, "/mypage/apply_status");
 
         return "mypage/apply_status";
     }
 
     @GetMapping("/scrap")
-    public String scrapPage(Model model, Principal principal) {
-        List<FavoriteDTO> favorites = myPageService.getFavorites(principal.getName());
-        model.addAttribute("favorites", favorites);
+    public String scrapPage(@RequestParam(defaultValue = "1") int page,
+                            @PageableDefault(size = 8) Pageable pageable,
+                            Model model,
+                            Principal principal) {
+
+        String email = principal.getName();
+        Pageable correctedPageable = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
+        Page<FavoriteDTO> jobPage = myPageService.getPagedFavorites(email, correctedPageable);
+
+        model.addAttribute("favorites", jobPage.getContent());
+        PaginationUtil.setPaging(model, jobPage, "/mypage/scrap");
+
         return "mypage/scrap";
     }
 

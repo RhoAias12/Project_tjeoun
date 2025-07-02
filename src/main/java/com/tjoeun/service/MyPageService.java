@@ -49,20 +49,20 @@ public class MyPageService {
       .toList();
   }
 
-  public Page<ApplyHistoryDTO> getApplyHistoryPage(String email, Pageable pageable) {
+  public Page<ApplyHistoryDTO> getPagedApplyHistories(String email, Pageable pageable) {
     Users user = userRepository.findByUserEmail(email);
     if (user == null) {
-      throw new IllegalArgumentException("로그인한 사용자를 찾을 수 없습니다.");
+      throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
     }
 
-    Page<ApplyHistory> historyPage = applyHistoryRepository.findByUser_UserIdx(user.getUserIdx(), pageable);
+    Page<ApplyHistory> page = applyHistoryRepository.findByUser(user, pageable);
 
-    return historyPage.map(history -> ApplyHistoryDTO.builder()
+    return page.map(history -> ApplyHistoryDTO.builder()
       .applyHistoryId(history.getOptionalIdx())
       .statusDisplay(history.getStatus().getDisplay())
       .recruitmentTitle(history.getRecruitment().getTitle())
       .recruitmentCompany(history.getRecruitment().getCompany())
-      .resumeId(history.getOptionalIdx())
+      .resumeId(history.getOptionalIdx()) // resume와 연결되었다면 수정 가능
       .build());
   }
 
@@ -130,5 +130,22 @@ public class MyPageService {
       .deadline(favorite.getRecruitment().getDeadline())
       .build()
     ).toList();
+  }
+
+  public Page<FavoriteDTO> getPagedFavorites(String userEmail, Pageable pageable) {
+    Users user = userRepository.findByUserEmail(userEmail);
+    if (user == null) {
+      throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
+    }
+
+    return favoriteRepository.findByUser(user, pageable)
+      .map(favorite -> FavoriteDTO.builder()
+        .favoriteIdx(favorite.getFavoriteIdx())
+        .userIdx(favorite.getUser().getUserIdx())
+        .recruitmentIdx(favorite.getRecruitment().getRecruitmentIdx())
+        .title(favorite.getRecruitment().getTitle())
+        .company(favorite.getRecruitment().getCompany())
+        .deadline(favorite.getRecruitment().getDeadline())
+        .build());
   }
 }

@@ -3,6 +3,8 @@ package com.tjoeun.repository;
 import com.tjoeun.entity.Favorite;
 import com.tjoeun.entity.Recruitment;
 import com.tjoeun.entity.Users;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -16,5 +18,6 @@ public interface FavoriteRepository extends JpaRepository<Favorite, Long> {
 
   List<Favorite> findByUser(Users user);
   void deleteByUserAndRecruitment(Users user, Recruitment recruitment);
+  Page<Favorite> findByUser(Users user, Pageable pageable);
 }
 

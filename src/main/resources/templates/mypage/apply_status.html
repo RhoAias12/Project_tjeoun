@@ -45,22 +45,9 @@
         </div>
       </div>
 
-      <!-- 페이지네이션 (예시용, 실제 페이징 처리 로직 필요 시 추가 구현) -->
-      <div class="pagination" th:if="${jobPage.totalPages > 1}">
-        <ul class="pagination-list">
-          <li th:if="${jobPage.hasPrevious()}">
-            <a th:href="@{${url}(page=${jobPage.number - 1})}" class="page-btn">〈</a>
-          </li>
-
-          <li th:each="i : ${#numbers.sequence(startPage + 1, endPage + 1)}"
-              th:classappend="${i - 1 == jobPage.number} ? 'active'">
-            <a th:href="@{${url}(page=${i - 1})}" class="page-btn" th:text="${i}">1</a>
-          </li>
-
-          <li th:if="${jobPage.hasNext()}">
-            <a th:href="@{${url}(page=${jobPage.number + 1})}" class="page-btn">〉</a>
-          </li>
-        </ul>
+      <!-- 페이지네이션  -->
+      <div th:replace="fragments/pagination :: fragment
+        (${jobPage}, ${startPage}, ${endPage}, '/mypage/apply_status')">
       </div>
     </div>
   </div>
