@@ -1,12 +1,31 @@
 package com.tjoeun.controller;
 
-import com.tjoeun.entity.*;
-import com.tjoeun.repository.*;
+import com.tjoeun.dto.UserFormDto;
+import com.tjoeun.entity.ApplyHistory;
+import com.tjoeun.entity.Favorite;
+import com.tjoeun.entity.Recruitment;
+import com.tjoeun.entity.Users;
+import com.tjoeun.repository.ApplyHistoryRepository;
+import com.tjoeun.repository.FavoriteRepository;
+import com.tjoeun.repository.RecruitmentRepository;
+import com.tjoeun.repository.UserRepository;
+import com.tjoeun.service.FavoriteService;
+import com.tjoeun.service.MyPageService;
+import com.tjoeun.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -19,13 +38,28 @@ public class MyPageController {
 
     private final ApplyHistoryRepository applyHistoryRepository;
     private final UserRepository userRepository;
+    private final MyPageService myPageService;
+    private final UserService userService;
+    private final PasswordEncoder passwordEncoder;
     private final FavoriteRepository favoriteRepository;
     private final RecruitmentRepository recruitmentRepository;
     private final ResumeRepository resumeRepository;
 
     @GetMapping("/member_modify")
-    public String memberModifyPage() {
+    public String showMemberModifyForm(Model model, Principal principal) {
+        String email = principal.getName();
+        UserFormDto dto = myPageService.getUserFormDto(email);
+        model.addAttribute("userFormDto", dto);
         return "mypage/member_modify";
+    }
+
+    @PostMapping("/member_modify")
+    public String updateMember(@ModelAttribute("userFormDto") UserFormDto dto,
+                               BindingResult bindingResult,
+                               Principal principal,
+                               Model model) {
+        String email = principal.getName();
+        return myPageService.updateUser(dto, email, bindingResult, model, passwordEncoder, userService);
     }
 
     @GetMapping("/react_list")
@@ -59,29 +93,14 @@ public class MyPageController {
 
     @GetMapping("/apply_status")
     public String applyStatus(Model model, Principal principal) {
-        String email = principal.getName();
-        Users user = userRepository.findByUserEmail(email);
-
-        if (user == null) {
-            throw new IllegalArgumentException("로그인한 사용자를 찾을 수 없습니다.");
-        }
-
-        List<ApplyHistory> historyList = applyHistoryRepository.findByUser_UserIdx(user.getUserIdx());
-
+        List<ApplyHistory> historyList = myPageService.getApplyHistoryList(principal.getName());
         model.addAttribute("historyList", historyList);
         return "mypage/apply_status";
     }
 
     @GetMapping("/scrap")
     public String scrapPage(Model model, Principal principal) {
-        String email = principal.getName();
-        Users user = userRepository.findByUserEmail(email);
-
-        if (user == null) {
-            throw new IllegalArgumentException("로그인한 사용자를 찾을 수 없습니다.");
-        }
-
-        List<Favorite> favorites = favoriteRepository.findByUser(user);
+        List<Favorite> favorites = myPageService.getFavorites(principal.getName());
         model.addAttribute("favorites", favorites);
 
         return "mypage/scrap";
@@ -91,14 +110,7 @@ public class MyPageController {
     @ResponseBody
     @Transactional
     public ResponseEntity<?> deleteScrap(@PathVariable Long recruitmentIdx, Principal principal) {
-        String email = principal.getName();
-        Users user = userRepository.findByUserEmail(email);
-
-        Recruitment recruitment = recruitmentRepository.findById(recruitmentIdx)
-          .orElseThrow(() -> new IllegalArgumentException("공고를 찾을 수 없습니다."));
-
-        favoriteRepository.deleteByUserAndRecruitment(user, recruitment);
-
+        myPageService.deleteScrap(principal.getName(), recruitmentIdx);
         return ResponseEntity.ok().build();
     }
 }
