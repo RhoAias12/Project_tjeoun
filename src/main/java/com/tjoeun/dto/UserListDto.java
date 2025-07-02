@@ -1,10 +1,14 @@
 package com.tjoeun.dto;
 
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
+@AllArgsConstructor
 public class UserListDto {
-    private Long userId;
-    private String name;
-    private String email;
+  private Integer userIdx;
+  private String userEmail;
+  private String userNickname;
 }
