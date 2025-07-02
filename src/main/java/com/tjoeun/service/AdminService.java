@@ -57,15 +57,13 @@ public class AdminService {
   // 회원 정보 수정
   public void updateUserInfo(Integer userIdx, UserFormDto dto) {
     Users user = userRepository.findById(userIdx).orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
-
     user.setUserNickname(dto.getUserNickname());
-
     if (dto.getUserPassword() != null && !dto.getUserPassword().isBlank()) {
       user.setUserPassword(passwordEncoder.encode(dto.getUserPassword()));
     }
-
     userRepository.save(user);
   }
+
   public Page<UserListDto> getPagedUsers(Pageable pageable) {
     Page<Users> userPage = userRepository.findAll(pageable);
     return userPage.map(user -> new UserListDto(

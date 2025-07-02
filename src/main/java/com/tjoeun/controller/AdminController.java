@@ -22,6 +22,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class AdminController {
     private final AdminService adminService;
 
+    //회원리스트+페이지네이션
     @GetMapping("/member_list")
     public String memberList(@RequestParam(defaultValue = "1") int page,
                              @PageableDefault(size = 10) Pageable pageable,
@@ -42,22 +43,24 @@ public class AdminController {
         return "redirect:/admin/member_list";
     }
 
-
+    //회원상세페이지
     @GetMapping("/member_modify")
     public String memberModify(@RequestParam("userIdx") Integer userIdx, Model model) {
         UserFormDto dto = adminService.getUserFormDtoById(userIdx);
         model.addAttribute("userFormDto", dto);
+        model.addAttribute("userIdx", userIdx);
         return "admin/ad_member_modify";
     }
 
-    @PostMapping("/member_modify")
-    public String updateMember(@ModelAttribute("userFormDto") @Valid UserFormDto userFormDto,
+    //회원상세수정
+    @PostMapping("/member_modify/{userIdx}")
+    public String updateMember(@PathVariable("userIdx") Integer userIdx,
+                               @ModelAttribute("userFormDto") @Valid UserFormDto userFormDto,
                                BindingResult bindingResult,
                                RedirectAttributes redirectAttributes,
-                               @RequestParam("userIdx") Integer userIdx,
                                Model model) {
         if (bindingResult.hasErrors()) {
-            return "admin/member_modify";
+            return "admin/ad_member_modify";
         }
         try {
             adminService.updateUserInfo(userIdx, userFormDto);
@@ -65,10 +68,9 @@ public class AdminController {
             return "redirect:/admin/member_modify?userIdx=" + userIdx + "&success";
         } catch (IllegalStateException e) {
             model.addAttribute("errorMessage", e.getMessage());
-            return "admin/member_modify";
+            return "admin/ad_member_modify";
         }
     }
-
 
     @GetMapping("/recruit_list")
     public String recruitList() {

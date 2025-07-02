@@ -142,7 +142,7 @@
         <div class="form-group">
             <label for="nickname">닉네임</label>
             <div class="input-wrapper">
-                <input type="text" id="nickname" th:field="*{userNickname}" required />
+                <input type="text" id="nickname" name="userNickname" th:value="*{userNickname}" required />
                 <button type="button" class="check-btn" onclick="checkNickname()">중복확인</button>
             </div>
             <p class="fieldError" th:if="${#fields.hasErrors('userNickname')}" th:errors="*{userNickname}"></p>
