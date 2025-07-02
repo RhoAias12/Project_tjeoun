@@ -12,6 +12,8 @@ import com.tjoeun.repository.FavoriteRepository;
 import com.tjoeun.repository.RecruitmentRepository;
 import com.tjoeun.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,6 +47,23 @@ public class MyPageService {
         .resumeId(history.getOptionalIdx())
         .build())
       .toList();
+  }
+
+  public Page<ApplyHistoryDTO> getApplyHistoryPage(String email, Pageable pageable) {
+    Users user = userRepository.findByUserEmail(email);
+    if (user == null) {
+      throw new IllegalArgumentException("로그인한 사용자를 찾을 수 없습니다.");
+    }
+
+    Page<ApplyHistory> historyPage = applyHistoryRepository.findByUser_UserIdx(user.getUserIdx(), pageable);
+
+    return historyPage.map(history -> ApplyHistoryDTO.builder()
+      .applyHistoryId(history.getOptionalIdx())
+      .statusDisplay(history.getStatus().getDisplay())
+      .recruitmentTitle(history.getRecruitment().getTitle())
+      .recruitmentCompany(history.getRecruitment().getCompany())
+      .resumeId(history.getOptionalIdx())
+      .build());
   }
 
   @Transactional(readOnly = true)
