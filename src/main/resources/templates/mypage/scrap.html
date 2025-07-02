@@ -17,30 +17,29 @@
     <title>스크랩</title>
 
     <script>
-      function toggleBookmark(element) {
-        element.classList.toggle('fa-regular');
-        element.classList.toggle('fa-solid');
-        element.classList.toggle('active');
+      function deleteScrap(recruitmentIdx, userIdx) {
+        const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+        const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
+        fetch(`/mypage/scrap`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            [csrfHeader]: csrfToken
+          },
+          body: JSON.stringify({
+            userIdx: userIdx,
+            recruitmentIdx: recruitmentIdx
+          })
+        })
+        .then(response => {
+          if (response.ok) {
+            document.getElementById('card-' + recruitmentIdx).remove();
+          } else {
+            alert("삭제 실패");
+          }
+        });
       }
-
-      function deleteScrap(recruitmentIdx) {
-      const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
-      const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
-
-      fetch(`/mypage/scrap/${recruitmentIdx}`, {
-        method: 'DELETE',
-        headers: {
-          [csrfHeader]: csrfToken
-        }
-      })
-      .then(response => {
-        if (response.ok) {
-          document.getElementById('card-' + recruitmentIdx).remove();
-        } else {
-          alert("삭제 실패");
-        }
-      });
-    }
     </script>
 
     <style>
@@ -68,23 +67,26 @@
         </div>
 
         <div class="apply-list">
-          <div class="apply-card" th:each="favorite : ${favorites}" th:id="'card-' + ${favorite.recruitment.recruitmentIdx}">
+          <div class="apply-card" th:each="favorite : ${favorites}" th:id="'card-' + ${favorite.recruitmentIdx}">
             <div class="apply-info">
               <div class="job-title">
-                <a th:href="@{/recruit/detail/{id}(id=${favorite.recruitment.recruitmentIdx})}"
-                   th:text="${favorite.recruitment.title}">공고명</a>
+                <a th:href="@{/recruit/detail/{id}(id=${favorite.recruitmentIdx})}"
+                   th:text="${favorite.title}">공고명</a>
               </div>
-              <div class="company-name" th:text="${favorite.recruitment.company}">회사명</div>
+              <div class="company-name" th:text="${favorite.company}">회사명</div>
             </div>
             <div class="apply-side">
               <span class="deadline"
-                    th:classappend="${favorite.recruitment.deadline.isBefore(T(java.time.LocalDate).now())} ? 'gray-text'"
-                    th:utext="'마감일<br/>' + ${#temporals.format(favorite.recruitment.deadline, 'yyyy.MM.dd')}">마감일</span>
+                      th:classappend="${favorite.deadline.isBefore(T(java.time.LocalDate).now())} ? 'gray-text'">
+                <span th:if="${favorite.deadline == T(java.time.LocalDate).parse('9999-12-31')}" th:utext="'상시채용'"></span>
+                <span th:unless="${favorite.deadline == T(java.time.LocalDate).parse('9999-12-31')}"
+                      th:utext="'마감일<br/>' + ${#temporals.format(favorite.deadline, 'yyyy.MM.dd')}"></span>
+              </span>
               <div class="apply-action">
                 <i class="fa-bookmark bookmark-icon fa-solid active"
-                   th:onclick="deleteScrap([[${favorite.recruitment.recruitmentIdx}]])">
+                   th:onclick="|deleteScrap(${favorite.recruitmentIdx}, ${favorite.userIdx})|">
                 </i>
-                <a th:href="@{/recruit/apply/{id}(id=${favorite.recruitment.recruitmentIdx})}">
+                <a th:href="@{/recruit/apply/{id}(id=${favorite.recruitmentIdx})}">
                   <button class="apply-btn">지원하기</button>
                 </a>
               </div>
