@@ -52,4 +52,8 @@ public class Recruitment {
 
   @Column(columnDefinition = "TEXT")
   private String employmentType;
+
+  // 추가
+  @OneToMany(mappedBy = "recruitment", cascade = CascadeType.ALL, orphanRemoval = true)
+  private java.util.List<Favorite> favorites = new java.util.ArrayList<>();
 }
