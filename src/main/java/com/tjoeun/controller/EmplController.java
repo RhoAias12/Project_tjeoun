@@ -1,6 +1,7 @@
 package com.tjoeun.controller;
 
 import com.tjoeun.dto.RecruitmentDTO;
+import com.tjoeun.service.FavoriteService;
 import com.tjoeun.service.RecruitmentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.tjoeun.util.PaginationUtil;
 
 
+import java.security.Principal;
 import java.util.List;
 
 @Controller
@@ -24,6 +26,9 @@ public class EmplController {
 
     @Autowired
     private RecruitmentService recruitmentService;
+
+    @Autowired
+    private FavoriteService favoriteService;
 
     // 채용 공고 메인 페이지 (전체 리스트 출력 + 페이징 처리)
     @GetMapping("/empl_main")
@@ -49,12 +54,21 @@ public class EmplController {
 
     // 개별 공고 상세 페이지
     @GetMapping("/empl_detail/{id}")
-    public String emplDetailPage(@PathVariable("id") Long id, Model model) {
+    public String emplDetailPage(@PathVariable("id") Long id, Model model, Principal principal) {
         RecruitmentDTO dto = recruitmentService.getPostById(id);
+
+        boolean isFavorited = false;
         if (dto == null) {
             return "error/404"; // 404 페이지 (없으면 기본 페이지)
         }
+
+        if (principal != null) {
+            String userEmail = principal.getName();
+            isFavorited = favoriteService.isFavorited(userEmail, id);
+        }
         model.addAttribute("job", dto);
+        model.addAttribute("isFavorited", isFavorited);
+
         return "empl/empl_detail";
     }
 

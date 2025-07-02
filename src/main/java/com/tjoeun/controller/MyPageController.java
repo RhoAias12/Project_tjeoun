@@ -1,5 +1,7 @@
 package com.tjoeun.controller;
 
+import com.tjoeun.dto.ApplyHistoryDTO;
+import com.tjoeun.dto.FavoriteDTO;
 import com.tjoeun.dto.UserFormDto;
 import com.tjoeun.entity.*;
 import com.tjoeun.repository.*;
@@ -89,24 +91,23 @@ public class MyPageController {
 
     @GetMapping("/apply_status")
     public String applyStatus(Model model, Principal principal) {
-        List<ApplyHistory> historyList = myPageService.getApplyHistoryList(principal.getName());
+        List<ApplyHistoryDTO> historyList = myPageService.getApplyHistoryList(principal.getName());
         model.addAttribute("historyList", historyList);
         return "mypage/apply_status";
     }
 
     @GetMapping("/scrap")
     public String scrapPage(Model model, Principal principal) {
-        List<Favorite> favorites = myPageService.getFavorites(principal.getName());
+        List<FavoriteDTO> favorites = myPageService.getFavorites(principal.getName());
         model.addAttribute("favorites", favorites);
-
         return "mypage/scrap";
     }
 
-    @DeleteMapping("/scrap/{recruitmentIdx}")
+    @DeleteMapping("/scrap")
     @ResponseBody
     @Transactional
-    public ResponseEntity<?> deleteScrap(@PathVariable Long recruitmentIdx, Principal principal) {
-        myPageService.deleteScrap(principal.getName(), recruitmentIdx);
+    public ResponseEntity<?> deleteScrap(@RequestBody FavoriteDTO favoriteDTO) {
+        myPageService.deleteScrap(favoriteDTO);
         return ResponseEntity.ok().build();
     }
 }
