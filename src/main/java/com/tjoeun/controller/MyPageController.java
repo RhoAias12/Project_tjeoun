@@ -1,14 +1,8 @@
 package com.tjoeun.controller;
 
 import com.tjoeun.dto.UserFormDto;
-import com.tjoeun.entity.ApplyHistory;
-import com.tjoeun.entity.Favorite;
-import com.tjoeun.entity.Recruitment;
-import com.tjoeun.entity.Users;
-import com.tjoeun.repository.ApplyHistoryRepository;
-import com.tjoeun.repository.FavoriteRepository;
-import com.tjoeun.repository.RecruitmentRepository;
-import com.tjoeun.repository.UserRepository;
+import com.tjoeun.entity.*;
+import com.tjoeun.repository.*;
 import com.tjoeun.service.FavoriteService;
 import com.tjoeun.service.MyPageService;
 import com.tjoeun.service.UserService;
