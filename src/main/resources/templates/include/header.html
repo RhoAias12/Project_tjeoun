@@ -1,17 +1,40 @@
-<header id="head" xmlns:th="http://www.w3.org/1999/xhtml">
+<header id="head" xmlns:th="http://www.w3.org/1999/xhtml"
+        xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
   <div class="menu left">
     <span class="logo">
-      <img src="/images/tjoeun.jpg" alt="로고" />
+      <a th:href="@{/}"><img src="/images/tjoeun.jpg" alt="로고" /></a>
     </span>
+
+    <!-- 공통: 모든 사용자에게 보임 -->
     <span><a th:href="@{/empl/empl_main}">채용공고</a></span>
-    <span><a th:href="@{/mypage/member_modify}">마이페이지</a></span>
-    <span><a th:href="@{/admin/member_list}">회원관리</a></span>
-    <span><a th:href="@{/admin/recruit_list}">공고관리</a></span>
+
+    <!-- 로그인한 사용자(회원+관리자)만 -->
+    <span sec:authorize="hasAnyAuthority('ROLE_USER')">
+      <a th:href="@{/mypage/member_modify}">마이페이지</a>
+    </span>
+
+    <!-- 관리자만 -->
+    <span sec:authorize="hasAnyAuthority('ROLE_ADMIN')">
+      <a th:href="@{/admin/member_list}">회원관리</a>
+    </span>
+    <span sec:authorize="hasAnyAuthority('ROLE_ADMIN')">
+      <a th:href="@{/admin/recruit_list}">공고관리</a>
+    </span>
   </div>
   <div class="menu right">
-    <span><a th:href="@{/user/login}">로그인</a></span>
-    <span><a th:href="@{/user/logout}">로그아웃</a></span> <!-- 로그아웃 경로는 컨트롤러에 맞게 조정 필요 -->
-    <span><a th:href="@{/user/signup}">회원가입</a></span>
+    <!-- 비회원만 -->
+    <span sec:authorize="isAnonymous()">
+      <a th:href="@{/user/login}">로그인</a>
+    </span>
+    <span sec:authorize="isAnonymous()">
+      <a th:href="@{/user/signup}">회원가입</a>
+    </span>
+
+    <!-- 로그인한 사용자(회원+관리자)만 -->
+    <span sec:authorize="isAuthenticated()">
+      <a th:href="@{/user/logout}">로그아웃</a>
+    </span>
   </div>
 </header>
 <link rel="stylesheet" href="css/header.css" />
+

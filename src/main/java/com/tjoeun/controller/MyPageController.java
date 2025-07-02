@@ -1,5 +1,6 @@
 package com.tjoeun.controller;
 
+import com.tjoeun.dto.UserFormDto;
 import com.tjoeun.entity.ApplyHistory;
 import com.tjoeun.entity.Favorite;
 import com.tjoeun.entity.Recruitment;
@@ -8,11 +9,21 @@ import com.tjoeun.repository.ApplyHistoryRepository;
 import com.tjoeun.repository.FavoriteRepository;
 import com.tjoeun.repository.RecruitmentRepository;
 import com.tjoeun.repository.UserRepository;
+import com.tjoeun.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -25,12 +36,61 @@ public class MyPageController {
 
     private final ApplyHistoryRepository applyHistoryRepository;
     private final UserRepository userRepository;
+    private final UserService userService;
+    private final PasswordEncoder passwordEncoder;
     private final FavoriteRepository favoriteRepository;
     private final RecruitmentRepository recruitmentRepository;
 
     @GetMapping("/member_modify")
-    public String memberModifyPage() {
+    public String showMemberModifyForm(Model model, Principal principal) {
+        String email = principal.getName();
+        Users user = userRepository.findByUserEmail(email);
+        if (user == null) {
+            throw new IllegalArgumentException("로그인한 사용자를 찾을 수 없습니다.");
+        }
+
+        UserFormDto dto = new UserFormDto();
+        dto.setUserName(user.getUserName());
+        dto.setUserEmail(user.getUserEmail());
+        dto.setUserNickname(user.getUserNickname());
+        dto.setUserBirth(user.getUserBirth());
+        dto.setUserPassword("");
+
+        model.addAttribute("userFormDto", dto);
         return "mypage/member_modify";
+    }
+
+    @PostMapping("/member_modify")
+    public String updateMember(@ModelAttribute("userFormDto") UserFormDto dto,
+                               BindingResult bindingResult,
+                               Principal principal,
+                               Model model) {
+        if (bindingResult.hasErrors()) {
+            return "mypage/member_modify";
+        }
+
+        String email = principal.getName();
+        Users user = userRepository.findByUserEmail(email);
+
+        if (user == null) {
+            throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
+        }
+
+        if (!dto.getUserNickname().equals(user.getUserNickname()) &&
+          userService.nicknameExists(dto.getUserNickname())) {
+            model.addAttribute("nicknameError", "이미 사용 중인 닉네임입니다.");
+            return "mypage/member_modify";
+        }
+
+        if (dto.getUserPassword() != null && !dto.getUserPassword().isBlank()) {
+            user.setUserPassword(passwordEncoder.encode(dto.getUserPassword()));
+        }
+
+        user.setUserNickname(dto.getUserNickname());
+
+        userRepository.save(user);
+
+        return "redirect:/mypage/member_modify?success";
     }
 
     @GetMapping("/react_list")
