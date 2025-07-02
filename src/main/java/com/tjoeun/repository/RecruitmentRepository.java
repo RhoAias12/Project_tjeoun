@@ -8,7 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface RecruitmentRepository extends JpaRepository<Recruitment, Long> {
 
-    @Query("SELECT r FROM Recruitment r LEFT JOIN r.favorites f GROUP BY r ORDER BY COUNT(f) DESC")
-    Page<Recruitment> findAllSortedByScrapCount(Pageable pageable);
+    @Query("SELECT r FROM Recruitment r JOIN r.favorites f GROUP BY r HAVING COUNT(f) > 0 ORDER BY COUNT(f) DESC")
+    Page<Recruitment> findOnlyFavorited(Pageable pageable);
+
 
 }

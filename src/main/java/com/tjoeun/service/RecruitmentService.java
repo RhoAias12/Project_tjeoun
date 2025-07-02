@@ -39,9 +39,13 @@ public class RecruitmentService {
                 .map(this::convertToDTO);
     }
 
-    public Page<RecruitmentDTO> getPostsSortedByScrap(Pageable pageable) {
-        return recruitmentRepository.findAllSortedByScrapCount(pageable);
+    public Page<RecruitmentDTO> getOnlyFavorited(Pageable pageable) {
+        return recruitmentRepository.findOnlyFavorited(pageable)
+                .map(this::convertToDTO);
     }
+
+
+
 
 
 

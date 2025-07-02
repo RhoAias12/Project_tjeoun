@@ -34,9 +34,7 @@ public class EmplController {
     @GetMapping("/empl_main")
     public String emplMainPage(@RequestParam(defaultValue = "1") int page,
                                @RequestParam(required = false) String customSort,
-                               @RequestParam(required = false) String dateSort,
                                @PageableDefault(size = 25) Pageable pageable,
-                               Principal principal,
                                Model model) {
 
         // 1. 전체 채용 리스트 (화면에 실제 출력할 리스트)
@@ -51,17 +49,13 @@ public class EmplController {
         PaginationUtil.setPaging(model, jobPage, "/empl/empl_main");
 
         // 4. 정렬 처리
-        if ("scrap".equals(customSort)) {
-            jobPage = recruitmentService.getPostsSortedByScrap(pageable);
-        } else if ("deadline".equals(customSort)) {
-            jobPage = recruitmentService.getPostsSortedByDeadline(pageable);
-        } else {
-            jobPage = recruitmentService.getPagedPosts(pageable); // 기본 최신순
+        if ("scrapOnly".equals(customSort)) {
+            jobPage = recruitmentService.getOnlyFavorited(correctedPageable);
         }
+
 
         model.addAttribute("jobPage", jobPage);
         model.addAttribute("customSort", customSort);
-        model.addAttribute("dateSort", dateSort);
 
         return "empl/empl_main";
     }
