@@ -15,7 +15,7 @@ public class Resume {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Integer resumeIdx;
+  private Long resumeIdx;
 
   @ManyToOne
   @JoinColumn(name = "user_idx", nullable = false)
@@ -50,3 +50,4 @@ public class Resume {
   @Column(columnDefinition = "TEXT")
   private String awards;
 }
+

@@ -14,6 +14,7 @@
     <!-- 헤더 -->
     <div th:replace="include/header :: header"></div>
 
+
     <!-- 전체 컨테이너 -->
     <div class="tab-box">
       <div class="tab-inner">
@@ -27,28 +28,33 @@
           <button class="tab" onclick="location.href='/mypage/scrap'">스크랩</button>
         </div>
 
-        <button class="tab5" onclick="location.href='/mypage/react_write'">추가</button>
+        <button class="tab5" onclick="location.href='/mypage/react_write';">추가</button>
 
         <!-- 게시물 리스트 -->
         <div class="resume-list">
-          <a th:href="@{/mypage/react_detail/{id}(id=${resume.id})}" class="resume-card">
+          <a href="#" class="resume-card">
             <span class="resume-title">이력서 1</span>
-            <button class="delete-button" onclick="event.stopPropagation();">삭제</button>
+            <button class="delete-button" onclick="event.stopPropagation();">
+              삭제
+            </button>
           </a>
-
-          <a th:href="@{/mypage/react_detail/{id}(id=${resume.id})}" class="resume-card">
+          <a href="#" class="resume-card">
             <span class="resume-title">이력서 2</span>
-            <button class="delete-button" onclick="event.stopPropagation();">삭제</button>
+            <button class="delete-button" onclick="event.stopPropagation();">
+              삭제
+            </button>
           </a>
-
-          <a th:href="@{/mypage/react_detail/{id}(id=${resume.id})}" class="resume-card">
+          <a href="#" class="resume-card">
             <span class="resume-title">이력서 3</span>
-            <button class="delete-button" onclick="event.stopPropagation();">삭제</button>
+            <button class="delete-button" onclick="event.stopPropagation();">
+              삭제
+            </button>
           </a>
-
-          <a th:href="@{/mypage/react_detail/{id}(id=${resume.id})}" class="resume-card">
+          <a href="#" class="resume-card">
             <span class="resume-title">이력서 4</span>
-            <button class="delete-button" onclick="event.stopPropagation();">삭제</button>
+            <button class="delete-button" onclick="event.stopPropagation();">
+              삭제
+            </button>
           </a>
         </div>
 
