@@ -75,28 +75,8 @@
 <!--       </div>-->
 <!--     </div>-->
 
-         <!-- 공고 리스트 반복 -->
-         <!-- 페이지네이션 -->
-         <div class="pagination">
-           <ul class="pagination-list">
-             <!-- 이전 페이지 버튼 -->
-             <li th:if="${jobPage.hasPrevious()}">
-               <a th:href="@{/empl/empl_main(page=${jobPage.number - 1})}" class="page-btn">〈</a>
-             </li>
-
-             <!-- 페이지 번호 10개씩 반복 -->
-             <li th:each="i : ${#numbers.sequence(startPage, endPage)}">
-               <a th:href="@{/empl/empl_main(page=${i})}"
-                  th:text="${i + 1}"
-                  th:class="'page-btn' + (${jobPage.number} == ${i} ? ' active' : '')">
-               </a>
-             </li>
-
-             <!-- 다음 페이지 버튼 -->
-             <li th:if="${jobPage.hasNext()}">
-               <a th:href="@{/empl/empl_main(page=${jobPage.number + 1})}" class="page-btn">〉</a>
-             </li>
-           </ul>
+         <div th:replace="fragments/pagination :: fragment
+            (${jobPage}, ${startPage}, ${endPage}, '/empl/empl_main')">
          </div>
 
 

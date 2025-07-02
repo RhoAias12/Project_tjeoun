@@ -2,10 +2,9 @@ package com.tjoeun.controller;
 
 import com.tjoeun.dto.RecruitmentDTO;
 import com.tjoeun.service.RecruitmentService;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
@@ -13,6 +12,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import com.tjoeun.util.PaginationUtil;
+
 
 import java.util.List;
 
@@ -23,27 +25,26 @@ public class EmplController {
     @Autowired
     private RecruitmentService recruitmentService;
 
-    // 채용 공고 메인 페이지 (전체 리스트 출력)
+    // 채용 공고 메인 페이지 (전체 리스트 출력 + 페이징 처리)
     @GetMapping("/empl_main")
-    public String emplMainPage(@PageableDefault(size = 25) Pageable pageable, Model model) {
+    public String emplMainPage(@RequestParam(defaultValue = "1") int page,
+                               @PageableDefault(size = 25) Pageable pageable,
+                               Model model) {
 
+        // 1. 전체 채용 리스트 (화면에 실제 출력할 리스트)
         List<RecruitmentDTO> jobList = recruitmentService.getAllPosts();
+        model.addAttribute("jobList", jobList);
 
-        Page<RecruitmentDTO> jobPage = recruitmentService.getPagedPosts(pageable);
+        // 2. 페이지네이션 전용 page 객체 (UI 페이지네이션 구성용)
+        Pageable correctedPageable = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
+        Page<RecruitmentDTO> jobPage = recruitmentService.getPagedPosts(correctedPageable);
 
-        int currentPage = jobPage.getNumber(); // 현재 페이지 (0부터 시작)
-        int totalPages = jobPage.getTotalPages();
-
-        int startPage = (currentPage / 10) * 10;
-        int endPage = Math.min(startPage + 9, totalPages - 1); // 페이지 번호는 0부터 시작
-
-        model.addAttribute("jobPage", jobPage);
-        model.addAttribute("startPage", startPage);
-        model.addAttribute("endPage", endPage);
-//        model.addAttribute("jobList", jobList);
+        // 3. 페이징 정보 + URL 설정
+        PaginationUtil.setPaging(model, jobPage, "/empl/empl_main");
 
         return "empl/empl_main";
     }
+
 
 
     // 개별 공고 상세 페이지
