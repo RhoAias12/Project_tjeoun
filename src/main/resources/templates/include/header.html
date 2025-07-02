@@ -9,7 +9,7 @@
     <span><a th:href="@{/empl/empl_main}">채용공고</a></span>
 
     <!-- 로그인한 사용자(회원+관리자)만 -->
-    <span>
+    <span sec:authorize="hasAnyAuthority('ROLE_USER')">
       <a th:href="@{/mypage/member_modify}">마이페이지</a>
     </span>
 
