@@ -45,17 +45,9 @@
         </div>
       </div>
 
-      <!-- 페이지네이션 (예시용, 실제 페이징 처리 로직 필요 시 추가 구현) -->
-      <div class="pagination">
-        <ul class="pagination-list">
-          <li><a href="#" class="page-btn">〈</a></li>
-          <li><a href="#" class="page-btn active">1</a></li>
-          <li><a href="#" class="page-btn">2</a></li>
-          <li><a href="#" class="page-btn">3</a></li>
-          <li><a href="#" class="page-btn">4</a></li>
-          <li><a href="#" class="page-btn">5</a></li>
-          <li><a href="#" class="page-btn">〉</a></li>
-        </ul>
+      <!-- 페이지네이션  -->
+      <div th:replace="fragments/pagination :: fragment
+        (${jobPage}, ${startPage}, ${endPage}, '/mypage/apply_status')">
       </div>
     </div>
   </div>

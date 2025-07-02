@@ -96,16 +96,8 @@
 
 
         <!-- 페이지네이션 -->
-        <div class="pagination">
-          <ul class="pagination-list">
-            <li><a href="#" class="page-btn">〈</a></li>
-            <li><a href="#" class="page-btn active">1</a></li>
-            <li><a href="#" class="page-btn">2</a></li>
-            <li><a href="#" class="page-btn">3</a></li>
-            <li><a href="#" class="page-btn">4</a></li>
-            <li><a href="#" class="page-btn">5</a></li>
-            <li><a href="#" class="page-btn">〉</a></li>
-          </ul>
+        <div th:replace="fragments/pagination :: fragment(${jobPage},
+          ${startPage}, ${endPage}, '/mypage/scrap')">
         </div>
       </div>
     </div>
