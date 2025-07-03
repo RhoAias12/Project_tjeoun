@@ -43,7 +43,7 @@ public class AdminController {
         return "redirect:/admin/member_list";
     }
 
-
+    //수정중
     @GetMapping("/member_modify")
     public String memberModify(@RequestParam("userIdx") Integer userIdx, Model model) {
         UserFormDto dto = adminService.getUserFormDtoById(userIdx);
