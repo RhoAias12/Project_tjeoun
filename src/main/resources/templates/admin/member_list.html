@@ -57,8 +57,12 @@
           <select name="sortBy" class="sort-select" onchange="handleSortChange(this)">
             <option value="latest" th:selected="${sortBy == 'latest'}">최신순</option>
             <option value="oldest" th:selected="${sortBy == 'oldest'}">오래된순</option>
-            <option value="email" th:selected="${sortBy == 'email'}">이메일순</option>
+            <option value="email" th:selected="${sortBy == 'email'}">이메일순(오름차순)</option>
+            <option value="emailDesc" th:selected="${sortBy == 'emailDesc'}">이메일순(내림차순)</option>
+<!--            <option value="nickname" th:selected="${sortBy == 'nickname'}">닉네임순(오름차순)</option>-->
+<!--            <option value="nicknameDesc" th:selected="${sortBy == 'nicknameDesc'}">닉네임순(내림차순)</option>-->
           </select>
+
           <!-- 페이지 파라미터 유지 (0으로 보내면 1페이지로 이동됨) -->
           <input type="hidden" name="page" th:value="${userPage.number + 1}" />
         </form>
