@@ -24,4 +24,5 @@ public class RecruitmentDTO {
     private String location;
     private String salary;
     private String employmentType;
+    private Integer scrapCount;
 }

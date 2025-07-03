@@ -13,6 +13,7 @@ import com.tjoeun.repository.RecruitmentRepository;
 import com.tjoeun.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,8 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -40,13 +43,13 @@ public class MyPageService {
     List<ApplyHistory> historyList = applyHistoryRepository.findByUser_UserIdx(user.getUserIdx());
 
     return historyList.stream().map(history -> ApplyHistoryDTO.builder()
-        .applyHistoryId(history.getOptionalIdx())
-        .statusDisplay(history.getStatus().getDisplay())
-        .recruitmentTitle(history.getRecruitment().getTitle())
-        .recruitmentCompany(history.getRecruitment().getCompany())
-        .resumeId(history.getOptionalIdx())
-        .build())
-      .toList();
+                    .applyHistoryId(history.getOptionalIdx())
+                    .statusDisplay(history.getStatus().getDisplay())
+                    .recruitmentTitle(history.getRecruitment().getTitle())
+                    .recruitmentCompany(history.getRecruitment().getCompany())
+                    .resumeId(history.getOptionalIdx())
+                    .build())
+            .toList();
   }
 
   public Page<ApplyHistoryDTO> getPagedApplyHistories(String email, Pageable pageable) {
@@ -58,12 +61,12 @@ public class MyPageService {
     Page<ApplyHistory> page = applyHistoryRepository.findByUser(user, pageable);
 
     return page.map(history -> ApplyHistoryDTO.builder()
-      .applyHistoryId(history.getOptionalIdx())
-      .statusDisplay(history.getStatus().getDisplay())
-      .recruitmentTitle(history.getRecruitment().getTitle())
-      .recruitmentCompany(history.getRecruitment().getCompany())
-      .resumeId(history.getOptionalIdx()) // resume와 연결되었다면 수정 가능
-      .build());
+            .applyHistoryId(history.getOptionalIdx())
+            .statusDisplay(history.getStatus().getDisplay())
+            .recruitmentTitle(history.getRecruitment().getTitle())
+            .recruitmentCompany(history.getRecruitment().getCompany())
+            .resumeId(history.getOptionalIdx())
+            .build());
   }
 
   @Transactional(readOnly = true)
@@ -89,7 +92,7 @@ public class MyPageService {
       throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
     }
     if (!dto.getUserNickname().equals(user.getUserNickname()) &&
-      userService.nicknameExists(dto.getUserNickname())) {
+            userService.nicknameExists(dto.getUserNickname())) {
       model.addAttribute("nicknameError", "이미 사용 중인 닉네임입니다.");
       return "mypage/member_modify";
     }
@@ -101,14 +104,13 @@ public class MyPageService {
     return "redirect:/mypage/member_modify?success";
   }
 
-
   @Transactional
   public void deleteScrap(FavoriteDTO favoriteDTO) {
     Users user = userRepository.findById(favoriteDTO.getUserIdx())
-      .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+            .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
     Recruitment recruitment = recruitmentRepository.findById(favoriteDTO.getRecruitmentIdx())
-      .orElseThrow(() -> new IllegalArgumentException("공고를 찾을 수 없습니다."));
+            .orElseThrow(() -> new IllegalArgumentException("공고를 찾을 수 없습니다."));
 
     favoriteRepository.deleteByUserAndRecruitment(user, recruitment);
   }
@@ -121,15 +123,21 @@ public class MyPageService {
 
     List<Favorite> favorites = favoriteRepository.findByUser(user);
 
-    return favorites.stream().map(favorite -> FavoriteDTO.builder()
-      .favoriteIdx(favorite.getFavoriteIdx())
-      .userIdx(favorite.getUser().getUserIdx())
-      .recruitmentIdx(favorite.getRecruitment().getRecruitmentIdx())
-      .title(favorite.getRecruitment().getTitle())
-      .company(favorite.getRecruitment().getCompany())
-      .deadline(favorite.getRecruitment().getDeadline())
-      .build()
-    ).toList();
+    return favorites.stream()
+            .map(favorite -> {
+              Recruitment r = favorite.getRecruitment();
+              if (r == null) return null;
+              return FavoriteDTO.builder()
+                      .favoriteIdx(favorite.getFavoriteIdx())
+                      .userIdx(favorite.getUser().getUserIdx())
+                      .recruitmentIdx(r.getRecruitmentIdx())
+                      .title(r.getTitle() != null ? r.getTitle() : "제목 없음")
+                      .company(r.getCompany() != null ? r.getCompany() : "회사 없음")
+                      .deadline(r.getDeadline())
+                      .build();
+            })
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
   }
 
   public Page<FavoriteDTO> getPagedFavorites(String userEmail, Pageable pageable) {
@@ -138,14 +146,26 @@ public class MyPageService {
       throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
     }
 
-    return favoriteRepository.findByUser(user, pageable)
-      .map(favorite -> FavoriteDTO.builder()
-        .favoriteIdx(favorite.getFavoriteIdx())
-        .userIdx(favorite.getUser().getUserIdx())
-        .recruitmentIdx(favorite.getRecruitment().getRecruitmentIdx())
-        .title(favorite.getRecruitment().getTitle())
-        .company(favorite.getRecruitment().getCompany())
-        .deadline(favorite.getRecruitment().getDeadline())
-        .build());
+    Page<Favorite> rawPage = favoriteRepository.findByUser(user, pageable);
+
+    List<FavoriteDTO> dtoList = rawPage.stream()
+            .map(favorite -> {
+              Recruitment r = favorite.getRecruitment();
+              if (r == null) return null;
+              return FavoriteDTO.builder()
+                      .favoriteIdx(favorite.getFavoriteIdx())
+                      .userIdx(favorite.getUser().getUserIdx())
+                      .recruitmentIdx(r.getRecruitmentIdx())
+                      .title(r.getTitle())
+                      .company(r.getCompany())
+                      .deadline(r.getDeadline())
+                      .build();
+            })
+            .filter(Objects::nonNull)
+            .toList();
+
+    return new PageImpl<>(dtoList, pageable, rawPage.getTotalElements());
   }
+
+
 }
