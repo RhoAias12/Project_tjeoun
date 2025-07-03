@@ -63,20 +63,12 @@
           </div>
         </div>
         <div class="info-right">
-          <label for="logoUpload" class="logo-label">로고 업로드</label>
-          <input type="file" id="logoUpload" accept="image/*" />
-          <img
-            id="logoPreview"
-            src="/page/img/logo.jpg"
-            alt="회사 로고"
-            class="logo"
-          />
+          <img src="/images/tjoeun.jpg" alt="회사 로고" class="logo" />
         </div>
       </section>
       <div class="status-wrapper">
         <select class="status-select">
-          <option value="open" selected>접수중</option>
-          <option value="pass">합격</option>
+          <option value="pass" selected>합격</option>
           <option value="fail">불합격</option>
         </select>
       </div>
@@ -91,7 +83,7 @@
           <tr>
             <th>
               <!-- <img id="preview" src="" alt="미리보기 없음" /> -->
-              <img class="img" src="/page/img/가나디.jpg" />
+              <img class="img" src="/images/tjoeun.jpg" />
             </th>
             <!-- 오른쪽: 개인정보 입력 -->
             <td>
@@ -159,11 +151,15 @@
           </tr>
         </table>
       </form>
+
+      <!-- ✅ 버튼 그룹 -->
+      <div class="button-group">
+        <button type="button" onclick="location.href='#'">수정</button>
+        <button type="button" onclick="location.href='/admin/apply_list'">목록</button>
+      </div>
+
     </div>
-    <!-- ✅ 버튼 그룹 -->
-    <div class="button-group">
-      <button type="button">목록보기</button>
-    </div>
+
 
     <div th:replace="include/footer :: footer"></div>
   </body>
