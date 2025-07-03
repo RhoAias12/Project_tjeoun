@@ -2,7 +2,7 @@ package com.tjoeun.service;
 
 import com.tjoeun.dto.RecruitmentDTO;
 import com.tjoeun.entity.Recruitment;
-import com.tjoeun.repository.JobPostingRepository;
+import com.tjoeun.repository.RecruitmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,23 +15,23 @@ import java.util.stream.Collectors;
 public class RecruitmentService {
 
     @Autowired
-    private JobPostingRepository jobPostingRepository;
+    private RecruitmentRepository recruitmentRepository;
 
     public List<RecruitmentDTO> getAllPosts() {
-        return jobPostingRepository.findAll()
+        return recruitmentRepository.findAll()
                 .stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
 
     public RecruitmentDTO getPostById(Long id) {
-        return jobPostingRepository.findById(id)
+        return recruitmentRepository.findById(id)
                 .map(this::convertToDTO)
                 .orElse(null);
     }
 
     public Page<RecruitmentDTO> getPagedPosts(Pageable pageable) {
-        return jobPostingRepository.findAll(pageable)
+        return recruitmentRepository.findAll(pageable)
                 .map(this::convertToDTO);
     }
 
@@ -53,5 +53,8 @@ public class RecruitmentService {
                 .build();
     }
 
+    public void deleteRecruitmentById(Long recruitmentIdx) {
+        recruitmentRepository.deleteById(recruitmentIdx);
+    }
 
 }

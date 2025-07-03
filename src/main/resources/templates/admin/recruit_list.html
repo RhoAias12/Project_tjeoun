@@ -11,20 +11,6 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
-    <script>
-      document.querySelectorAll('.situation').forEach((el) => {
-        const text = el.textContent.trim();
-        if (text === '지원모집') {
-          el.classList.add('open');
-        } else if (text === '합격') {
-          el.classList.add('pass');
-        } else if (text === '지원마감') {
-          el.classList.add('closed');
-        } else if (text === '불합격') {
-          el.classList.add('fail');
-        }
-      });
-    </script>
 
     <title>공고관리</title>
   </head>
@@ -37,7 +23,7 @@
       <div class="tab-inner">
         <h2 class="mypage-title">공고관리</h2>
 
-        <!-- 검색 및 정렬 영역 -->
+        <!-- 검색 및 정렬 영역 (향후 기능 확장 가능) -->
         <div class="search">
           <section class="search-bar">
             <input type="text" placeholder="공고이름" />
@@ -56,65 +42,34 @@
           </div>
         </div>
 
-        <!-- 게시물 리스트 -->
+        <!-- 삭제 완료 메시지 -->
+        <div th:if="${message}" class="alert-box">
+          <p th:text="${message}"></p>
+        </div>
+
+        <!-- 공고 리스트 -->
         <div class="apply-list">
-          <div class="apply-card">
+          <div th:each="recruit : ${recruitmentList}"
+               class="apply-card"
+               th:onclick="|location.href='@{/admin/recruit_modify(recruitmentIdx=${recruit.recruitmentIdx})}'|"
+               style="cursor: pointer;">
             <div class="apply-info">
-              <div class="job-title">공고명</div>
-              <div class="company-name">회사명</div>
+              <div class="job-title" th:text="${recruit.title}">공고명</div>
+              <div class="company-name" th:text="${recruit.company}">회사명</div>
             </div>
             <div class="apply-buttons">
-              <!-- <div class="situation">지원상태</div> -->
-              <div class="situation open">지원모집</div>
-              <!-- <div class="situation pass">합격</div>
-              <div class="situation closed">지원마감</div>
-              <div class="situation fail">불합격</div> -->
-
-              <button class="cancel-btn">삭제</button>
-            </div>
-          </div>
-
-          <div class="apply-card">
-            <div class="apply-info">
-              <div class="job-title">공고명</div>
-              <div class="company-name">회사명</div>
-            </div>
-            <div class="apply-buttons">
-              <!-- <div class="situation">지원상태</div> -->
-              <!-- <div class="situation open">지원모집</div> -->
-              <div class="situation pass">합격</div>
-              <!-- <div class="situation closed">지원마감</div>
-              <div class="situation fail">불합격</div> -->
-              <button class="cancel-btn">삭제</button>
-            </div>
-          </div>
-
-          <div class="apply-card">
-            <div class="apply-info">
-              <div class="job-title">공고명</div>
-              <div class="company-name">회사명</div>
-            </div>
-            <div class="apply-buttons">
-              <!-- <div class="situation">지원상태</div> -->
-              <!-- <div class="situation open">지원모집</div>
-              <div class="situation pass">합격</div> -->
-              <div class="situation closed">지원마감</div>
-              <!-- <div class="situation fail">불합격</div> -->
-              <button class="cancel-btn">삭제</button>
-            </div>
-          </div>
-          <div class="apply-card">
-            <div class="apply-info">
-              <div class="job-title">공고명</div>
-              <div class="company-name">회사명</div>
-            </div>
-            <div class="apply-buttons">
-              <!-- <div class="situation">지원상태</div> -->
-              <!-- <div class="situation open">지원모집</div>
-              <div class="situation pass">합격</div>
-              <div class="situation closed">지원마감</div> -->
-              <div class="situation fail">불합격</div>
-              <button class="cancel-btn">삭제</button>
+              <div class="situation"
+                   th:text="${recruit.deadline.isBefore(T(java.time.LocalDate).now()) ? '지원마감' : '지원모집'}"
+                   th:classappend="${recruit.deadline.isBefore(T(java.time.LocalDate).now()) ? 'closed' : 'open'}">
+                공고상태
+              </div>
+              <form th:action="@{/admin/recruit_delete}" method="post"
+                    th:onsubmit="return confirm('정말 삭제하시겠습니까?');"
+                    style="margin-left: 10px;">
+                <input type="hidden" name="recruitmentIdx" th:value="${recruit.recruitmentIdx}" />
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <button type="submit" class="cancel-btn" onclick="event.stopPropagation();">삭제</button>
+              </form>
             </div>
           </div>
         </div>
