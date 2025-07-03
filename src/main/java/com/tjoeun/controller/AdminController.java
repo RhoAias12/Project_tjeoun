@@ -80,4 +80,14 @@ public class AdminController {
     public String recruitModify() {
         return "admin/recruit_modify";
     }
+
+    @GetMapping("/apply_list")
+    public String applyList() {
+        return "admin/apply_list";
+    }
+
+    @GetMapping("/apply_detail")
+    public String applyDetail() {
+        return "admin/apply_detail";
+    }
 }

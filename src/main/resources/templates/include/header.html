@@ -8,7 +8,7 @@
     <!-- 공통: 모든 사용자에게 보임 -->
     <span><a th:href="@{/empl/empl_main}">채용공고</a></span>
 
-    <!-- 로그인한 사용자(회원+관리자)만 -->
+    <!-- 로그인한 사용자(회원)만 -->
     <span sec:authorize="hasAnyAuthority('ROLE_USER')">
       <a th:href="@{/mypage/member_modify}">마이페이지</a>
     </span>
@@ -19,6 +19,9 @@
     </span>
     <span sec:authorize="hasAnyAuthority('ROLE_ADMIN')">
       <a th:href="@{/admin/recruit_list}">공고관리</a>
+    </span>
+    <span sec:authorize="hasAnyAuthority('ROLE_ADMIN')">
+      <a th:href="@{/admin/apply_list}">지원관리</a>
     </span>
   </div>
   <div class="menu right">
