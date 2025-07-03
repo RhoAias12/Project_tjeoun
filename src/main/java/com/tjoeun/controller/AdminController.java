@@ -38,20 +38,26 @@ public class AdminController {
         model.addAttribute("userPage", userPage);
         return "admin/member_list";
     }
+
+
     @PostMapping("/member_list/delete")
     public String deleteMember(@RequestParam("userIdx") Integer userIdx) {
         adminService.deleteUserById(userIdx);
         return "redirect:/admin/member_list";
     }
-    //여기부터 추가
+
 
     @GetMapping("/member_modify")
-    public String memberModify(@RequestParam("userIdx") Integer userIdx, Model model) {
+    public String memberModify(@RequestParam("userIdx") Integer userIdx,
+                               @RequestParam(value = "page", required = false, defaultValue = "1") int page,
+                               Model model) {
         UserFormDto dto = adminService.getUserFormDtoById(userIdx);
         model.addAttribute("userFormDto", dto);
         model.addAttribute("userIdx", userIdx);
+        model.addAttribute("page", page);
         return "admin/ad_member_modify";
     }
+
 
     @PostMapping("/member_modify/{userIdx}")
     public String updateMember(@PathVariable("userIdx") Integer userIdx,

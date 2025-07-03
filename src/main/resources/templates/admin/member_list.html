@@ -46,7 +46,7 @@
           <div class="apply-card" th:each="user : ${userList}">
             <div class="apply-info">
               <!-- 상세페이지 이동 링크 (userIdx 파라미터 포함) -->
-              <a th:href="@{'/admin/member_modify'(userIdx=${user.userIdx})}"
+              <a th:href="@{'/admin/member_modify'(userIdx=${user.userIdx}, page=${userPage.number + 1})}"
                  style="text-decoration:none; color:inherit; display:block;">
                 <div class="job-title" th:text="${user.userEmail}">이메일</div>
                 <div class="company-name" th:text="${user.userNickname}">닉네임</div>

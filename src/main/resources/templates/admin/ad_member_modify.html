@@ -180,7 +180,9 @@
     <!-- 버튼 -->
     <div class="button-box">
       <button type="submit" class="action-button">수정</button>
-      <button type="button" class="action-button" onclick="location.href='/admin/member_list'">목록</button>
+      <a th:href="@{/admin/member_list(page=${page})}" class="action-button">
+        목록
+      </a>
     </div>
   </form>
 </div>
