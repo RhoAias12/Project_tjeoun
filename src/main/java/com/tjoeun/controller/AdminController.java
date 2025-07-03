@@ -43,33 +43,33 @@ public class AdminController {
         adminService.deleteUserById(userIdx);
         return "redirect:/admin/member_list";
     }
-
+    //여기부터 추가
 
     @GetMapping("/member_modify")
     public String memberModify(@RequestParam("userIdx") Integer userIdx, Model model) {
         UserFormDto dto = adminService.getUserFormDtoById(userIdx);
         model.addAttribute("userFormDto", dto);
+        model.addAttribute("userIdx", userIdx);
         return "admin/ad_member_modify";
     }
 
-    @PostMapping("/member_modify")
-    public String updateMember(@ModelAttribute("userFormDto") @Valid UserFormDto userFormDto,
+    @PostMapping("/member_modify/{userIdx}")
+    public String updateMember(@PathVariable("userIdx") Integer userIdx,
+                               @ModelAttribute("userFormDto") UserFormDto dto,
                                BindingResult bindingResult,
-                               RedirectAttributes redirectAttributes,
-                               @RequestParam("userIdx") Integer userIdx,
-                               Model model) {
-        if (bindingResult.hasErrors()) {
-            return "admin/member_modify";
-        }
+                               Model model,
+                               RedirectAttributes redirectAttributes) {
         try {
-            adminService.updateUserInfo(userIdx, userFormDto);
-            redirectAttributes.addFlashAttribute("success", true);
+            adminService.updateUser(userIdx, dto, bindingResult, model);
+            redirectAttributes.addFlashAttribute("successMessage", "회원정보가 성공적으로 수정되었습니다.");
             return "redirect:/admin/member_modify?userIdx=" + userIdx + "&success";
         } catch (IllegalStateException e) {
             model.addAttribute("errorMessage", e.getMessage());
-            return "admin/member_modify";
+            model.addAttribute("userIdx", userIdx);
+            return "admin/ad_member_modify";
         }
     }
+
 
 
     @GetMapping("/recruit_list")
