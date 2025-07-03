@@ -3,6 +3,7 @@ package com.tjoeun.controller;
 import com.tjoeun.dto.RecruitmentDTO;
 import com.tjoeun.service.FavoriteService;
 import com.tjoeun.service.RecruitmentService;
+import com.tjoeun.util.PaginationUtil2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -75,7 +76,7 @@ public class EmplController {
 
             model.addAttribute("jobList", pageContent);
             model.addAttribute("jobPage", jobPage);
-            PaginationUtil.setPaging(model, jobPage, "/empl/empl_main", scrapSort, 10); // scrapSort로 URL 유지
+            PaginationUtil2.setPaging(model, jobPage, "/empl/empl_main", scrapSort, 10); // scrapSort로 URL 유지
 
         } else {
             // ✅ scrapSort 없으면 → DB 페이징 + 정렬
@@ -86,7 +87,7 @@ public class EmplController {
 
             model.addAttribute("jobList", jobPage.getContent());
             model.addAttribute("jobPage", jobPage);
-            PaginationUtil.setPaging(model, jobPage, "/empl/empl_main", combinedSort, 10);
+            PaginationUtil2.setPaging(model, jobPage, "/empl/empl_main", combinedSort, 10);
         }
 
         // ✅ 드롭다운 유지

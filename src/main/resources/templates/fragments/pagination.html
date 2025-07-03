@@ -4,29 +4,27 @@
 <head></head>
 <body>
 
-<div th:fragment="fragment (jobPage, startPage, endPage, url, customSort)"
-     class="pagination">
+<!-- 🔽 페이징 프래그먼트 -->
+<div th:fragment="fragment (jobPage, startPage, endPage, url)" th:if="${jobPage.totalPages > 1}" class="pagination">
   <ul class="pagination-list">
 
-    <!-- 이전 버튼 -->
-    <li th:if="${jobPage.number > 0}">
-      <a class="page-btn"
-         th:href="@{${url}(page=${jobPage.number}, customSort=${customSort})}">〈</a>
+    <!-- « 이전 -->
+    <li th:if="${jobPage.number + 1 > 1}">
+      <a class="page-btn" th:href="@{${url}(page=${jobPage.number})}">〈</a>
     </li>
 
-    <!-- 페이지 번호 -->
-    <li th:if="${endPage >= startPage}"
-        th:each="i : ${#numbers.sequence(startPage + 1, endPage + 1)}">
+    <!-- 페이지 번호 (1-based) -->
+    <li th:each="i : ${#numbers.sequence(startPage + 1, endPage + 1)}">
       <a class="page-btn"
-         th:href="@{${url}(page=${i}, customSort=${customSort})}"
-         th:classappend="${i} == ${jobPage.number + 1} ? ' active' : ''"
-         th:text="${i}">1</a>
+         th:classappend="${i} == ${jobPage.number + 1} ? ' active'"
+         th:href="@{${url}(page=${i})}"
+         th:text="${i}">
+      </a>
     </li>
 
-    <!-- 다음 버튼 -->
-    <li th:if="${jobPage.number < jobPage.totalPages - 1}">
-      <a class="page-btn"
-         th:href="@{${url}(page=${jobPage.number + 2}, customSort=${customSort})}">〉</a>
+    <!-- » 다음 -->
+    <li th:if="${jobPage.number + 1 < jobPage.totalPages}">
+      <a class="page-btn" th:href="@{${url}(page=${jobPage.number + 2})}">〉</a>
     </li>
 
   </ul>
@@ -34,3 +32,4 @@
 
 </body>
 </html>
+pagination.html

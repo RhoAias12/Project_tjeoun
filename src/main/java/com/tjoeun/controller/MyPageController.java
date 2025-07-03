@@ -9,6 +9,7 @@ import com.tjoeun.repository.*;
 import com.tjoeun.service.MyPageService;
 import com.tjoeun.service.UserService;
 import com.tjoeun.util.PaginationUtil;
+import com.tjoeun.util.PaginationUtil2;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -145,7 +146,7 @@ public class MyPageController {
 
         Page<ApplyHistoryDTO> historyPage = myPageService.getPagedApplyHistories(email, correctedPageable);
 
-        PaginationUtil.setPaging(model, historyPage, "/mypage/apply_status", customSort, 10);
+        PaginationUtil.setPaging(model, historyPage, "/mypage/apply_status");
 
         model.addAttribute("historyList", historyPage.getContent());
         model.addAttribute("jobPage", historyPage);
@@ -172,7 +173,7 @@ public class MyPageController {
         model.addAttribute("favorites", jobPage.getContent());
         model.addAttribute("jobPage", jobPage);
         model.addAttribute("customSort", customSort);
-        PaginationUtil.setPaging(model, jobPage, "/mypage/scrap", customSort, 5);
+        PaginationUtil2.setPaging(model, jobPage, "/mypage/scrap", customSort, 5);
 
         return "mypage/scrap";
     }
