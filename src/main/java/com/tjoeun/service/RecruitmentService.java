@@ -2,6 +2,7 @@ package com.tjoeun.service;
 
 import com.tjoeun.dto.RecruitmentDTO;
 import com.tjoeun.entity.Recruitment;
+import com.tjoeun.repository.FavoriteRepository;
 import com.tjoeun.repository.JobPostingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -10,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,6 +20,9 @@ public class RecruitmentService {
 
     @Autowired
     private JobPostingRepository jobPostingRepository;
+
+    @Autowired
+    private FavoriteRepository favoriteRepository;
 
     public List<RecruitmentDTO> getAllPosts() {
         return jobPostingRepository.findAll()
@@ -28,12 +33,46 @@ public class RecruitmentService {
 
     // 🔽 customSort에 따른 정렬 리스트 반환
     public List<RecruitmentDTO> getAllPosts(String customSort) {
-        Sort sort = resolveSort(customSort);
-        return jobPostingRepository.findAll(sort)
-                .stream()
+        List<Recruitment> list = jobPostingRepository.findAll();
+
+        // scrapCount 채우기
+        for (Recruitment r : list) {
+            int count = favoriteRepository.countByRecruitment(r);
+            r.setScrapCount(count);
+        }
+
+        if ("scrap-desc".equals(customSort)) {
+            // 스크랩 된 것만 필터링
+            list = list.stream()
+                    .filter(r -> r.getScrapCount() != null && r.getScrapCount() > 0)
+                    .collect(Collectors.toList());
+            list.sort(Comparator.comparing(Recruitment::getScrapCount).reversed());
+
+        } else if ("scrap-asc".equals(customSort)) {
+            // 스크랩 안 된 것만 필터링
+            list = list.stream()
+                    .filter(r -> r.getScrapCount() == null || r.getScrapCount() == 0)
+                    .collect(Collectors.toList());
+        }
+
+
+        // 정렬
+        if ("scrap-desc".equals(customSort)) {
+            list.sort(Comparator.comparing(Recruitment::getScrapCount).reversed());
+        } else if ("scrap-asc".equals(customSort)) {
+            list.sort(Comparator.comparing(Recruitment::getScrapCount));
+        } else if ("deadline-asc".equals(customSort)) {
+            list.sort(Comparator.comparing(Recruitment::getDeadline));
+        } else if ("deadline-desc".equals(customSort)) {
+            list.sort(Comparator.comparing(Recruitment::getDeadline).reversed());
+        }
+
+        return list.stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
+
+
 
     public Page<RecruitmentDTO> getPagedPosts(Pageable pageable) {
         return jobPostingRepository.findAll(pageable)
@@ -57,11 +96,11 @@ public class RecruitmentService {
         return switch (customSort) {
             case "deadline-asc" -> Sort.by(Sort.Direction.ASC, "deadline");
             case "deadline-desc" -> Sort.by(Sort.Direction.DESC, "deadline");
-            case "scrap-desc" -> Sort.by(Sort.Direction.DESC, "scrapCount");
-            case "scrap-asc" -> Sort.by(Sort.Direction.ASC, "scrapCount");
+            // ⚠️ scrap 관련 정렬은 제거해야 함
             default -> Sort.by(Sort.Direction.DESC, "createdAt");
         };
     }
+
 
     private RecruitmentDTO convertToDTO(Recruitment entity) {
         return RecruitmentDTO.builder()
@@ -77,6 +116,7 @@ public class RecruitmentService {
                 .location(entity.getLocation())
                 .salary(entity.getSalary())
                 .employmentType(entity.getEmploymentType())
+                .scrapCount(entity.getScrapCount())
                 .build();
     }
 

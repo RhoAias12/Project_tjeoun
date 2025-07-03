@@ -5,6 +5,7 @@ import com.tjoeun.service.FavoriteService;
 import com.tjoeun.service.RecruitmentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -33,23 +34,52 @@ public class EmplController {
     // 채용 공고 메인 페이지 (전체 리스트 출력 + 페이징 처리)
     @GetMapping("/empl_main")
     public String emplMainPage(@RequestParam(defaultValue = "1") int page,
-                               @RequestParam(required = false) String customSort,
+                               @RequestParam(required = false) String deadlineSort,
+                               @RequestParam(required = false) String scrapSort,
                                @PageableDefault(size = 25) Pageable pageable,
                                Model model) {
 
-        // 1. 전체 채용 리스트 (화면에 실제 출력할 리스트)
-        List<RecruitmentDTO> jobList = recruitmentService.getAllPosts(customSort);
-        model.addAttribute("jobList", jobList);
+        int pageSize = pageable.getPageSize();
 
-        // 2. 페이지네이션 전용 page 객체 (UI 페이지네이션 구성용)
-        Pageable correctedPageable = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
-        Page<RecruitmentDTO> jobPage = recruitmentService.getPagedPosts(correctedPageable, customSort);
+        // ✅ scrapSort 우선 적용
+        String combinedSort = null;
+        if (scrapSort != null && !scrapSort.isEmpty()) {
+            combinedSort = scrapSort;
+        } else if (deadlineSort != null && !deadlineSort.isEmpty()) {
+            combinedSort = deadlineSort;
+        }
 
-        // 3. 페이징 정보 + URL 설정
-        PaginationUtil.setPaging(model, jobPage, "/empl/empl_main", customSort);
+        // ✅ 스크랩 정렬인 경우 메모리 페이징
+        if ("scrap-desc".equals(combinedSort) || "scrap-asc".equals(combinedSort)) {
+            List<RecruitmentDTO> all = recruitmentService.getAllPosts(combinedSort);
+            int start = (page - 1) * pageSize;
+            int end = Math.min(start + pageSize, all.size());
+            List<RecruitmentDTO> pageContent = all.subList(start, end);
+
+            Page<RecruitmentDTO> jobPage = new PageImpl<>(pageContent, PageRequest.of(page - 1, pageSize), all.size());
+
+            model.addAttribute("jobList", pageContent);
+            model.addAttribute("jobPage", jobPage);
+            PaginationUtil.setPaging(model, jobPage, "/empl/empl_main", combinedSort); // ✅ 에러 안 나는 버전
+
+        } else {
+            Pageable correctedPageable = PageRequest.of(page - 1, pageSize, pageable.getSort());
+            Page<RecruitmentDTO> jobPage = recruitmentService.getPagedPosts(correctedPageable, combinedSort);
+
+            model.addAttribute("jobList", jobPage.getContent());
+            model.addAttribute("jobPage", jobPage);
+            PaginationUtil.setPaging(model, jobPage, "/empl/empl_main", combinedSort);
+        }
+
+        // ✅ 드롭다운 유지
+        model.addAttribute("scrapSort", scrapSort);
+        model.addAttribute("deadlineSort", deadlineSort);
 
         return "empl/empl_main";
     }
+
+
+
 
 
 

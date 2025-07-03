@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "recruitment", uniqueConstraints = {
@@ -55,5 +56,13 @@ public class Recruitment {
 
   @Transient
   private Integer scrapCount;
+
+  @Column
+  private LocalDateTime createdAt;
+
+  @PrePersist
+  protected void onCreate() {
+    this.createdAt = LocalDateTime.now();
+  }
 
 }

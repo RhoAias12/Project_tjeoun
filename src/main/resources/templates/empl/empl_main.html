@@ -37,19 +37,18 @@
     <div class="search-sort">
       <div class="search-wrapper">
 
-        <!-- 정렬기준: 최신순 / 오래된순 -->
-        <select class="sort-select" name="dateSort">
-          <option value="latest" th:selected="${dateSort == 'latest'}">최신순</option>
-          <option value="oldest" th:selected="${dateSort == 'oldest'}">오래된순</option>
+        <!-- 🔵 마감일 정렬 -->
+        <select class="sort-select" name="deadlineSort" onchange="document.getElementById('sortForm').submit()">
+          <option value="" th:selected="${deadlineSort == null or deadlineSort == ''}">전체</option>
+          <option value="deadline-asc" th:selected="${deadlineSort == 'deadline-asc'}">마감일 빠른 순</option>
+          <option value="deadline-desc" th:selected="${deadlineSort == 'deadline-desc'}">마감일 늦는 순</option>
         </select>
 
-        <!-- 정렬기준: 스크랩순 / 마감일순 -->
-        <select class="sort-select" name="customSort" onchange="document.getElementById('sortForm').submit()">
-          <option value="" th:selected="${customSort == null or customSort == ''}">전체</option>
-          <option value="scrap-desc" th:selected="${customSort == 'scrap-desc'}">스크랩된 순</option>
-          <option value="scrap-asc" th:selected="${customSort == 'scrap-asc'}">스크랩 안된 순</option>
-          <option value="deadline-asc" th:selected="${customSort == 'deadline-asc'}">마감일 빠른 순</option>
-          <option value="deadline-desc" th:selected="${customSort == 'deadline-desc'}">마감일 늦는 순</option>
+        <!-- 🟢 스크랩 정렬 -->
+        <select class="sort-select" name="scrapSort" onchange="document.getElementById('sortForm').submit()">
+          <option value="" th:selected="${scrapSort == null or scrapSort == ''}">전체</option>
+          <option value="scrap-desc" th:selected="${scrapSort == 'scrap-desc'}">스크랩된 순</option>
+          <option value="scrap-asc" th:selected="${scrapSort == 'scrap-asc'}">스크랩 안된 순</option>
         </select>
 
 
@@ -66,6 +65,7 @@
           <p class="job-deadline"
              th:text="${#strings.startsWith(job.deadline.toString(), '9999') ? '상시채용' : '마감일: ' + job.deadline}">
           </p>
+
 
         </a>
       </div>
