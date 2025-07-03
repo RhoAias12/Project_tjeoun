@@ -79,8 +79,6 @@ public class RecruitmentService {
                 .collect(Collectors.toList());
     }
 
-
-
     public Page<RecruitmentDTO> getPagedPosts(Pageable pageable) {
         return jobPostingRepository.findAll(pageable)
                 .map(this::convertToDTO);

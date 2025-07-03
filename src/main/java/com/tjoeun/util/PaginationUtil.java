@@ -14,7 +14,6 @@ public class PaginationUtil {
         int endPage = Math.min(startPage + 9, totalPages - 1);
 
         // model에 속성 등록
-        model.addAttribute("jobPage", page);
         model.addAttribute("startPage", startPage);
         model.addAttribute("customSort", customSort);
         model.addAttribute("endPage", endPage);

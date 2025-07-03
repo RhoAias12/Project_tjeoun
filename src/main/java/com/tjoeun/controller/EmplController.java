@@ -98,9 +98,6 @@ public class EmplController {
 
 
 
-
-
-
     // 개별 공고 상세 페이지
     @GetMapping("/empl_detail/{id}")
     public String emplDetailPage(@PathVariable("id") Long id, Model model, Principal principal) {
