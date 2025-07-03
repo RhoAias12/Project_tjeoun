@@ -70,7 +70,7 @@
           <div class="apply-card" th:each="favorite : ${favorites}" th:id="'card-' + ${favorite.recruitmentIdx}">
             <div class="apply-info">
               <div class="job-title">
-                <a th:href="@{/recruit/detail/{id}(id=${favorite.recruitmentIdx})}"
+                <a th:href="@{/empl/empl_detail/{id}(id=${favorite.recruitmentIdx})}"
                    th:text="${favorite.title}">공고명</a>
               </div>
               <div class="company-name" th:text="${favorite.company}">회사명</div>
