@@ -44,6 +44,7 @@
             <option value="apply_oldest" th:selected="${applySort == 'apply_oldest'}">지원일: 오래된순</option>
           </select>
 
+
           <select name="deadlineSort" class="sort-select" onchange="document.getElementById('sortForm').submit()">
             <option value="deadline_all" th:selected="${deadlineSort == 'deadline_all'}">마감일: 전체</option>
             <option value="deadline_latest" th:selected="${deadlineSort == 'deadline_latest'}">마감일: 최신순</option>
