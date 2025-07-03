@@ -10,6 +10,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,7 +24,7 @@ public class AdminService {
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
 
-  // 모든 회원 리스트 조회 (관리자용)
+  // 모든 회원 리스트 조회
   public List<UserListDto> getAllUsers() {
     List<Users> users = userRepository.findAll();
     return users.stream()
@@ -39,33 +41,50 @@ public class AdminService {
     userRepository.deleteById(userIdx);
   }
 
-  // 회원 상세 조회 (필요 시)
+  // 회원 상세 조회
   public UserFormDto getUserFormDtoById(Integer userIdx) {
     Users user = userRepository.findById(userIdx)
-      .orElseThrow(() -> new IllegalArgumentException("해당 사용자가 존재하지 않습니다."));
-
+      .orElseThrow(() -> new IllegalArgumentException("해당 회원을 찾을 수 없습니다."));
     UserFormDto dto = new UserFormDto();
+
     dto.setUserName(user.getUserName());
     dto.setUserEmail(user.getUserEmail());
     dto.setUserNickname(user.getUserNickname());
     dto.setUserBirth(user.getUserBirth());
+    dto.setUserRole(user.getUserRole());
     dto.setUserPassword("");
-
     return dto;
   }
 
-  // 회원 정보 수정
-  public void updateUserInfo(Integer userIdx, UserFormDto dto) {
-    Users user = userRepository.findById(userIdx).orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
 
-    user.setUserNickname(dto.getUserNickname());
+  public void updateUser(Integer userIdx, UserFormDto dto, BindingResult bindingResult, Model model) {
+    Users user = userRepository.findById(userIdx)
+      .orElseThrow(() -> new IllegalArgumentException("해당 회원을 찾을 수 없습니다."));
 
-    if (dto.getUserPassword() != null && !dto.getUserPassword().isBlank()) {
-      user.setUserPassword(passwordEncoder.encode(dto.getUserPassword()));
+    if (!user.getUserNickname().equals(dto.getUserNickname())) {
+      if (userRepository.findByUserNickname(dto.getUserNickname()) != null) {
+        model.addAttribute("nicknameError", "이미 사용 중인 닉네임입니다.");
+        throw new IllegalStateException("이미 사용 중인 닉네임입니다.");
+      }
+      user.setUserNickname(dto.getUserNickname());
     }
 
+    if (dto.getUserPassword() != null && !dto.getUserPassword().isBlank()) {
+      String pw = dto.getUserPassword();
+      if (pw.length() < 8 || pw.length() > 16 || !pw.matches("^[a-zA-Z0-9]*$")) {
+        model.addAttribute("errorMessage", "비밀번호는 8~16자의 영문+숫자 조합이어야 하며 특수문자와 한글은 안 됩니다.");
+        throw new IllegalStateException("비밀번호 유효성 검사 실패");
+      }
+      user.setUserPassword(passwordEncoder.encode(pw));
+    }
+
+    if (dto.getUserRole() != null) {
+      user.setUserRole(dto.getUserRole());
+    }
     userRepository.save(user);
   }
+
+  //페이지네이션
   public Page<UserListDto> getPagedUsers(Pageable pageable) {
     Page<Users> userPage = userRepository.findAll(pageable);
     return userPage.map(user -> new UserListDto(
