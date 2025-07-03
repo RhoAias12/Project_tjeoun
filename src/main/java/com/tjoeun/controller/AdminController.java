@@ -32,7 +32,7 @@ public class AdminController {
         Pageable correctedPageable = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
         Page<UserListDto> userPage = adminService.getPagedUsers(correctedPageable);
 
-        com.tjoeun.util.PaginationUtil.setPaging(model, userPage, "/admin/member_list", customSort);
+        com.tjoeun.util.PaginationUtil.setPaging(model, userPage, "/admin/member_list", customSort, 10);
 
 
         model.addAttribute("userList", userPage.getContent());

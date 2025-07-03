@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>공고 상세페이지</title>
 
+  <script th:inline="javascript">
+    let isLogin = /*[[${#authorization.expression('isAuthenticated()')}]]*/ false;
+  </script>
+
   <!-- ✅ CSRF 토큰 -->
   <meta name="_csrf" th:content="${_csrf.token}" />
   <meta name="_csrf_header" th:content="${_csrf.headerName}" />
@@ -64,19 +68,30 @@
 </div>
 
 <div class="button-group">
+  <!-- 북마크 버튼: 로그인한 사용자만 표시 -->
   <button
           type="button"
           class="bookmark-icon"
+          th:if="${#authorization.expression('isAuthenticated()')}"
           th:classappend="${isFavorited} ? ' active' : ''"
           onclick="toggleBookmark(this)"
-          th:attr="data-id=${job.recruitmentIdx}"
-  >
+          th:attr="data-id=${job.recruitmentIdx}">
     <i class="fa-bookmark"
        th:classappend="${isFavorited} ? ' fa-solid' : ' fa-regular'"></i>
   </button>
 
+  <!-- 비로그인 사용자에게는 회색 비활성 아이콘 + 로그인 유도 -->
+  <button
+          type="button"
+          class="bookmark-icon inactive"
+          th:unless="${#authorization.expression('isAuthenticated()')}"
+          onclick="alert('로그인 후 이용해 주세요.'); location.href='/user/login'">
+    <i class="fa-bookmark fa-regular"></i>
+  </button>
+
+
   <button type="button">지원하기</button>
-  <button type="button">목록보기</button>
+  <button type="button" onclick="location.href='/empl/empl_main'">목록보기</button>
 </div>
 
 <div th:replace="include/footer :: footer"></div>
@@ -84,6 +99,12 @@
 <!-- ✅ JS는 body 끝에 넣기 -->
 <script>
   function toggleBookmark(button) {
+    if (!isLogin) {
+      alert('로그인 후 이용해 주세요.');
+      location.href = '/user/login';
+      return;
+    }
+
     const recruitmentId = button.getAttribute("data-id");
     const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute("content");
     const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute("content");
@@ -100,11 +121,13 @@
     .then(result => {
       const icon = button.querySelector('i');
       icon.classList.remove('fa-regular', 'fa-solid');
-      icon.classList.add(result === 'favorited' ? 'fa-solid' : 'fa-regular');
+
       if (result === 'favorited') {
-        button.classList.add('active');  // ⭐ 노란색 아이콘용 클래스
+        icon.classList.add('fa-solid');
+        button.classList.add('active');
         button.title = '스크랩됨';
       } else {
+        icon.classList.add('fa-regular');
         button.classList.remove('active');
         button.title = '스크랩';
       }

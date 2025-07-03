@@ -75,7 +75,7 @@ public class EmplController {
 
             model.addAttribute("jobList", pageContent);
             model.addAttribute("jobPage", jobPage);
-            PaginationUtil.setPaging(model, jobPage, "/empl/empl_main", scrapSort); // scrapSort로 URL 유지
+            PaginationUtil.setPaging(model, jobPage, "/empl/empl_main", scrapSort, 10); // scrapSort로 URL 유지
 
         } else {
             // ✅ scrapSort 없으면 → DB 페이징 + 정렬
@@ -86,7 +86,7 @@ public class EmplController {
 
             model.addAttribute("jobList", jobPage.getContent());
             model.addAttribute("jobPage", jobPage);
-            PaginationUtil.setPaging(model, jobPage, "/empl/empl_main", combinedSort);
+            PaginationUtil.setPaging(model, jobPage, "/empl/empl_main", combinedSort, 10);
         }
 
         // ✅ 드롭다운 유지

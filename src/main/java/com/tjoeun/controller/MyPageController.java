@@ -145,9 +145,10 @@ public class MyPageController {
 
         Page<ApplyHistoryDTO> historyPage = myPageService.getPagedApplyHistories(email, correctedPageable);
 
-        PaginationUtil.setPaging(model, historyPage, "/mypage/apply_status", customSort);
+        PaginationUtil.setPaging(model, historyPage, "/mypage/apply_status", customSort, 10);
 
         model.addAttribute("historyList", historyPage.getContent());
+        model.addAttribute("jobPage", historyPage);
 
         return "mypage/apply_status";
     }
@@ -163,8 +164,15 @@ public class MyPageController {
         Pageable correctedPageable = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
         Page<FavoriteDTO> jobPage = myPageService.getPagedFavorites(email, correctedPageable);
 
+        System.out.println("📌 로그인 유저: " + email);
+        System.out.println("📌 스크랩 개수: " + jobPage.getTotalElements());
+        System.out.println("📌 스크랩 리스트: " + jobPage.getContent());
+
+
         model.addAttribute("favorites", jobPage.getContent());
-        PaginationUtil.setPaging(model, jobPage, "/mypage/scrap", customSort);
+        model.addAttribute("jobPage", jobPage);
+        model.addAttribute("customSort", customSort);
+        PaginationUtil.setPaging(model, jobPage, "/mypage/scrap", customSort, 5);
 
         return "mypage/scrap";
     }
