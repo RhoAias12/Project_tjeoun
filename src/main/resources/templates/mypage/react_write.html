@@ -10,21 +10,6 @@
     <link rel="stylesheet" th:href="@{/css/react.css}" />
     <script defer src="../../../../../../final_project/front/js/main.js"></script>
 
-      <script>
-          // 이미지 미리보기 함수
-          function previewImage(event) {
-              const file = event.target.files[0];
-              const reader = new FileReader();
-              reader.onload = function (e) {
-                  const preview = document.getElementById('preview');
-                  preview.src = e.target.result;
-              };
-              if (file) {
-                  reader.readAsDataURL(file);
-                  document.getElementById('fileName').innerText = file.name;
-              }
-          }
-      </script>
   </head>
   <body>
     <div th:replace="include/header :: header"></div>
@@ -32,67 +17,161 @@
       <p>마이페이지 &gt; 이력서</p>
     </div>
     <div class="container">
-        <form th:action="@{/mypage/react_write}" method="post" enctype="multipart/form-data">
+        <form>
             <table class="resume-table">
+                <!-- 첫 줄: 이미지 텍스트 -->
                 <tr>
-                    <th>제목</th>
+                    <th class="img">제목</th>
+                    <td class="centered-cell">
+                        <div class="form-group">
+                <textarea
+                        id="title"
+                        class="short-text"
+                        placeholder="제목를 입력해 주세요."
+                >
+여러분들의 일개미가 되겠습니다! </textarea
+                >
+                        </div>
+                    </td>
+                </tr>
+
+                <!-- 둘째 줄: 왼쪽에 이미지 + 파일선택 / 오른쪽은 그대로 -->
+                <tr>
+                    <th style="text-align: center">
+                        <img id="preview" src="" alt="미리보기 없음" />
+
+                        <input type="file" id="imageUpload" accept="image/*" />
+                        <div id="fileName" style="margin-top: 4px"></div>
+                    </th>
+                    <!-- 오른쪽: 개인정보 입력 -->
                     <td>
-                        <input type="text" name="title" th:value="${resumeDto.title}" placeholder="제목을 입력하세요" required />
+                        <div class="form-group">
+                            <label class="thick">이름</label>
+                            <p class="readonly-box">홍길동</p>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="thick">이메일</label>
+                            <p class="readonly-box">honggildong@example.com</p>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="thick">생년월일</label>
+                            <p class="readonly-box">1995-07-01</p>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="address">주소</label>
+                            <textarea
+                                    id="address"
+                                    class="short-text"
+                                    placeholder="주소를 입력해 주세요."
+                            >
+서울특별시 성동구 성수동</textarea
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="phone">전화번호</label>
+                            <textarea
+                                    id="phone"
+                                    class="short-text"
+                                    placeholder="전화번호를 입력해 주세요."
+                            >
+010-1234-5678</textarea
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="education">학력</label>
+                            <textarea
+                                    id="education"
+                                    class="short-text"
+                                    placeholder="학력을 입력해 주세요."
+                            >
+서울대학교 컴퓨터공학과 졸업</textarea
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="career">스킬</label>
+                            <textarea
+                                    id="skill"
+                                    class="short-text1"
+                                    placeholder="스킬을 입력해 주세요."
+                            >
+python, SQL</textarea
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="career">경력</label>
+                            <textarea
+                                    id="career"
+                                    class="short-text1"
+                                    placeholder="경력을 입력해 주세요."
+                            >
+2021 ~ 2024 (주)코드랩 백엔드 개발자</textarea
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="award">수상이력</label>
+                            <textarea
+                                    id="award"
+                                    class="short-text1"
+                                    placeholder="수상이력을 입력해 주세요."
+                            >
+2023 SW창의력대회 최우수상 수상</textarea
+                            >
+                        </div>
+                    </td>
+                </tr>
+
+                <tr>
+                    <th><textarea placeholder="질문 1을 입력하세요."></textarea></th>
+                    <td>
+                        <div class="textarea-wrapper">
+                            <textarea placeholder="내용을 입력하세요."></textarea>
+                        </div>
                     </td>
                 </tr>
                 <tr>
-                    <th>이력서 내용</th>
+                    <th><textarea placeholder="질문 2를 입력하세요."></textarea></th>
                     <td>
-                        <textarea name="context" th:value="${resumeDto.context}" placeholder="이력서를 입력하세요" required></textarea>
+                        <div class="textarea-wrapper">
+                            <textarea placeholder="내용을 입력하세요."></textarea>
+                        </div>
                     </td>
                 </tr>
                 <tr>
-                    <th>주소</th>
+                    <th><textarea placeholder="질문 3을 입력하세요."></textarea></th>
                     <td>
-                        <textarea name="address" th:value="${resumeDto.address}" placeholder="주소를 입력하세요" required></textarea>
+                        <div class="textarea-wrapper">
+                            <textarea placeholder="내용을 입력하세요."></textarea>
+                        </div>
                     </td>
                 </tr>
                 <tr>
-                    <th>전화번호</th>
+                    <th><textarea placeholder="질문 4를 입력하세요."></textarea></th>
                     <td>
-                        <textarea name="phoneNum" th:value="${resumeDto.phoneNum}" placeholder="전화번호를 입력하세요" required></textarea>
+                        <div class="textarea-wrapper">
+                            <textarea placeholder="내용을 입력하세요."></textarea>
+                        </div>
                     </td>
                 </tr>
                 <tr>
-                    <th>학력</th>
+                    <th class="link">
+                        포트폴리오 링크를<br />
+                        넣어주세요.
+                    </th>
                     <td>
-                        <textarea name="education" th:value="${resumeDto.education}" placeholder="학력을 입력하세요" required></textarea>
-                    </td>
-                </tr>
-                <tr>
-                    <th>스킬</th>
-                    <td>
-                        <textarea name="ability" th:value="${resumeDto.ability}" placeholder="스킬을 입력하세요" required></textarea>
-                    </td>
-                </tr>
-                <tr>
-                    <th>경력</th>
-                    <td>
-                        <textarea name="antecedents" th:value="${resumeDto.antecedents}" placeholder="경력을 입력하세요" required></textarea>
-                    </td>
-                </tr>
-                <tr>
-                    <th>수상이력</th>
-                    <td>
-                        <textarea name="awards" th:value="${resumeDto.awards}" placeholder="수상이력을 입력하세요" required></textarea>
-                    </td>
-                </tr>
-                <tr>
-                    <th>이미지</th>
-                    <td>
-                        <input type="file" name="img" required />
+              <textarea
+                      placeholder="예: https://github.com/yourname/portfolio"
+              ></textarea>
                     </td>
                 </tr>
             </table>
-            <div class="button-group">
-                <button type="submit">저장</button>
-                <button type="button" onclick="location.href='/mypage/react_list'">취소</button>
-            </div>
         </form>
 
     </div>
