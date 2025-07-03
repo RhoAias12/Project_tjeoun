@@ -8,8 +8,7 @@ import com.tjoeun.entity.Users;
 import com.tjoeun.repository.ApplyHistoryRepository;
 import com.tjoeun.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -99,17 +98,37 @@ public class AdminService {
     ));
   }
 
-  public Page<ApplyHistoryDTO> getPagedApplyHistory(Pageable pageable) {
-    Page<ApplyHistory> applyPage = applyHistoryRepository.findAll(pageable);
-    return applyPage.map(apply -> ApplyHistoryDTO.builder()
-      .applyHistoryId(apply.getOptionalIdx())
-      .statusDisplay(apply.getStatus().getDisplay())
-      .recruitmentTitle(apply.getRecruitment().getTitle())
-      .recruitmentCompany(apply.getRecruitment().getCompany())
-      .recruitmentId(apply.getRecruitment().getRecruitmentIdx())
-      .userNickname(apply.getUser().getUserNickname())
-      .userEmail(apply.getUser().getUserEmail())
+  public Page<ApplyHistoryDTO> getPagedApplyHistory(int page, int size, String applySort, String deadlineSort) {
+    Sort sort = Sort.unsorted();
+
+    if ("apply_latest".equals(applySort)) {
+      sort = Sort.by(Sort.Direction.DESC, "apply");
+    } else if ("apply_oldest".equals(applySort)) {
+      sort = Sort.by(Sort.Direction.ASC, "apply");
+    }
+
+    if ("deadline_latest".equals(deadlineSort)) {
+      Sort deadlineSortObj = Sort.by(Sort.Direction.DESC, "recruitment.deadline");
+      sort = sort.isSorted() ? sort.and(deadlineSortObj) : deadlineSortObj;
+    } else if ("deadline_oldest".equals(deadlineSort)) {
+      Sort deadlineSortObj = Sort.by(Sort.Direction.ASC, "recruitment.deadline");
+      sort = sort.isSorted() ? sort.and(deadlineSortObj) : deadlineSortObj;
+    }
+
+    Pageable pageable = PageRequest.of(page, size, sort);
+    Page<ApplyHistory> applyHistoryPage = applyHistoryRepository.findAll(pageable);
+
+    return applyHistoryPage.map(applyHistory -> ApplyHistoryDTO.builder()
+      .applyHistoryId(applyHistory.getOptionalIdx())
+      .statusDisplay(applyHistory.getStatus().getDisplay())
+      .recruitmentTitle(applyHistory.getRecruitment().getTitle())
+      .recruitmentCompany(applyHistory.getRecruitment().getCompany())
+      .recruitmentId(applyHistory.getRecruitment().getRecruitmentIdx())
+      .userEmail(applyHistory.getUser().getUserEmail())
+      .userNickname(applyHistory.getUser().getUserNickname())
       .build());
   }
+
+
 
 }

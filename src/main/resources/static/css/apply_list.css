@@ -65,6 +65,11 @@
   margin-top: 0; /* 필요없으면 제거 */
 }
 
+.sort-wrapper label {
+  font-weight: 500;
+  font-size: 14px;
+}
+
 .sort-select {
   padding: 8px 15px;
   font-size: 14px;
