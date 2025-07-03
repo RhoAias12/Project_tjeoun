@@ -44,7 +44,7 @@ public class AdminController {
     }
     //여기부터 추가
 
-    @GetMapping("/ad_member_modify/{userIdx}")
+    @GetMapping("/member_modify")
     public String memberModify(@RequestParam("userIdx") Integer userIdx, Model model) {
         UserFormDto dto = adminService.getUserFormDtoById(userIdx);
         model.addAttribute("userFormDto", dto);
@@ -52,7 +52,7 @@ public class AdminController {
         return "admin/ad_member_modify";
     }
 
-    @PostMapping("/ad_member_modify/{userIdx}")
+    @PostMapping("/member_modify/{userIdx}")
     public String updateMember(@PathVariable("userIdx") Integer userIdx,
                                @ModelAttribute("userFormDto") UserFormDto dto,
                                BindingResult bindingResult,
@@ -60,7 +60,8 @@ public class AdminController {
                                RedirectAttributes redirectAttributes) {
         try {
             adminService.updateUser(userIdx, dto, bindingResult, model);
-            return "redirect:/admin/ad_member_modify?userIdx=" + userIdx + "&success";
+            redirectAttributes.addFlashAttribute("successMessage", "회원정보가 성공적으로 수정되었습니다.");
+            return "redirect:/admin/member_modify?userIdx=" + userIdx + "&success";
         } catch (IllegalStateException e) {
             model.addAttribute("errorMessage", e.getMessage());
             model.addAttribute("userIdx", userIdx);

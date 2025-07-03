@@ -81,6 +81,7 @@ public class AdminService {
     if (dto.getUserRole() != null) {
       user.setUserRole(dto.getUserRole());
     }
+
     userRepository.save(user);
   }
 
