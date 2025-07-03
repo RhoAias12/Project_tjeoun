@@ -26,32 +26,43 @@ public class AdminController {
 
     @GetMapping("/member_list")
     public String memberList(@RequestParam(defaultValue = "1") int page,
+                             @RequestParam(defaultValue = "latest") String sortBy,
                              @PageableDefault(size = 10) Pageable pageable,
                              Model model) {
 
-        Pageable correctedPageable = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
-        Page<UserListDto> userPage = adminService.getPagedUsers(correctedPageable);
+        // 정렬은 서비스에 위임
+        Page<UserListDto> userPage = adminService.getPagedUsers(page, pageable.getPageSize(), sortBy);
 
-        com.tjoeun.util.PaginationUtil.setPaging(model, userPage, "/admin/member_list");
+        PaginationUtil.setPaging(model, userPage, "/admin/member_list?sortBy=" + sortBy);
 
         model.addAttribute("userList", userPage.getContent());
         model.addAttribute("userPage", userPage);
+        model.addAttribute("sortBy", sortBy);
+        model.addAttribute("page", page);
+
         return "admin/member_list";
     }
+
+
+
     @PostMapping("/member_list/delete")
     public String deleteMember(@RequestParam("userIdx") Integer userIdx) {
         adminService.deleteUserById(userIdx);
         return "redirect:/admin/member_list";
     }
-    //여기부터 추가
+
 
     @GetMapping("/member_modify")
-    public String memberModify(@RequestParam("userIdx") Integer userIdx, Model model) {
+    public String memberModify(@RequestParam("userIdx") Integer userIdx,
+                               @RequestParam(value = "page", required = false, defaultValue = "1") int page,
+                               Model model) {
         UserFormDto dto = adminService.getUserFormDtoById(userIdx);
         model.addAttribute("userFormDto", dto);
         model.addAttribute("userIdx", userIdx);
+        model.addAttribute("page", page);
         return "admin/ad_member_modify";
     }
+
 
     @PostMapping("/member_modify/{userIdx}")
     public String updateMember(@PathVariable("userIdx") Integer userIdx,

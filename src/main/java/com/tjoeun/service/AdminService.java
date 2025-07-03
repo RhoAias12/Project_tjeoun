@@ -28,16 +28,31 @@ public class AdminService {
   private final ApplyHistoryRepository applyHistoryRepository;
 
   // 모든 회원 리스트 조회
-  public List<UserListDto> getAllUsers() {
-    List<Users> users = userRepository.findAll();
-    return users.stream()
-      .map(user -> new UserListDto(
-        user.getUserIdx(),
-        user.getUserEmail(),
-        user.getUserNickname()
-      ))
-      .collect(Collectors.toList());
+  public Page<UserListDto> getPagedUsers(int page, int size, String sortBy) {
+    Sort sort;
+    switch (sortBy) {
+      case "latest":
+        sort = Sort.by(Sort.Direction.DESC, "userIdx");
+        break;
+      case "oldest":
+        sort = Sort.by(Sort.Direction.ASC, "userIdx");
+        break;
+      case "email":
+        sort = Sort.by(Sort.Direction.ASC, "userEmail");
+        break;
+      default:
+        sort = Sort.by(Sort.Direction.DESC, "userIdx");
+        break;
+    }
+    Pageable pageable = PageRequest.of(page - 1, size, sort);
+    Page<Users> userPage = userRepository.findAll(pageable);
+    return userPage.map(user -> new UserListDto(
+      user.getUserIdx(),
+      user.getUserEmail(),
+      user.getUserNickname()
+    ));
   }
+
 
   // 회원 삭제
   public void deleteUserById(Integer userIdx) {
@@ -86,16 +101,6 @@ public class AdminService {
     }
 
     userRepository.save(user);
-  }
-
-  //페이지네이션
-  public Page<UserListDto> getPagedUsers(Pageable pageable) {
-    Page<Users> userPage = userRepository.findAll(pageable);
-    return userPage.map(user -> new UserListDto(
-      user.getUserIdx(),
-      user.getUserEmail(),
-      user.getUserNickname()
-    ));
   }
 
   public Page<ApplyHistoryDTO> getPagedApplyHistory(int page, int size, String applySort, String deadlineSort) {
