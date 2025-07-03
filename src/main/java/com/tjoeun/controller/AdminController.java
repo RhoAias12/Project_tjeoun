@@ -101,7 +101,6 @@ public class AdminController {
 
     @GetMapping("/recruit_list")
     public String recruitList(@RequestParam(defaultValue = "1") int page,
-                              @RequestParam(defaultValue = "favorite_all") String favoriteSort,
                               @RequestParam(defaultValue = "deadline_all") String deadlineSort,
                               @PageableDefault(size = 10) Pageable pageable,
                               Model model) {
@@ -109,14 +108,13 @@ public class AdminController {
         Pageable correctedPageable = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
 
         Page<RecruitmentDTO> recruitmentPage =
-          recruitmentService.getSortedPagedPosts(correctedPageable, favoriteSort, deadlineSort);
+          recruitmentService.getSortedPagedPosts(correctedPageable, deadlineSort);
 
-        String urlWithParams = "/admin/recruit_list?favoriteSort=" + favoriteSort + "&deadlineSort=" + deadlineSort;
+        String urlWithParams = "/admin/recruit_list?deadlineSort=" + deadlineSort;
         PaginationUtil.setPaging(model, recruitmentPage, urlWithParams);
 
         model.addAttribute("recruitmentList", recruitmentPage.getContent());
         model.addAttribute("recruitmentPage", recruitmentPage);
-        model.addAttribute("favoriteSort", favoriteSort);
         model.addAttribute("deadlineSort", deadlineSort);
         model.addAttribute("page", page);
 
@@ -133,24 +131,18 @@ public class AdminController {
     @PostMapping("/recruit_delete")
     public String deleteRecruit(@RequestParam("recruitmentIdx") Long recruitmentIdx,
                                 @RequestParam(defaultValue = "1") int page,
-                                @RequestParam(defaultValue = "favorite_all") String favoriteSort,
                                 @RequestParam(defaultValue = "deadline_all") String deadlineSort) {
 
-        // 삭제
         adminService.deleteRecruitmentById(recruitmentIdx);
 
-        // 삭제 이후 남은 공고 수 확인
         int totalCount = adminService.countRecruitments();
-        int pageSize = 10; // 한 페이지당 개수
+        int pageSize = 10;
 
-        // 전체 페이지 계산
         int totalPages = (int) Math.ceil((double) totalCount / pageSize);
 
-        // 현재 페이지가 존재하지 않으면 마지막 페이지로 보냄
         int finalPage = Math.min(page, Math.max(totalPages, 1));
 
         return "redirect:/admin/recruit_list?page=" + finalPage
-          + "&favoriteSort=" + favoriteSort
           + "&deadlineSort=" + deadlineSort;
     }
 

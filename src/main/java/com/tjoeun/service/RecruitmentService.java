@@ -58,49 +58,20 @@ public class RecruitmentService {
 
 
 
-    public Page<RecruitmentDTO> getSortedPagedPosts(Pageable pageable, String favoriteSort, String deadlineSort) {
+    public Page<RecruitmentDTO> getSortedPagedPosts(Pageable pageable, String deadlineSort) {
         List<Recruitment> recruitments = recruitmentRepository.findAll();
 
-        Stream<Recruitment> stream = recruitments.stream();
+        Comparator<Recruitment> comparator;
 
-        if ("favorite_all".equals(favoriteSort) && "deadline_all".equals(deadlineSort)) {
-            // 둘 다 전체면 기본 정렬 (recruitmentIdx 오름차순)
-            stream = stream.sorted(Comparator.comparing(Recruitment::getRecruitmentIdx));
+        if ("deadline_desc".equals(deadlineSort)) {
+            comparator = Comparator.comparing(Recruitment::getDeadline).reversed();
+        } else if ("deadline_asc".equals(deadlineSort)) {
+            comparator = Comparator.comparing(Recruitment::getDeadline);
         } else {
-            Comparator<Recruitment> comparator = Comparator.comparing(Recruitment::getDeadline);
-
-            if ("deadline_desc".equals(deadlineSort)) {
-                comparator = Comparator.comparing(Recruitment::getDeadline).reversed();
-            } else if ("deadline_all".equals(deadlineSort)) {
-                // deadline 전체일 경우 마감일 기준 정렬 없이 기본 정렬로 할지 아니면 deadline 오름차순 유지할지 정할 수 있음
-                // 여기선 기본 정렬로 함
-                comparator = Comparator.comparing(Recruitment::getRecruitmentIdx);
-            }
-
-            if ("favorite_desc".equals(favoriteSort)) {
-                comparator = Comparator
-                  .comparing((Recruitment r) -> -r.getFavorites().size())
-                  .thenComparing(comparator);
-            } else if ("favorite_asc".equals(favoriteSort)) {
-                comparator = Comparator
-                  .comparing((Recruitment r) -> r.getFavorites().size())
-                  .thenComparing(comparator);
-            } else if ("favorite_all".equals(favoriteSort)) {
-                // favorite 전체일 경우 마감일 정렬만 적용
-                if (!"deadline_all".equals(deadlineSort)) {
-                    // deadline 정렬만 적용
-                    if ("deadline_desc".equals(deadlineSort)) {
-                        comparator = Comparator.comparing(Recruitment::getDeadline).reversed();
-                    } else {
-                        comparator = Comparator.comparing(Recruitment::getDeadline);
-                    }
-                } else {
-                    comparator = Comparator.comparing(Recruitment::getRecruitmentIdx);
-                }
-            }
-
-            stream = stream.sorted(comparator);
+            comparator = Comparator.comparing(Recruitment::getRecruitmentIdx); // recruitmentIdx 기준 기본 정렬
         }
+
+        Stream<Recruitment> stream = recruitments.stream().sorted(comparator);
 
         List<RecruitmentDTO> sortedList = stream
           .map(this::convertToDTO)
@@ -112,6 +83,8 @@ public class RecruitmentService {
 
         return new PageImpl<>(pageContent, pageable, sortedList.size());
     }
+
+
 
 
 }

@@ -15,7 +15,6 @@
 
     <script>
       function onSortChange() {
-        const scrapSort = document.getElementById("scrapSort").value;
         const deadlineSort = document.getElementById("deadlineSort").value;
         const url = `/admin/recruit_list?scrapSort=${scrapSort}&deadlineSort=${deadlineSort}`;
         location.href = url;
@@ -45,16 +44,10 @@
           <div class="sort-wrapper" style="display: flex; gap: 10px;">
             <form method="get" th:action="@{/admin/recruit_list}" style="display: flex; gap: 10px;">
 
-              <select class="sort-select" name="favoriteSort" onchange="this.form.submit()">
-                <option value="favorite_all" th:selected="${favoriteSort == 'favorite_all'}">스크랩: 전체</option>
-                <option value="favorite_desc" th:selected="${favoriteSort == 'favorite_desc'}">스크랩: 많은순</option>
-                <option value="favorite_asc" th:selected="${favoriteSort == 'favorite_asc'}">스크랩: 적은순</option>
-              </select>
-
               <select class="sort-select" name="deadlineSort" onchange="this.form.submit()">
                 <option value="deadline_all" th:selected="${deadlineSort == 'deadline_all'}">마감일: 전체</option>
-                <option value="deadline_desc" th:selected="${deadlineSort == 'deadline_desc'}">마감일: 많은순</option>
-                <option value="deadline_asc" th:selected="${deadlineSort == 'deadline_asc'}">마감일: 적은순</option>
+                <option value="deadline_desc" th:selected="${deadlineSort == 'deadline_desc'}">마감일: 내림차순</option>
+                <option value="deadline_asc" th:selected="${deadlineSort == 'deadline_asc'}">마감일: 오름차순</option>
               </select>
 
               <input type="hidden" name="page" th:value="${page}" />
@@ -88,7 +81,6 @@
                     style="margin-left: 10px;">
                 <input type="hidden" name="recruitmentIdx" th:value="${recruit.recruitmentIdx}" />
                 <input type="hidden" name="page" th:value="${page}" />
-                <input type="hidden" name="favoriteSort" th:value="${favoriteSort}" />
                 <input type="hidden" name="deadlineSort" th:value="${deadlineSort}" />
                 <button type="submit" class="cancel-btn" onclick="event.stopPropagation();">삭제</button>
               </form>
