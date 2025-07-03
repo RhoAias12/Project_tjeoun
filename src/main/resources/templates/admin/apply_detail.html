@@ -76,40 +76,71 @@
       <!-- ✅ 상세 테이블 -->
       <form>
         <table class="resume-table">
+          <!-- 첫 줄: 이미지 텍스트 -->
           <tr>
-            <th class="img">이미지</th>
-            <td class="centered-cell"><p>개인정보</p></td>
+            <th scope="row">제목</th>
+            <td class="centered-cell">
+              <div class="form-group">
+                <p class="readonly-box1">여러분들의 일개미가 되겠습니다!</p>
+              </div>
+            </td>
           </tr>
+
           <tr>
-            <th>
-              <!-- <img id="preview" src="" alt="미리보기 없음" /> -->
-              <img class="img" src="/images/tjoeun.jpg" />
+            <!-- 왼쪽: 이미지 + 파일 선택 -->
+            <th style="text-align: center">
+              <img id="preview" src="/images/가나디.jpg" alt="미리보기 없음" />
+<!--              <input type="file" id="imageUpload" accept="image/*" />-->
+              <div id="fileName" style="margin-top: 4px"></div>
             </th>
-            <!-- 오른쪽: 개인정보 입력 -->
+
+            <!-- 오른쪽: 개인정보 출력 -->
             <td>
               <div class="form-group">
-                <label class="thick">주소</label>
-                <p class="readonly-box">서울특별시 성동구 성수동</p>
+                <label>이름</label>
+                <p class="readonly-box1">홍길동</p>
               </div>
 
               <div class="form-group">
-                <label class="thick">전화번호</label>
-                <p class="readonly-box">010-1234-5678</p>
+                <label>이메일</label>
+                <p class="readonly-box1">honggildong@example.com</p>
               </div>
 
               <div class="form-group">
-                <label class="thick">최종 학력</label>
-                <p class="readonly-box">서울대학교 컴퓨터공학과 졸업</p>
+                <label>생년월일</label>
+                <p class="readonly-box1">1995-07-01</p>
               </div>
 
               <div class="form-group">
-                <label class="thick">경력</label>
-                <p class="readonly-box">2021 ~ 2024 (주)코드랩 백엔드 개발자</p>
+                <label>주소</label>
+                <p class="readonly-box1">서울특별시 성동구 성수동</p>
               </div>
 
               <div class="form-group">
-                <label class="thick">수상이력</label>
-                <p class="readonly-box">2023 SW창의력대회 최우수상 수상</p>
+                <label>전화번호</label>
+                <p class="readonly-box1">010-1234-5678</p>
+              </div>
+
+              <div class="form-group">
+                <label>학력</label>
+                <p class="readonly-box1">서울대학교 컴퓨터공학과 졸업</p>
+              </div>
+
+              <div class="form-group">
+                <label>자격증 및 스킬</label>
+                <p class="readonly-box1">python, SQL</p>
+              </div>
+
+              <div class="form-group">
+                <label>경력</label>
+                <p class="readonly-box1">
+                  2021 ~ 2024 (주)코드랩 백엔드 개발자
+                </p>
+              </div>
+
+              <div class="form-group">
+                <label>수상이력</label>
+                <p class="readonly-box1">2023 SW창의력대회 최우수상 수상</p>
               </div>
             </td>
           </tr>
