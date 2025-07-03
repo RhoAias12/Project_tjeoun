@@ -1,10 +1,11 @@
 package com.tjoeun.controller;
 
+import com.tjoeun.dto.ApplyHistoryDTO;
 import com.tjoeun.dto.UserFormDto;
 import com.tjoeun.dto.UserListDto;
 import com.tjoeun.service.AdminService;
-import jakarta.validation.Valid;
 
+import com.tjoeun.util.PaginationUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -82,9 +83,30 @@ public class AdminController {
     }
 
     @GetMapping("/apply_list")
-    public String applyList() {
+    public String applyList(@RequestParam(defaultValue = "1") int page,
+                            @RequestParam(defaultValue = "all") String applySort,
+                            @RequestParam(defaultValue = "all") String deadlineSort,
+                            @PageableDefault(size = 10) Pageable pageable,
+                            Model model) {
+
+        Pageable correctedPageable = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
+
+        Page<ApplyHistoryDTO> applyPage = adminService.getPagedApplyHistory(
+          page - 1,
+          pageable.getPageSize(),
+          applySort,
+          deadlineSort
+        );
+
+        // 페이징 정보 설정
+        PaginationUtil.setPaging(model, applyPage, "/admin/apply_list");
+
+        // 리스트 전달
+        model.addAttribute("applyList", applyPage.getContent());
+        model.addAttribute("applyPage", applyPage); // 현재 페이지 객체
         return "admin/apply_list";
     }
+
 
     @GetMapping("/apply_detail")
     public String applyDetail() {

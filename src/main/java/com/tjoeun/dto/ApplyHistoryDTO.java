@@ -22,4 +22,8 @@ public class ApplyHistoryDTO {
   private Long recruitmentId;
 
   private Integer resumeId;
+
+  private String userNickname;
+
+  private String userEmail;
 }
