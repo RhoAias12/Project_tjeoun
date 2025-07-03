@@ -17,87 +17,93 @@
     }
   </style>
   <script th:inline="javascript">
-    let originalNickname = /*[[${userFormDto.userNickname}]]*/ '';
-    let nicknameChecked = true;
+    /*<![CDATA[*/
+        let originalNickname = /*[[${userFormDto.userNickname}]]*/ '';
+        let nicknameChecked = false;
 
-    document.addEventListener("DOMContentLoaded", () => {
-      const nicknameInput = document.getElementById("nickname");
-      nicknameChecked = nicknameInput.value.trim() === originalNickname;
+        document.addEventListener("DOMContentLoaded", () => {
+            const nicknameInput = document.getElementById("nickname");
+            nicknameInput.addEventListener("input", () => {
+                nicknameChecked = false;
+                document.getElementById("nicknameMessage").textContent = "";
+            });
 
-      nicknameInput.addEventListener("input", () => {
-        nicknameChecked = nicknameInput.value.trim() === originalNickname;
-        document.getElementById("nicknameMessage").textContent = "";
-      });
-    });
-
-    function checkNickname() {
-      const nickname = document.getElementById("nickname").value.trim();
-      const msg = document.getElementById("nicknameMessage");
-
-      if (!nickname) {
-        msg.textContent = "닉네임을 입력해주세요.";
-        nicknameChecked = false;
-        return;
-      }
-
-      if (nickname.length < 2 || nickname.length > 20) {
-        msg.textContent = "닉네임은 2~20글자 사이로 입력해주세요.";
-        nicknameChecked = false;
-        return;
-      }
-
-      fetch(`/api/user/check-nickname?nickname=${encodeURIComponent(nickname)}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.exists && nickname !== originalNickname) {
-            msg.textContent = "이미 존재하는 닉네임입니다.";
-            nicknameChecked = false;
-          } else {
-            msg.textContent = "사용 가능한 닉네임입니다.";
-            nicknameChecked = true;
-          }
-        })
-        .catch(err => {
-          alert("닉네임 확인 중 오류 발생");
-          nicknameChecked = false;
+            if (window.location.search.includes("success")) {
+                alert("회원정보가 성공적으로 수정되었습니다.");
+                history.replaceState(null, null, window.location.pathname);
+            }
         });
-    }
 
-    function validateForm() {
-    const nickname = document.getElementById("nickname").value.trim();
-    const password = document.getElementById("password").value;
-    const confirmPassword = document.getElementById("password-confirm").value;
+        function checkNickname() {
+            const nickname = document.getElementById("nickname").value.trim();
+            const msg = document.getElementById("nicknameMessage");
 
-    if (nickname.length < 2 || nickname.length > 20) {
-      alert("닉네임은 2~20글자 사이로 입력해주세요.");
-      return false;
-    }
+            if (!nickname) {
+                msg.textContent = "닉네임을 입력해주세요.";
+                nicknameChecked = false;
+                return;
+            }
+            if (nickname.length < 2 || nickname.length > 20) {
+                msg.textContent = "닉네임은 2~20글자 사이로 입력해주세요.";
+                nicknameChecked = false;
+                return;
+            }
 
-    if (nickname !== originalNickname && !nicknameChecked) {
-      alert("닉네임 중복 확인을 해주세요.");
-      return false;
-    }
+            fetch(`/api/user/check-nickname?nickname=${encodeURIComponent(nickname)}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.exists) {
+                        msg.textContent = "이미 존재하는 닉네임입니다.";
+                        nicknameChecked = false;
+                    } else {
+                        msg.textContent = "사용 가능한 닉네임입니다.";
+                        nicknameChecked = true;
+                    }
+                })
+                .catch(err => {
+                    alert("닉네임 확인 중 오류 발생");
+                    nicknameChecked = false;
+                });
+        }
 
-    if (password || confirmPassword) {
-      const invalidPw = /[\u3131-\uD79D~!@#$%^&*()_+|<>?:{}]/;
-      if (invalidPw.test(password)) {
-        alert("비밀번호는 한글과 특수문자를 포함할 수 없습니다.");
-        return false;
-      }
+        function validateForm() {
+            const nickname = document.getElementById("nickname").value.trim();
+            const password = document.getElementById("password").value;
+            const passwordConfirm = document.getElementById("password-confirm").value;
+            const msg = document.getElementById("nicknameMessage");
 
-      if (password.length < 8 || password.length > 16) {
-        alert("비밀번호는 8~16자 사이여야 합니다.");
-        return false;
-      }
+            // 닉네임 길이 체크
+            if (nickname.length < 2 || nickname.length > 20) {
+                alert("닉네임은 2~20글자 사이로 입력해주세요.");
+                return false;
+            }
 
-      if (password !== confirmPassword) {
-        alert("비밀번호가 일치하지 않습니다.");
-        return false;
-      }
-    }
+            if (nickname !== originalNickname && !nicknameChecked) {
+                alert("닉네임 중복 확인을 해주세요.");
+                return false;
+            }
 
-    return true;
-  }
+            if (password || passwordConfirm) {
+                // 한글, 특수문자 체크 (한글은 \uAC00-\uD7A3 범위)
+                const hangulOrSpecial = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]|[~!@#$%^&*()_+|<>?:{}]/;
+                if (hangulOrSpecial.test(password)) {
+                    alert("비밀번호는 한글과 특수문자를 포함할 수 없습니다.");
+                    return false;
+                }
+
+                if (password.length < 8 || password.length > 16) {
+                    alert("비밀번호는 8~16자 사이여야 합니다.");
+                    return false;
+                }
+
+                if (password !== passwordConfirm) {
+                    alert("비밀번호가 일치하지 않습니다.");
+                    return false;
+                }
+            }
+            return true;
+        }
+        /*]]>*/
   </script>
 </head>
 <body>
