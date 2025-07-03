@@ -55,6 +55,24 @@
         </div>
 
         <!-- 게시물 리스트 -->
+        <div class="apply-list">
+
+          <a href="/admin/apply_detail" class="apply-card">
+            <div class="apply-info">
+              <div class="job-title">
+                공고명<span class="company-name"> | 회사명</span>
+              </div>
+              <div class="nickname">닉네임</div>
+            </div>
+            <div class="apply-buttons">
+              <!-- 상황별로 하나만 보이게 처리 -->
+               <div class="situation pass">합격</div>
+              <!-- <div class="situation fail">불합격</div> -->
+            </div>
+
+          </a>
+
+          <a href="/admin/apply_detail" class="apply-card">
         <div class="apply-list" th:each="apply : ${applyList}">
           <a th:href="@{'/admin/apply_detail'(applyHistoryId=${apply.applyHistoryId})}" class="apply-card">
             <div class="apply-info">
@@ -68,12 +86,47 @@
                 <span> | </span>
                 <span th:text="${apply.userNickname}">닉네임</span>
               </div>
+              <div class="nickname">닉네임</div>
             </div>
 
             <div class="apply-buttons">
+              <!-- 상황별로 하나만 보이게 처리 -->
+              <div class="situation pass">합격</div>
+              <!-- <div class="situation fail">불합격</div> -->
               <div class="situation open" th:text="${apply.statusDisplay}">지원상태</div>
             </div>
           </a>
+
+          <a href="/admin/apply_detail" class="apply-card">
+            <div class="apply-info">
+              <div class="job-title">
+                공고명<span class="company-name"> | 회사명</span>
+              </div>
+              <div class="nickname">닉네임</div>
+            </div>
+            <div class="apply-buttons">
+              <!-- 상황별로 하나만 보이게 처리 -->
+              <!-- <div class="situation pass">합격</div> -->
+              <div class="situation fail">불합격</div>
+            </div>
+          </a>
+          </a>
+        </div>
+
+          <a href="/admin/apply_detail" class="apply-card">
+            <div class="apply-info">
+              <div class="job-title">
+                공고명<span class="company-name"> | 회사명</span>
+              </div>
+              <div class="nickname">닉네임</div>
+            </div>
+            <div class="apply-buttons">
+              <!-- 상황별로 하나만 보이게 처리 -->
+              <!-- <div class="situation pass">합격</div> -->
+              <div class="situation fail">불합격</div>
+            </div>
+          </a>
+
         </div>
 
 
