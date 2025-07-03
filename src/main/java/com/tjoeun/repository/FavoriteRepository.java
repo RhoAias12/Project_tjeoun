@@ -19,5 +19,7 @@ public interface FavoriteRepository extends JpaRepository<Favorite, Long> {
   List<Favorite> findByUser(Users user);
   void deleteByUserAndRecruitment(Users user, Recruitment recruitment);
   Page<Favorite> findByUser(Users user, Pageable pageable);
+
+  int countByRecruitment(Recruitment recruitment);
 }
 
