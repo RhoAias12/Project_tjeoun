@@ -6,6 +6,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "recruitment", uniqueConstraints = {
@@ -52,4 +54,20 @@ public class Recruitment {
 
   @Column(columnDefinition = "TEXT")
   private String employmentType;
+
+  @Transient
+  private Integer scrapCount;
+
+  @Column
+  private LocalDateTime createdAt;
+
+  @PrePersist
+  protected void onCreate() {
+    this.createdAt = LocalDateTime.now();
+  }
+
+  @OneToMany(mappedBy = "recruitment", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<Favorite> favorites;
+
+
 }
