@@ -79,8 +79,11 @@
           <form th:action="@{/admin/member_list/delete}" method="post" style="display:inline;"
                 onsubmit="return confirm('정말 삭제하시겠습니까?');">
             <input type="hidden" name="userIdx" th:value="${user.userIdx}" />
+            <input type="hidden" name="page" th:value="${page}" />
+            <input type="hidden" name="sortBy" th:value="${sortBy}" />
             <button type="submit" class="cancel-btn">삭제</button>
           </form>
+
         </div>
       </div>
     </div>

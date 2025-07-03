@@ -46,37 +46,48 @@ public class AdminController {
 
 
     @PostMapping("/member_list/delete")
-    public String deleteMember(@RequestParam("userIdx") Integer userIdx) {
+    public String deleteMember(@RequestParam("userIdx") Integer userIdx,
+                               @RequestParam(defaultValue = "1") int page,
+                               @RequestParam(defaultValue = "latest") String sortBy) {
         adminService.deleteUserById(userIdx);
-        return "redirect:/admin/member_list";
+        return "redirect:/admin/member_list?page=" + page + "&sortBy=" + sortBy;
     }
 
 
     @GetMapping("/member_modify")
     public String memberModify(@RequestParam("userIdx") Integer userIdx,
                                @RequestParam(value = "page", required = false, defaultValue = "1") int page,
+                               @RequestParam(value = "sortBy", required = false, defaultValue = "latest") String sortBy,
                                Model model) {
         UserFormDto dto = adminService.getUserFormDtoById(userIdx);
         model.addAttribute("userFormDto", dto);
         model.addAttribute("userIdx", userIdx);
         model.addAttribute("page", page);
+        model.addAttribute("sortBy", sortBy); // <-- 이 부분 꼭 필요
         return "admin/ad_member_modify";
     }
 
 
+
     @PostMapping("/member_modify/{userIdx}")
-    public String updateMember(@PathVariable("userIdx") Integer userIdx,
-                               @ModelAttribute("userFormDto") UserFormDto dto,
-                               BindingResult bindingResult,
-                               Model model,
-                               RedirectAttributes redirectAttributes) {
+    public String updateMember(
+      @PathVariable("userIdx") Integer userIdx,
+      @ModelAttribute("userFormDto") UserFormDto dto,
+      BindingResult bindingResult,
+      Model model,
+      RedirectAttributes redirectAttributes,
+      @RequestParam(value = "page", required = false, defaultValue = "1") int page,
+      @RequestParam(value = "sortBy", required = false, defaultValue = "latest") String sortBy
+    ) {
         try {
             adminService.updateUser(userIdx, dto, bindingResult, model);
             redirectAttributes.addFlashAttribute("successMessage", "회원정보가 성공적으로 수정되었습니다.");
-            return "redirect:/admin/member_modify?userIdx=" + userIdx + "&success";
+            return "redirect:/admin/member_modify?userIdx=" + userIdx + "&page=" + page + "&sortBy=" + sortBy + "&success";
         } catch (IllegalStateException e) {
             model.addAttribute("errorMessage", e.getMessage());
             model.addAttribute("userIdx", userIdx);
+            model.addAttribute("page", page);
+            model.addAttribute("sortBy", sortBy);
             return "admin/ad_member_modify";
         }
     }
