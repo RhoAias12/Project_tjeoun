@@ -1,5 +1,6 @@
 package com.tjoeun.dto;
 
+import com.tjoeun.constant.UserRole;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -29,4 +30,6 @@ public class UserFormDto {
 
   @NotNull(message = "생년월일은 필수 입력 값입니다.")
   private LocalDate userBirth;
+
+  private UserRole userRole;
 }
