@@ -12,6 +12,17 @@
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
   />
   <script>
+    window.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const sortBy = urlParams.get('sortBy') || 'latest'; // 기본값 맞춰서
+
+    document.querySelectorAll('.pagination a').forEach(link => {
+      const linkUrl = new URL(link.href);
+      linkUrl.searchParams.set('sortBy', sortBy);
+      link.href = linkUrl.toString();
+    });
+  });
+
     function handleSortChange(selectElement) {
       const selectedSort = selectElement.value;
       // 정렬 시 항상 1페이지로 이동
