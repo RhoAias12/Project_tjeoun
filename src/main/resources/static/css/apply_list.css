@@ -1,0 +1,192 @@
+/* 전체 컨테이너 중앙 정렬 및 폭 고정 */
+.tab-box {
+  display: flex;
+  justify-content: center;
+  margin-top: 60px;
+  width: 100%;
+}
+
+.tab-inner {
+  width: 800px; /* 기존 700px보다 조금 넓혀서 간격 여유 */
+  max-width: 100%;
+}
+
+.mypage-title {
+  font-size: 30px;
+  color: #444;
+  margin: 0 0 40px 0; /* 제목 아래 간격 */
+  transform: translateY(4px);
+  text-align: left;
+}
+
+/* 검색 영역 */
+.search {
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* 검색바와 정렬 셀렉트 간격 */
+}
+
+.search-bar {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 0; /* 아래 여백 제거, gap으로 대체 */
+}
+
+.search-bar input[type='text'],
+.search-bar input[type='date'] {
+  padding: 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 100%;
+}
+
+.search-bar button {
+  grid-column: span 2;
+  padding: 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  background-color: #0085ff;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.search-bar button:hover {
+  background-color: #006edc;
+}
+
+/* 정렬 드롭다운 박스 */
+.sort-wrapper {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0; /* 필요없으면 제거 */
+}
+
+.sort-select {
+  padding: 8px 15px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background-color: #fff;
+  cursor: pointer;
+}
+
+/* 게시물 리스트 간격 */
+.apply-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* 카드 간격 충분히 */
+  margin: 40px 0; /* 위쪽 검색과 아래 페이지네이션 간격 조절 */
+}
+
+/* 개별 카드 */
+.apply-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border: 1px solid #ccc;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+}
+
+.apply-info {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.job-title {
+  font-weight: bold;
+}
+
+.company-name,
+.nickname {
+  color: #555;
+}
+
+.apply-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cancel-btn:hover {
+  background-color: #ffeded;
+  border-color: #f55;
+}
+
+.status-btn,
+.cancel-btn {
+  padding: 6px 14px;
+  background-color: white;
+  border: 1px solid #999;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.status-btn:hover {
+  background-color: rgba(85, 144, 255, 0.2);
+  border-color: #5590ff;
+}
+
+/* 페이지네이션 간격 */
+.pagination {
+  text-align: center;
+  margin: 30px 0 50px 0; /* 상하 여백 균형 */
+}
+
+.pagination-list {
+  list-style: none;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  padding: 0;
+  margin: 0;
+}
+
+.page-btn {
+  display: inline-block;
+  padding: 6px 12px; /* 페이지 버튼 조금 넓힘 */
+  text-align: center;
+  color: #333;
+  text-decoration: none;
+  font-size: 16px;
+  border: none;
+  background-color: transparent;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.page-btn:hover {
+  color: #0085ff;
+}
+
+.page-btn.active {
+  color: #0085ff;
+  font-weight: bold;
+}
+
+/* 지원상태 */
+/* 공통 상태 스타일 */
+.situation {
+  font-weight: bold;
+  font-size: 15px;
+  text-align: center;
+}
+
+/* 파란색: 접수중, 합격 */
+.situation.open,
+.situation.pass {
+  color: #0085ff;
+}
+
+/* 회색: 불합격, 마감 */
+.situation.fail,
+.situation.closed {
+  color: #999999;
+}
