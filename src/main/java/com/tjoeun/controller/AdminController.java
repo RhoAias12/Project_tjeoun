@@ -84,8 +84,8 @@ public class AdminController {
 
     @GetMapping("/apply_list")
     public String applyList(@RequestParam(defaultValue = "1") int page,
-                            @RequestParam(defaultValue = "all") String applySort,
-                            @RequestParam(defaultValue = "all") String deadlineSort,
+                            @RequestParam(defaultValue = "apply_all") String applySort,
+                            @RequestParam(defaultValue = "deadline_all") String deadlineSort,
                             @PageableDefault(size = 10) Pageable pageable,
                             Model model) {
 
@@ -101,9 +101,12 @@ public class AdminController {
         // 페이징 정보 설정
         PaginationUtil.setPaging(model, applyPage, "/admin/apply_list");
 
-        // 리스트 전달
+        // 리스트 및 정렬값 전달
         model.addAttribute("applyList", applyPage.getContent());
-        model.addAttribute("applyPage", applyPage); // 현재 페이지 객체
+        model.addAttribute("applyPage", applyPage);
+        model.addAttribute("applySort", applySort);
+        model.addAttribute("deadlineSort", deadlineSort);
+
         return "admin/apply_list";
     }
 

@@ -15,6 +15,22 @@
   />
 
   <title>지원관리</title>
+
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const applySort = urlParams.get('applySort') || 'apply_all';
+      const deadlineSort = urlParams.get('deadlineSort') || 'deadline_all';
+
+      document.querySelectorAll('.pagination a').forEach(link => {
+        const linkUrl = new URL(link.href);
+        linkUrl.searchParams.set('applySort', applySort);
+        linkUrl.searchParams.set('deadlineSort', deadlineSort);
+        link.href = linkUrl.toString();
+      });
+    });
+  </script>
+
 </head>
 <body>
 <!-- 헤더 -->
@@ -35,7 +51,7 @@
         <button type="button">검색</button>
       </section>
 
-
+      <!-- 정렬 -->
       <div class="sort-wrapper">
         <form method="get" th:action="@{/admin/apply_list}" id="sortForm">
           <select name="applySort" class="sort-select" onchange="document.getElementById('sortForm').submit()">
@@ -51,18 +67,14 @@
           </select>
         </form>
       </div>
-
     </div>
 
     <!-- 게시물 리스트 -->
     <div class="apply-list" th:each="apply : ${applyList}">
       <a th:href="@{'/admin/apply_detail'(applyHistoryId=${apply.applyHistoryId})}" class="apply-card">
         <div class="apply-info">
-
           <div class="job-title" th:text="${apply.recruitmentTitle}">공고명</div>
-
           <div class="company-name" th:text="${apply.recruitmentCompany}">회사명</div>
-
           <div class="nickname">
             <span th:text="${apply.userEmail}">이메일</span>
             <span> | </span>
@@ -76,7 +88,6 @@
       </a>
     </div>
 
-
     <!-- 페이지네이션 -->
     <div class="pagination">
       <div th:replace="fragments/pagination :: fragment
@@ -85,6 +96,7 @@
     </div>
   </div>
 </div>
+
 <!-- 푸터 -->
 <div th:replace="include/footer :: footer"></div>
 </body>
