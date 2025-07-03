@@ -35,96 +35,53 @@
             <button type="button">검색</button>
           </section>
 
+
           <div class="sort-wrapper">
-            <select class="sort-select">
-              <option value="latest">최신순</option>
-              <option value="oldest">오래된순</option>
-              <option value="company">회사명순</option>
-            </select>
+            <form method="get" th:action="@{/admin/apply_list}" id="sortForm">
+              <select name="applySort" class="sort-select" onchange="document.getElementById('sortForm').submit()">
+                <option value="apply_all" th:selected="${applySort == 'apply_all'}">지원일: 전체</option>
+                <option value="apply_latest" th:selected="${applySort == 'apply_latest'}">지원일: 최신순</option>
+                <option value="apply_oldest" th:selected="${applySort == 'apply_oldest'}">지원일: 오래된순</option>
+              </select>
+
+              <select name="deadlineSort" class="sort-select" onchange="document.getElementById('sortForm').submit()">
+                <option value="deadline_all" th:selected="${deadlineSort == 'deadline_all'}">마감일: 전체</option>
+                <option value="deadline_latest" th:selected="${deadlineSort == 'deadline_latest'}">마감일: 최신순</option>
+                <option value="deadline_oldest" th:selected="${deadlineSort == 'deadline_oldest'}">마감일: 오래된순</option>
+              </select>
+            </form>
           </div>
+
         </div>
 
         <!-- 게시물 리스트 -->
-        <div class="apply-list">
-          <div class="apply-card">
+        <div class="apply-list" th:each="apply : ${applyList}">
+          <a th:href="@{'/admin/apply_detail'(applyHistoryId=${apply.applyHistoryId})}" class="apply-card">
             <div class="apply-info">
-              <div class="job-title">
-                공고명<span class="company-name"> | 회사명</span>
-              </div>
-              <div class="nickname">닉네임</div>
-            </div>
-            <div class="apply-buttons">
-              <!-- 상황별로 하나만 보이게 처리 -->
-              <div class="situation open">접수중</div>
-              <!-- <div class="situation pass">합격</div> -->
-              <!-- <div class="situation fail">불합격</div> -->
-            </div>
-            <!-- 토글 
-            <div class="apply-buttons">
-              <select class="status-select">
-                <option value="open" selected>접수중</option>
-                <option value="closed">접수마감</option>
-              </select>
-            </div> -->
-          </div>
 
-          <div class="apply-card">
-            <div class="apply-info">
-              <div class="job-title">
-                공고명<span class="company-name"> | 회사명</span>
-              </div>
-              <div class="nickname">닉네임</div>
-            </div>
-            <div class="apply-buttons">
-              <!-- 상황별로 하나만 보이게 처리 -->
-              <!-- <div class="situation open">접수중</div> -->
-              <div class="situation pass">합격</div>
-              <!-- <div class="situation fail">불합격</div> -->
-            </div>
-          </div>
+              <div class="job-title" th:text="${apply.recruitmentTitle}">공고명</div>
 
-          <div class="apply-card">
-            <div class="apply-info">
-              <div class="job-title">
-                공고명<span class="company-name"> | 회사명</span>
-              </div>
-              <div class="nickname">닉네임</div>
-            </div>
-            <div class="apply-buttons">
-              <!-- 상황별로 하나만 보이게 처리 -->
-              <!-- <div class="situation open">접수중</div> -->
-              <!-- <div class="situation pass">합격</div> -->
-              <div class="situation fail">불합격</div>
-            </div>
-          </div>
+              <div class="company-name" th:text="${apply.recruitmentCompany}">회사명</div>
 
-          <div class="apply-card">
-            <div class="apply-info">
-              <div class="job-title">
-                공고명<span class="company-name"> | 회사명</span>
+              <div class="nickname">
+                <span th:text="${apply.userEmail}">이메일</span>
+                <span> | </span>
+                <span th:text="${apply.userNickname}">닉네임</span>
               </div>
-              <div class="nickname">닉네임</div>
             </div>
+
             <div class="apply-buttons">
-              <!-- 상황별로 하나만 보이게 처리 -->
-              <!-- <div class="situation open">접수중</div> -->
-              <!-- <div class="situation pass">합격</div> -->
-              <div class="situation fail">불합격</div>
+              <div class="situation open" th:text="${apply.statusDisplay}">지원상태</div>
             </div>
-          </div>
+          </a>
         </div>
+
 
         <!-- 페이지네이션 -->
         <div class="pagination">
-          <ul class="pagination-list">
-            <li><a href="#" class="page-btn">〈</a></li>
-            <li><a href="#" class="page-btn active">1</a></li>
-            <li><a href="#" class="page-btn">2</a></li>
-            <li><a href="#" class="page-btn">3</a></li>
-            <li><a href="#" class="page-btn">4</a></li>
-            <li><a href="#" class="page-btn">5</a></li>
-            <li><a href="#" class="page-btn">〉</a></li>
-          </ul>
+          <div th:replace="fragments/pagination :: fragment
+            (${applyPage}, ${startPage}, ${endPage}, '/admin/apply_list')">
+          </div>
         </div>
       </div>
     </div>
