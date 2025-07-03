@@ -25,11 +25,18 @@ public class RecruitmentService {
     private FavoriteRepository favoriteRepository;
 
     public List<RecruitmentDTO> getAllPosts() {
-        return jobPostingRepository.findAll()
-                .stream()
+        List<Recruitment> list = jobPostingRepository.findAll();
+
+        for (Recruitment r : list) {
+            int count = favoriteRepository.countByRecruitment(r);
+            r.setScrapCount(count);
+        }
+
+        return list.stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
+
 
     // 🔽 customSort에 따른 정렬 리스트 반환
     public List<RecruitmentDTO> getAllPosts(String customSort) {

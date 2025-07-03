@@ -12,23 +12,22 @@
     <!-- « 이전 -->
     <li th:if="${jobPage.number > 0}">
       <a class="page-btn"
-         th:href="@{${url}(page=${jobPage.number - 1}, customSort=${customSort})}">〈</a>
+         th:href="@{${url}(page=${jobPage.number}, customSort=${customSort})}">〈</a>
     </li>
 
-    <!-- 페이지 번호 -->
-    <li th:each="i : ${#numbers.sequence(startPage, endPage)}">
+    <!-- 페이지 번호 (1-based) -->
+    <li th:each="i : ${#numbers.sequence(startPage + 1, endPage + 1)}">
       <a class="page-btn"
-         th:href="@{${url}(page=${i+1}, customSort=${customSort})}"
-         th:classappend="${i+1} == ${jobPage.number} ? ' active' : ''"
-         th:text="${i + 1}">
+         th:href="@{${url}(page=${i}, customSort=${customSort})}"
+         th:classappend="${i} == ${jobPage.number + 1} ? ' active' : ''"
+         th:text="${i}">
       </a>
     </li>
-
 
     <!-- » 다음 -->
     <li th:if="${jobPage.number < jobPage.totalPages - 1}">
       <a class="page-btn"
-         th:href="@{${url}(page=${jobPage.number + 1}, customSort=${customSort})}">〉</a>
+         th:href="@{${url}(page=${jobPage.number + 2}, customSort=${customSort})}">〉</a>
     </li>
 
   </ul>

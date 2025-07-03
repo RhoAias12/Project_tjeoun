@@ -19,7 +19,9 @@ import com.tjoeun.util.PaginationUtil;
 
 
 import java.security.Principal;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/empl")
@@ -40,18 +42,31 @@ public class EmplController {
                                Model model) {
 
         int pageSize = pageable.getPageSize();
+        boolean usingScrapSort = scrapSort != null && !scrapSort.isEmpty();
 
-        // ✅ scrapSort 우선 적용
-        String combinedSort = null;
-        if (scrapSort != null && !scrapSort.isEmpty()) {
-            combinedSort = scrapSort;
-        } else if (deadlineSort != null && !deadlineSort.isEmpty()) {
-            combinedSort = deadlineSort;
-        }
+        if (usingScrapSort) {
+            // ✅ 1. 전체 가져와서 자바에서 필터/정렬
+            List<RecruitmentDTO> all = recruitmentService.getAllPosts(); // 모든 공고
 
-        // ✅ 스크랩 정렬인 경우 메모리 페이징
-        if ("scrap-desc".equals(combinedSort) || "scrap-asc".equals(combinedSort)) {
-            List<RecruitmentDTO> all = recruitmentService.getAllPosts(combinedSort);
+            // 🔹 필터: 스크랩 조건
+            if ("scrap-desc".equals(scrapSort)) {
+                all = all.stream()
+                        .filter(r -> r.getScrapCount() != null && r.getScrapCount() > 0)
+                        .collect(Collectors.toList());
+            } else if ("scrap-asc".equals(scrapSort)) {
+                all = all.stream()
+                        .filter(r -> r.getScrapCount() == null || r.getScrapCount() == 0)
+                        .collect(Collectors.toList());
+            }
+
+            // 🔹 정렬: 마감일 기준
+            if ("deadline-asc".equals(deadlineSort)) {
+                all.sort(Comparator.comparing(RecruitmentDTO::getDeadline));
+            } else if ("deadline-desc".equals(deadlineSort)) {
+                all.sort(Comparator.comparing(RecruitmentDTO::getDeadline).reversed());
+            }
+
+            // 🔹 메모리 페이징
             int start = (page - 1) * pageSize;
             int end = Math.min(start + pageSize, all.size());
             List<RecruitmentDTO> pageContent = all.subList(start, end);
@@ -60,9 +75,12 @@ public class EmplController {
 
             model.addAttribute("jobList", pageContent);
             model.addAttribute("jobPage", jobPage);
-            PaginationUtil.setPaging(model, jobPage, "/empl/empl_main", combinedSort); // ✅ 에러 안 나는 버전
+            PaginationUtil.setPaging(model, jobPage, "/empl/empl_main", scrapSort); // scrapSort로 URL 유지
 
         } else {
+            // ✅ scrapSort 없으면 → DB 페이징 + 정렬
+            String combinedSort = (deadlineSort != null && !deadlineSort.isEmpty()) ? deadlineSort : null;
+
             Pageable correctedPageable = PageRequest.of(page - 1, pageSize, pageable.getSort());
             Page<RecruitmentDTO> jobPage = recruitmentService.getPagedPosts(correctedPageable, combinedSort);
 
