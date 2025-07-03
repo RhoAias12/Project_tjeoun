@@ -52,4 +52,8 @@ public class Recruitment {
 
   @Column(columnDefinition = "TEXT")
   private String employmentType;
+
+  @Transient
+  private Integer scrapCount;
+
 }

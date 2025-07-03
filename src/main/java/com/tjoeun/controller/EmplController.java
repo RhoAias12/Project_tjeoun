@@ -33,19 +33,20 @@ public class EmplController {
     // 채용 공고 메인 페이지 (전체 리스트 출력 + 페이징 처리)
     @GetMapping("/empl_main")
     public String emplMainPage(@RequestParam(defaultValue = "1") int page,
+                               @RequestParam(required = false) String customSort,
                                @PageableDefault(size = 25) Pageable pageable,
                                Model model) {
 
         // 1. 전체 채용 리스트 (화면에 실제 출력할 리스트)
-        List<RecruitmentDTO> jobList = recruitmentService.getAllPosts();
+        List<RecruitmentDTO> jobList = recruitmentService.getAllPosts(customSort);
         model.addAttribute("jobList", jobList);
 
         // 2. 페이지네이션 전용 page 객체 (UI 페이지네이션 구성용)
         Pageable correctedPageable = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
-        Page<RecruitmentDTO> jobPage = recruitmentService.getPagedPosts(correctedPageable);
+        Page<RecruitmentDTO> jobPage = recruitmentService.getPagedPosts(correctedPageable, customSort);
 
         // 3. 페이징 정보 + URL 설정
-        PaginationUtil.setPaging(model, jobPage, "/empl/empl_main");
+        PaginationUtil.setPaging(model, jobPage, "/empl/empl_main", customSort);
 
         return "empl/empl_main";
     }

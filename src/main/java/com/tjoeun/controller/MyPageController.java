@@ -65,6 +65,7 @@ public class MyPageController {
     public String reactList() {
         return "mypage/react_list";
     }
+
     // 이력서 저장
     @PostMapping("/mypage/react_write")
     public String saveResume(@ModelAttribute("resumeDto") @Valid ResumeDto resumeDto, BindingResult bindingResult, Principal principal) {
@@ -133,6 +134,7 @@ public class MyPageController {
 
     @GetMapping("/apply_status")
     public String applyStatus(@RequestParam(defaultValue = "1") int page,
+                              @RequestParam(required = false) String customSort,
                               @PageableDefault(size = 10) Pageable pageable,
                               Model model,
                               Principal principal) {
@@ -143,7 +145,7 @@ public class MyPageController {
 
         Page<ApplyHistoryDTO> historyPage = myPageService.getPagedApplyHistories(email, correctedPageable);
 
-        PaginationUtil.setPaging(model, historyPage, "/mypage/apply_status");
+        PaginationUtil.setPaging(model, historyPage, "/mypage/apply_status", customSort);
 
         model.addAttribute("historyList", historyPage.getContent());
 
@@ -152,6 +154,7 @@ public class MyPageController {
 
     @GetMapping("/scrap")
     public String scrapPage(@RequestParam(defaultValue = "1") int page,
+                            @RequestParam(required = false) String customSort,
                             @PageableDefault(size = 8) Pageable pageable,
                             Model model,
                             Principal principal) {
@@ -161,7 +164,7 @@ public class MyPageController {
         Page<FavoriteDTO> jobPage = myPageService.getPagedFavorites(email, correctedPageable);
 
         model.addAttribute("favorites", jobPage.getContent());
-        PaginationUtil.setPaging(model, jobPage, "/mypage/scrap");
+        PaginationUtil.setPaging(model, jobPage, "/mypage/scrap", customSort);
 
         return "mypage/scrap";
     }

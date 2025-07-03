@@ -5,7 +5,9 @@ import com.tjoeun.entity.Recruitment;
 import com.tjoeun.repository.JobPostingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,10 +26,13 @@ public class RecruitmentService {
                 .collect(Collectors.toList());
     }
 
-    public RecruitmentDTO getPostById(Long id) {
-        return jobPostingRepository.findById(id)
+    // 🔽 customSort에 따른 정렬 리스트 반환
+    public List<RecruitmentDTO> getAllPosts(String customSort) {
+        Sort sort = resolveSort(customSort);
+        return jobPostingRepository.findAll(sort)
+                .stream()
                 .map(this::convertToDTO)
-                .orElse(null);
+                .collect(Collectors.toList());
     }
 
     public Page<RecruitmentDTO> getPagedPosts(Pageable pageable) {
@@ -35,6 +40,28 @@ public class RecruitmentService {
                 .map(this::convertToDTO);
     }
 
+    // 🔽 customSort에 따른 정렬 Page 반환
+    public Page<RecruitmentDTO> getPagedPosts(Pageable pageable, String customSort) {
+        Sort sort = resolveSort(customSort);
+        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+        return jobPostingRepository.findAll(sortedPageable)
+                .map(this::convertToDTO);
+    }
+
+    // 🔽 정렬 조건 처리 메서드
+    private Sort resolveSort(String customSort) {
+        if (customSort == null || customSort.isEmpty()) {
+            return Sort.by(Sort.Direction.DESC, "createdAt"); // 기본 정렬
+        }
+
+        return switch (customSort) {
+            case "deadline-asc" -> Sort.by(Sort.Direction.ASC, "deadline");
+            case "deadline-desc" -> Sort.by(Sort.Direction.DESC, "deadline");
+            case "scrap-desc" -> Sort.by(Sort.Direction.DESC, "scrapCount");
+            case "scrap-asc" -> Sort.by(Sort.Direction.ASC, "scrapCount");
+            default -> Sort.by(Sort.Direction.DESC, "createdAt");
+        };
+    }
 
     private RecruitmentDTO convertToDTO(Recruitment entity) {
         return RecruitmentDTO.builder()
@@ -51,6 +78,12 @@ public class RecruitmentService {
                 .salary(entity.getSalary())
                 .employmentType(entity.getEmploymentType())
                 .build();
+    }
+
+    public RecruitmentDTO getPostById(Long id) {
+        return jobPostingRepository.findById(id)
+                .map(this::convertToDTO)
+                .orElse(null);
     }
 
 

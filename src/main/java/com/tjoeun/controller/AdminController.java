@@ -25,16 +25,19 @@ public class AdminController {
 
     @GetMapping("/member_list")
     public String memberList(@RequestParam(defaultValue = "1") int page,
+                             @RequestParam(required = false) String customSort,
                              @PageableDefault(size = 10) Pageable pageable,
                              Model model) {
 
         Pageable correctedPageable = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
         Page<UserListDto> userPage = adminService.getPagedUsers(correctedPageable);
 
-        com.tjoeun.util.PaginationUtil.setPaging(model, userPage, "/admin/member_list");
+        com.tjoeun.util.PaginationUtil.setPaging(model, userPage, "/admin/member_list", customSort);
+
 
         model.addAttribute("userList", userPage.getContent());
         model.addAttribute("userPage", userPage);
+        model.addAttribute("customSort", customSort);
         return "admin/member_list";
     }
     @PostMapping("/member_list/delete")
