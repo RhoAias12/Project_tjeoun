@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>지원 관리</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}" />
+    <link rel="stylesheet" th:href="@{/css/header.css}" />
+    <link rel="stylesheet" th:href="@{/css/footer.css}" />
+    <link rel="stylesheet" th:href="@{/css/apply_detail.css}" />
+    <script defer src="js/header.js"></script>
+    <script defer src="js/footer.js"></script>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        const logoUpload = document.getElementById('logoUpload');
+        const logoPreview = document.getElementById('logoPreview');
+
+        logoUpload.addEventListener('change', function () {
+          const file = logoUpload.files[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+              logoPreview.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+          }
+        });
+      });
+    </script>
+  </head>
+
+  <body>
+    <div th:replace="include/header :: header"></div>
+
+    <div class="page-title">
+      <p>지원 관리</p>
+    </div>
+
+    <div class="container">
+      <!-- ✅ 공고 정보 -->
+      <section class="job-info">
+        <div class="info-left">
+          <div class="title">
+            <p class="readonly-box">
+              [인텔리전스랩스그룹] 데이터 분석가 (인게임 로그 및 비즈니스
+              인사이트 분석)
+            </p>
+          </div>
+          <div class="company">
+            <p class="readonly-box">바이오리서치에이아이</p>
+          </div>
+          <div class="meta">
+            <span class="deadline">
+              마감일:
+              <p class="readonly-box-inline">2025-12-31</p>
+            </span>
+            &nbsp; &nbsp; &nbsp;
+            <span class="region">
+              지역:
+              <p class="readonly-box-inline">서울시 강남구</p>
+            </span>
+          </div>
+        </div>
+        <div class="info-right">
+          <label for="logoUpload" class="logo-label">로고 업로드</label>
+          <input type="file" id="logoUpload" accept="image/*" />
+          <img
+            id="logoPreview"
+            src="/page/img/logo.jpg"
+            alt="회사 로고"
+            class="logo"
+          />
+        </div>
+      </section>
+      <div class="status-wrapper">
+        <select class="status-select">
+          <option value="open" selected>접수중</option>
+          <option value="pass">합격</option>
+          <option value="fail">불합격</option>
+        </select>
+      </div>
+
+      <!-- ✅ 상세 테이블 -->
+      <form>
+        <table class="resume-table">
+          <tr>
+            <th class="img">이미지</th>
+            <td class="centered-cell"><p>개인정보</p></td>
+          </tr>
+          <tr>
+            <th>
+              <!-- <img id="preview" src="" alt="미리보기 없음" /> -->
+              <img class="img" src="/page/img/가나디.jpg" />
+            </th>
+            <!-- 오른쪽: 개인정보 입력 -->
+            <td>
+              <div class="form-group">
+                <label class="thick">주소</label>
+                <p class="readonly-box">서울특별시 성동구 성수동</p>
+              </div>
+
+              <div class="form-group">
+                <label class="thick">전화번호</label>
+                <p class="readonly-box">010-1234-5678</p>
+              </div>
+
+              <div class="form-group">
+                <label class="thick">최종 학력</label>
+                <p class="readonly-box">서울대학교 컴퓨터공학과 졸업</p>
+              </div>
+
+              <div class="form-group">
+                <label class="thick">경력</label>
+                <p class="readonly-box">2021 ~ 2024 (주)코드랩 백엔드 개발자</p>
+              </div>
+
+              <div class="form-group">
+                <label class="thick">수상이력</label>
+                <p class="readonly-box">2023 SW창의력대회 최우수상 수상</p>
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <th>
+              <div class="question">
+                <p>질문1.</p>
+                <p>본인 소개 부탁드립니다.</p>
+              </div>
+            </th>
+            <td>
+              <p class="content">
+                안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
+              </p>
+            </td>
+          </tr>
+
+          <tr>
+            <th>
+              <div class="question">
+                <p>질문1.</p>
+                <p>본인 소개 부탁드립니다.</p>
+              </div>
+            </th>
+            <td>
+              <p class="content">
+                안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
+              </p>
+            </td>
+          </tr>
+
+          <!-- 추가 질문/답변 반복 -->
+          <tr>
+            <th class="link">포트폴리오 링크를<br />넣어주세요.</th>
+            <td>
+              <p class="content">https://github.com/yourname/portfolio</p>
+            </td>
+          </tr>
+        </table>
+      </form>
+    </div>
+    <!-- ✅ 버튼 그룹 -->
+    <div class="button-group">
+      <button type="button">목록보기</button>
+    </div>
+
+    <div th:replace="include/footer :: footer"></div>
+  </body>
+</html>
