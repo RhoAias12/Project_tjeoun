@@ -1,5 +1,6 @@
 package com.tjoeun.controller;
 
+import com.tjoeun.dto.ApplyHistoryDTO;
 import com.tjoeun.dto.UserFormDto;
 import com.tjoeun.dto.UserListDto;
 import com.tjoeun.service.AdminService;
@@ -82,9 +83,19 @@ public class AdminController {
     }
 
     @GetMapping("/apply_list")
-    public String applyList() {
+    public String applyList(@RequestParam(defaultValue = "1") int page,
+                            @PageableDefault(size = 10) Pageable pageable,
+                            Model model) {
+        Pageable correctedPageable = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
+        Page<ApplyHistoryDTO> applyPage = adminService.getPagedApplyHistory(correctedPageable);
+
+        com.tjoeun.util.PaginationUtil.setPaging(model, applyPage, "/admin/apply_list");
+
+        model.addAttribute("applyList", applyPage.getContent());
+        model.addAttribute("applyPage", applyPage);
         return "admin/apply_list";
     }
+
 
     @GetMapping("/apply_detail")
     public String applyDetail() {

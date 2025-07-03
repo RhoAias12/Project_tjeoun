@@ -1,8 +1,11 @@
 package com.tjoeun.service;
 
+import com.tjoeun.dto.ApplyHistoryDTO;
 import com.tjoeun.dto.UserFormDto;
 import com.tjoeun.dto.UserListDto;
+import com.tjoeun.entity.ApplyHistory;
 import com.tjoeun.entity.Users;
+import com.tjoeun.repository.ApplyHistoryRepository;
 import com.tjoeun.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -21,6 +24,7 @@ public class AdminService {
 
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
+  private final ApplyHistoryRepository applyHistoryRepository;
 
   // 모든 회원 리스트 조회 (관리자용)
   public List<UserListDto> getAllUsers() {
@@ -74,4 +78,18 @@ public class AdminService {
       user.getUserNickname()
     ));
   }
+
+  public Page<ApplyHistoryDTO> getPagedApplyHistory(Pageable pageable) {
+    Page<ApplyHistory> applyPage = applyHistoryRepository.findAll(pageable);
+    return applyPage.map(apply -> ApplyHistoryDTO.builder()
+      .applyHistoryId(apply.getOptionalIdx())
+      .statusDisplay(apply.getStatus().getDisplay())
+      .recruitmentTitle(apply.getRecruitment().getTitle())
+      .recruitmentCompany(apply.getRecruitment().getCompany())
+      .recruitmentId(apply.getRecruitment().getRecruitmentIdx())
+      .userNickname(apply.getUser().getUserNickname())
+      .userEmail(apply.getUser().getUserEmail())
+      .build());
+  }
+
 }
