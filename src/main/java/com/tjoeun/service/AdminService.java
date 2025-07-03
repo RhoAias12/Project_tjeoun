@@ -1,12 +1,14 @@
 package com.tjoeun.service;
 
+import com.tjoeun.dto.ApplyHistoryDTO;
 import com.tjoeun.dto.UserFormDto;
 import com.tjoeun.dto.UserListDto;
+import com.tjoeun.entity.ApplyHistory;
 import com.tjoeun.entity.Users;
+import com.tjoeun.repository.ApplyHistoryRepository;
 import com.tjoeun.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,18 +25,34 @@ public class AdminService {
 
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
+  private final ApplyHistoryRepository applyHistoryRepository;
 
   // 모든 회원 리스트 조회
-  public List<UserListDto> getAllUsers() {
-    List<Users> users = userRepository.findAll();
-    return users.stream()
-      .map(user -> new UserListDto(
-        user.getUserIdx(),
-        user.getUserEmail(),
-        user.getUserNickname()
-      ))
-      .collect(Collectors.toList());
+  public Page<UserListDto> getPagedUsers(int page, int size, String sortBy) {
+    Sort sort;
+    switch (sortBy) {
+      case "latest":
+        sort = Sort.by(Sort.Direction.DESC, "userIdx");
+        break;
+      case "oldest":
+        sort = Sort.by(Sort.Direction.ASC, "userIdx");
+        break;
+      case "email":
+        sort = Sort.by(Sort.Direction.ASC, "userEmail");
+        break;
+      default:
+        sort = Sort.by(Sort.Direction.DESC, "userIdx");
+        break;
+    }
+    Pageable pageable = PageRequest.of(page - 1, size, sort);
+    Page<Users> userPage = userRepository.findAll(pageable);
+    return userPage.map(user -> new UserListDto(
+      user.getUserIdx(),
+      user.getUserEmail(),
+      user.getUserNickname()
+    ));
   }
+
 
   // 회원 삭제
   public void deleteUserById(Integer userIdx) {
@@ -85,13 +103,37 @@ public class AdminService {
     userRepository.save(user);
   }
 
-  //페이지네이션
-  public Page<UserListDto> getPagedUsers(Pageable pageable) {
-    Page<Users> userPage = userRepository.findAll(pageable);
-    return userPage.map(user -> new UserListDto(
-      user.getUserIdx(),
-      user.getUserEmail(),
-      user.getUserNickname()
-    ));
+  public Page<ApplyHistoryDTO> getPagedApplyHistory(int page, int size, String applySort, String deadlineSort) {
+    Sort sort = Sort.unsorted();
+
+    if ("apply_latest".equals(applySort)) {
+      sort = Sort.by(Sort.Direction.DESC, "apply");
+    } else if ("apply_oldest".equals(applySort)) {
+      sort = Sort.by(Sort.Direction.ASC, "apply");
+    }
+
+    if ("deadline_latest".equals(deadlineSort)) {
+      Sort deadlineSortObj = Sort.by(Sort.Direction.DESC, "recruitment.deadline");
+      sort = sort.isSorted() ? sort.and(deadlineSortObj) : deadlineSortObj;
+    } else if ("deadline_oldest".equals(deadlineSort)) {
+      Sort deadlineSortObj = Sort.by(Sort.Direction.ASC, "recruitment.deadline");
+      sort = sort.isSorted() ? sort.and(deadlineSortObj) : deadlineSortObj;
+    }
+
+    Pageable pageable = PageRequest.of(page, size, sort);
+    Page<ApplyHistory> applyHistoryPage = applyHistoryRepository.findAll(pageable);
+
+    return applyHistoryPage.map(applyHistory -> ApplyHistoryDTO.builder()
+      .applyHistoryId(applyHistory.getOptionalIdx())
+      .statusDisplay(applyHistory.getStatus().getDisplay())
+      .recruitmentTitle(applyHistory.getRecruitment().getTitle())
+      .recruitmentCompany(applyHistory.getRecruitment().getCompany())
+      .recruitmentId(applyHistory.getRecruitment().getRecruitmentIdx())
+      .userEmail(applyHistory.getUser().getUserEmail())
+      .userNickname(applyHistory.getUser().getUserNickname())
+      .build());
   }
+
+
+
 }

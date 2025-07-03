@@ -1,134 +1,104 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script src="js/header.js"></script>
-    <script src="js/footer.js"></script>
-    <link rel="stylesheet" th:href="@{/css/main.css}" />
-    <link rel="stylesheet" th:href="@{/css/header.css}" />
-    <link rel="stylesheet" th:href="@{/css/footer.css}" />
-    <link rel="stylesheet" th:href="@{/css/apply_list.css}" />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    />
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="js/header.js"></script>
+  <script src="js/footer.js"></script>
+  <link rel="stylesheet" th:href="@{/css/main.css}" />
+  <link rel="stylesheet" th:href="@{/css/header.css}" />
+  <link rel="stylesheet" th:href="@{/css/footer.css}" />
+  <link rel="stylesheet" th:href="@{/css/apply_list.css}" />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+  />
 
-    <title>지원관리</title>
-  </head>
-  <body>
-    <!-- 헤더 -->
-    <div th:replace="include/header :: header"></div>
+  <title>지원관리</title>
 
-    <!-- 전체 컨테이너 -->
-    <div class="tab-box">
-      <div class="tab-inner">
-        <h2 class="mypage-title">지원관리</h2>
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const applySort = urlParams.get('applySort') || 'apply_all';
+      const deadlineSort = urlParams.get('deadlineSort') || 'deadline_all';
 
-        <!-- 검색 및 정렬 영역 -->
-        <div class="search">
-          <section class="search-bar">
-            <input type="text" placeholder="공고이름" />
-            <input type="text" placeholder="회사명" />
-            <input type="date" />
-            <input type="text" placeholder="지역" />
-            <button type="button">검색</button>
-          </section>
+      document.querySelectorAll('.pagination a').forEach(link => {
+        const linkUrl = new URL(link.href);
+        linkUrl.searchParams.set('applySort', applySort);
+        linkUrl.searchParams.set('deadlineSort', deadlineSort);
+        link.href = linkUrl.toString();
+      });
+    });
+  </script>
 
-          <div class="sort-wrapper">
-            <select class="sort-select">
-              <option value="latest">최신순</option>
-              <option value="oldest">오래된순</option>
-              <option value="company">회사명순</option>
-            </select>
-          </div>
-        </div>
+</head>
+<body>
+<!-- 헤더 -->
+<div th:replace="include/header :: header"></div>
 
-        <!-- 게시물 리스트 -->
-        <div class="apply-list">
-          <div class="apply-card">
-            <div class="apply-info">
-              <div class="job-title">
-                공고명<span class="company-name"> | 회사명</span>
-              </div>
-              <div class="nickname">닉네임</div>
-            </div>
-            <div class="apply-buttons">
-              <!-- 상황별로 하나만 보이게 처리 -->
-              <div class="situation open">접수중</div>
-              <!-- <div class="situation pass">합격</div> -->
-              <!-- <div class="situation fail">불합격</div> -->
-            </div>
-            <!-- 토글 
-            <div class="apply-buttons">
-              <select class="status-select">
-                <option value="open" selected>접수중</option>
-                <option value="closed">접수마감</option>
-              </select>
-            </div> -->
-          </div>
+<!-- 전체 컨테이너 -->
+<div class="tab-box">
+  <div class="tab-inner">
+    <h2 class="mypage-title">지원관리</h2>
 
-          <div class="apply-card">
-            <div class="apply-info">
-              <div class="job-title">
-                공고명<span class="company-name"> | 회사명</span>
-              </div>
-              <div class="nickname">닉네임</div>
-            </div>
-            <div class="apply-buttons">
-              <!-- 상황별로 하나만 보이게 처리 -->
-              <!-- <div class="situation open">접수중</div> -->
-              <div class="situation pass">합격</div>
-              <!-- <div class="situation fail">불합격</div> -->
-            </div>
-          </div>
+    <!-- 검색 및 정렬 영역 -->
+    <div class="search">
+      <section class="search-bar">
+        <input type="text" placeholder="공고이름" />
+        <input type="text" placeholder="회사명" />
+        <input type="date" />
+        <input type="text" placeholder="지역" />
+        <button type="button">검색</button>
+      </section>
 
-          <div class="apply-card">
-            <div class="apply-info">
-              <div class="job-title">
-                공고명<span class="company-name"> | 회사명</span>
-              </div>
-              <div class="nickname">닉네임</div>
-            </div>
-            <div class="apply-buttons">
-              <!-- 상황별로 하나만 보이게 처리 -->
-              <!-- <div class="situation open">접수중</div> -->
-              <!-- <div class="situation pass">합격</div> -->
-              <div class="situation fail">불합격</div>
-            </div>
-          </div>
+      <!-- 정렬 -->
+      <div class="sort-wrapper">
+        <form method="get" th:action="@{/admin/apply_list}" id="sortForm">
+          <select name="applySort" class="sort-select" onchange="document.getElementById('sortForm').submit()">
+            <option value="apply_all" th:selected="${applySort == 'apply_all'}">지원일: 전체</option>
+            <option value="apply_latest" th:selected="${applySort == 'apply_latest'}">지원일: 최신순</option>
+            <option value="apply_oldest" th:selected="${applySort == 'apply_oldest'}">지원일: 오래된순</option>
+          </select>
 
-          <div class="apply-card">
-            <div class="apply-info">
-              <div class="job-title">
-                공고명<span class="company-name"> | 회사명</span>
-              </div>
-              <div class="nickname">닉네임</div>
-            </div>
-            <div class="apply-buttons">
-              <!-- 상황별로 하나만 보이게 처리 -->
-              <!-- <div class="situation open">접수중</div> -->
-              <!-- <div class="situation pass">합격</div> -->
-              <div class="situation fail">불합격</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 페이지네이션 -->
-        <div class="pagination">
-          <ul class="pagination-list">
-            <li><a href="#" class="page-btn">〈</a></li>
-            <li><a href="#" class="page-btn active">1</a></li>
-            <li><a href="#" class="page-btn">2</a></li>
-            <li><a href="#" class="page-btn">3</a></li>
-            <li><a href="#" class="page-btn">4</a></li>
-            <li><a href="#" class="page-btn">5</a></li>
-            <li><a href="#" class="page-btn">〉</a></li>
-          </ul>
-        </div>
+          <select name="deadlineSort" class="sort-select" onchange="document.getElementById('sortForm').submit()">
+            <option value="deadline_all" th:selected="${deadlineSort == 'deadline_all'}">마감일: 전체</option>
+            <option value="deadline_latest" th:selected="${deadlineSort == 'deadline_latest'}">마감일: 최신순</option>
+            <option value="deadline_oldest" th:selected="${deadlineSort == 'deadline_oldest'}">마감일: 오래된순</option>
+          </select>
+          <input type="hidden" name="page" value="1" />
+        </form>
       </div>
     </div>
-    <!-- 푸터 -->
-    <div th:replace="include/footer :: footer"></div>
-  </body>
+
+    <!-- 게시물 리스트 -->
+    <div class="apply-list" th:each="apply : ${applyList}">
+      <a th:href="@{'/admin/apply_detail'(applyHistoryId=${apply.applyHistoryId})}" class="apply-card">
+        <div class="apply-info">
+          <div class="job-title" th:text="${apply.recruitmentTitle}">공고명</div>
+          <div class="company-name" th:text="${apply.recruitmentCompany}">회사명</div>
+          <div class="nickname">
+            <span th:text="${apply.userEmail}">이메일</span>
+            <span> | </span>
+            <span th:text="${apply.userNickname}">닉네임</span>
+          </div>
+        </div>
+
+        <div class="apply-buttons">
+          <div class="situation open" th:text="${apply.statusDisplay}">지원상태</div>
+        </div>
+      </a>
+    </div>
+
+    <!-- 페이지네이션 -->
+    <div class="pagination">
+      <div th:replace="fragments/pagination :: fragment
+            (${applyPage}, ${startPage}, ${endPage}, '/admin/apply_list')">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 푸터 -->
+<div th:replace="include/footer :: footer"></div>
+</body>
 </html>

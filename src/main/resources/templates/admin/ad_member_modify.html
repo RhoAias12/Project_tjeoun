@@ -29,9 +29,14 @@
            });
 
            if (window.location.search.includes("success")) {
-               alert("회원정보가 성공적으로 수정되었습니다.");
-               history.replaceState(null, null, window.location.pathname);
-           }
+              alert("회원정보가 성공적으로 수정되었습니다.");
+              // 현재 URL 객체 생성 예이
+              const url = new URL(window.location.href);
+              // success 파라미터만 제거
+              url.searchParams.delete("success");
+              // 쿼리스트링에서 success만 제거한 URL로 히스토리 교체
+              history.replaceState(null, null, url.toString());
+          }
        });
 
        function checkNickname() {
@@ -116,6 +121,8 @@
         method="post"
         onsubmit="return validateForm()">
     <input type="hidden" th:name="userIdx" th:value="${userIdx}" />
+    <input type="hidden" name="page" th:value="${page}" />
+    <input type="hidden" name="sortBy" th:value="${sortBy}" />
 
     <!-- 이름 -->
     <div class="form-group">
@@ -180,7 +187,9 @@
     <!-- 버튼 -->
     <div class="button-box">
       <button type="submit" class="action-button">수정</button>
-      <button type="button" class="action-button" onclick="location.href='/admin/member_list'">목록</button>
+      <a th:href="@{/admin/member_list(page=${page}, sortBy=${sortBy})}" class="action-button">
+        목록
+      </a>
     </div>
   </form>
 </div>

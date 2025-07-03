@@ -1,74 +1,101 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" th:href="@{/css/main.css}" />
-    <link rel="stylesheet" th:href="@{/css/header.css}" />
-    <link rel="stylesheet" th:href="@{/css/footer.css}" />
-    <link rel="stylesheet" th:href="@{/css/manager_list_care.css}" />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    />
-    <title>회원관리</title>
-  </head>
-  <body>
-    <!-- 헤더 -->
-    <div th:replace="include/header :: header"></div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" th:href="@{/css/main.css}" />
+  <link rel="stylesheet" th:href="@{/css/header.css}" />
+  <link rel="stylesheet" th:href="@{/css/footer.css}" />
+  <link rel="stylesheet" th:href="@{/css/manager_list_care.css}" />
+  <link
+          rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+  />
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const sortBy = urlParams.get('sortBy') || 'latest'; // 기본값 맞춰서
 
-    <!-- 전체 컨테이너 -->
-    <div class="tab-box">
-      <div class="tab-inner">
-        <h2 class="mypage-title">회원관리</h2>
+    document.querySelectorAll('.pagination a').forEach(link => {
+      const linkUrl = new URL(link.href);
+      linkUrl.searchParams.set('sortBy', sortBy);
+      link.href = linkUrl.toString();
+    });
+  });
 
-        <!-- 검색 및 정렬 영역 -->
-        <div class="search">
-          <section class="search-bar">
-            <input type="text" placeholder="이메일" />
-            <input type="text" placeholder="닉네임" />
-            <!-- <input type="date" />
-            <input type="text" placeholder="지역" /> -->
-            <button type="button">검색</button>
-          </section>
+    function handleSortChange(selectElement) {
+      const selectedSort = selectElement.value;
+      // 정렬 시 항상 1페이지로 이동
+      const url = new URL(window.location.href);
+      url.searchParams.set("sortBy", selectedSort);
+      url.searchParams.set("page", 1);
+      window.location.href = url.toString();
+    }
+  </script>
+  <title>회원관리</title>
+</head>
+<body>
+<!-- 헤더 -->
+<div th:replace="include/header :: header"></div>
 
-          <div class="sort-wrapper">
-            <select class="sort-select">
-              <option value="latest">최신순</option>
-              <option value="oldest">오래된순</option>
-            </select>
-          </div>
+<!-- 전체 컨테이너 -->
+<div class="tab-box">
+  <div class="tab-inner">
+    <h2 class="mypage-title">회원관리</h2>
+
+    <!-- 검색 및 정렬 영역 -->
+    <div class="search">
+      <section class="search-bar">
+        <input type="text" placeholder="이메일" />
+        <input type="text" placeholder="닉네임" />
+        <button type="button">검색</button>
+      </section>
+
+      <!-- ✅ 정렬 폼 -->
+      <div class="sort-wrapper">
+        <form id="sortForm" method="get" th:action="@{/admin/member_list}">
+          <select name="sortBy" class="sort-select" onchange="handleSortChange(this)">
+            <option value="latest" th:selected="${sortBy == 'latest'}">최신순</option>
+            <option value="oldest" th:selected="${sortBy == 'oldest'}">오래된순</option>
+            <option value="email" th:selected="${sortBy == 'email'}">이메일순</option>
+          </select>
+          <!-- 페이지 파라미터 유지 (0으로 보내면 1페이지로 이동됨) -->
+          <input type="hidden" name="page" th:value="${userPage.number + 1}" />
+        </form>
+      </div>
+    </div>
+
+    <!-- 회원 리스트 -->
+    <div class="apply-list" th:if="${userList}">
+      <div class="apply-card" th:each="user : ${userList}">
+        <div class="apply-info">
+          <a th:href="@{'/admin/member_modify'(userIdx=${user.userIdx}, page=${userPage.number + 1}, sortBy=${sortBy})}"
+             style="text-decoration:none; color:inherit; display:block;">
+            <div class="job-title" th:text="${user.userEmail}">이메일</div>
+            <div class="company-name" th:text="${user.userNickname}">닉네임</div>
+          </a>
         </div>
+        <div class="apply-buttons">
+          <form th:action="@{/admin/member_list/delete}" method="post" style="display:inline;"
+                onsubmit="return confirm('정말 삭제하시겠습니까?');">
+            <input type="hidden" name="userIdx" th:value="${user.userIdx}" />
+            <input type="hidden" name="page" th:value="${page}" />
+            <input type="hidden" name="sortBy" th:value="${sortBy}" />
+            <button type="submit" class="cancel-btn">삭제</button>
+          </form>
 
-        <!-- 게시물 리스트 -->
-        <div class="apply-list" th:if="${userList}">
-          <!-- userList를 돌면서 각 회원 출력 -->
-          <div class="apply-card" th:each="user : ${userList}">
-            <div class="apply-info">
-              <!-- 상세페이지 이동 링크 (userIdx 파라미터 포함) -->
-              <a th:href="@{'/admin/member_modify'(userIdx=${user.userIdx})}"
-                 style="text-decoration:none; color:inherit; display:block;">
-                <div class="job-title" th:text="${user.userEmail}">이메일</div>
-                <div class="company-name" th:text="${user.userNickname}">닉네임</div>
-              </a>
-            </div>
-            <div class="apply-buttons">
-              <form th:action="@{/admin/member_list/delete}" method="post" style="display:inline;"
-                    onsubmit="return confirm('정말 삭제하시겠습니까?');">
-                <input type="hidden" name="userIdx" th:value="${user.userIdx}" />
-                <button type="submit" class="cancel-btn">삭제</button>
-              </form>
-            </div>
-          </div>
-        </div>
-
-        <!-- 페이지네이션 -->
-        <div th:replace="fragments/pagination :: fragment
-      (${userPage}, ${startPage}, ${endPage}, '/admin/member_list')">
         </div>
       </div>
     </div>
-    <!-- 푸터 -->
-    <div th:replace="include/footer :: footer"></div>
-  </body>
+
+    <!-- 페이지네이션 -->
+    <div th:replace="fragments/pagination :: fragment
+      (${userPage}, ${startPage}, ${endPage}, '/admin/member_list')">
+    </div>
+  </div>
+</div>
+
+<!-- 푸터 -->
+<div th:replace="include/footer :: footer"></div>
+</body>
 </html>
