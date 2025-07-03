@@ -11,6 +11,16 @@
           rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
   />
+  <script>
+    function handleSortChange(selectElement) {
+      const selectedSort = selectElement.value;
+      // 정렬 시 항상 1페이지로 이동
+      const url = new URL(window.location.href);
+      url.searchParams.set("sortBy", selectedSort);
+      url.searchParams.set("page", 1);
+      window.location.href = url.toString();
+    }
+  </script>
   <title>회원관리</title>
 </head>
 <body>
@@ -32,8 +42,8 @@
 
       <!-- ✅ 정렬 폼 -->
       <div class="sort-wrapper">
-        <form method="get" th:action="@{/admin/member_list}" id="sortForm">
-          <select name="sortBy" class="sort-select" onchange="document.getElementById('sortForm').submit()">
+        <form id="sortForm" method="get" th:action="@{/admin/member_list}">
+          <select name="sortBy" class="sort-select" onchange="handleSortChange(this)">
             <option value="latest" th:selected="${sortBy == 'latest'}">최신순</option>
             <option value="oldest" th:selected="${sortBy == 'oldest'}">오래된순</option>
             <option value="email" th:selected="${sortBy == 'email'}">이메일순</option>

@@ -103,16 +103,6 @@ public class AdminService {
     userRepository.save(user);
   }
 
-//  //페이지네이션
-//  public Page<UserListDto> getPagedUsers(Pageable pageable) {
-//    Page<Users> userPage = userRepository.findAll(pageable);
-//    return userPage.map(user -> new UserListDto(
-//      user.getUserIdx(),
-//      user.getUserEmail(),
-//      user.getUserNickname()
-//    ));
-//  }
-
   public Page<ApplyHistoryDTO> getPagedApplyHistory(int page, int size, String applySort, String deadlineSort) {
     Sort sort = Sort.unsorted();
 
