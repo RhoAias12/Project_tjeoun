@@ -6,6 +6,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "recruitment", uniqueConstraints = {
@@ -52,4 +54,7 @@ public class Recruitment {
 
   @Column(columnDefinition = "TEXT")
   private String employmentType;
+
+  @OneToMany(mappedBy = "recruitment", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<Favorite> favorites = new ArrayList<>();
 }
