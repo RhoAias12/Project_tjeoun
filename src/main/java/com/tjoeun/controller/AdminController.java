@@ -185,7 +185,7 @@ public class AdminController {
     @PostMapping("/apply_detail/{applyHistoryId}/updateStatus")
     public String updateApplyStatus(@PathVariable Integer applyHistoryId,
                                     @RequestParam("newStatus") String newStatus,
-                                    @RequestParam(value = "page", defaultValue = "0") int page,
+                                    @RequestParam(value = "page", defaultValue = "1") int page,
                                     @RequestParam(value = "sortOption", defaultValue = "apply_latest") String sortOption,
                                     RedirectAttributes redirectAttributes) {
         adminService.updateApplyStatus(applyHistoryId, newStatus);
