@@ -1,5 +1,6 @@
 package com.tjoeun.entity;
 
+import com.tjoeun.converter.ApplyStatusConverter;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -26,15 +27,16 @@ public class ApplyHistory {
   @JoinColumn(name = "recruitment_idx", nullable = false)
   private Recruitment recruitment;
 
-  @Enumerated(EnumType.STRING)
+  @Convert(converter = ApplyStatusConverter.class)
   @Column(nullable = false)
   private ApplyStatus status;
+
 
   @Column(columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
   private Timestamp apply;
 
   public enum ApplyStatus {
-    SUBMITTED("접수중"),
+    SUBMITTED("접수"),
     FINALIZED("합격"),
     REJECTED("불합격");
 
@@ -54,5 +56,14 @@ public class ApplyHistory {
         .findFirst()
         .orElseThrow(() -> new IllegalArgumentException("Unknown display value: " + display));
     }
+
+    public String toDbValue() {
+      return display;
+    }
+
+    public static ApplyStatus fromDbValue(String dbValue) {
+      return fromDisplay(dbValue);
+    }
   }
+
 }

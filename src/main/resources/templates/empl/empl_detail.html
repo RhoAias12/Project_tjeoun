@@ -97,7 +97,11 @@
   </button>
 
 
-  <button type="button">지원하기</button>
+  <button type="button"
+          th:onclick="|location.href='/mypage/choice_list/${job.recruitmentIdx}'|">
+    지원하기
+  </button>
+
   <button type="button" onclick="location.href='/empl/empl_main'">목록보기</button>
 </div>
 
