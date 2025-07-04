@@ -1,9 +1,6 @@
 package com.tjoeun.controller;
 
-import com.tjoeun.dto.ApplyHistoryDTO;
-import com.tjoeun.dto.FavoriteDTO;
-import com.tjoeun.dto.ResumeDto;
-import com.tjoeun.dto.UserFormDto;
+import com.tjoeun.dto.*;
 import com.tjoeun.entity.*;
 import com.tjoeun.repository.*;
 import com.tjoeun.service.MyPageService;
@@ -33,9 +30,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.security.Principal;
 import java.util.List;
 
+@RequiredArgsConstructor
 @Controller
 @RequestMapping("/mypage")
-@RequiredArgsConstructor
 public class MyPageController {
 
     private final ApplyHistoryRepository applyHistoryRepository;
@@ -46,6 +43,8 @@ public class MyPageController {
     private final FavoriteRepository favoriteRepository;
     private final RecruitmentRepository recruitmentRepository;
     private final ResumeRepository resumeRepository;
+    private final ResumeContentRepository resumeContentRepository;
+
 
 
     @GetMapping("/member_modify")
@@ -81,20 +80,22 @@ public class MyPageController {
     @PostMapping("/react_write")
     public String saveResume(
       @ModelAttribute("resumeDto") @Valid ResumeDto resumeDto,
-      @RequestParam("imgFile") MultipartFile imgFile,  // 이미지
+      @RequestParam("imgFile") MultipartFile imgFile,
       BindingResult bindingResult,
       Principal principal) {
 
         if (bindingResult.hasErrors()) {
-            return "mypage/react_write";
+            return "mypage/react_write";  // 유효성 검사 실패 시 다시 폼
         }
 
+        // 사용자 정보 조회
         String email = principal.getName();
         Users user = userRepository.findByUserEmail(email);
         if (user == null) {
             throw new IllegalArgumentException("로그인 사용자가 없습니다.");
         }
 
+        // Resume 엔터티 생성
         Resume resume = new Resume();
         resume.setUser(user);
         resume.setTitle(resumeDto.getTitle());
@@ -106,26 +107,29 @@ public class MyPageController {
         resume.setAwards(resumeDto.getAwards());
         resume.setContext(resumeDto.getContext());
 
-        // 질문/답변
-        resume.setQuestion1(resumeDto.getQuestion1());
-        resume.setAnswer1(resumeDto.getAnswer1());
-        resume.setQuestion2(resumeDto.getQuestion2());
-        resume.setAnswer2(resumeDto.getAnswer2());
-        resume.setQuestion3(resumeDto.getQuestion3());
-        resume.setAnswer3(resumeDto.getAnswer3());
-        resume.setQuestion4(resumeDto.getQuestion4());
-        resume.setAnswer4(resumeDto.getAnswer4());
-
-        // 이미지
         if (!imgFile.isEmpty()) {
             resume.setImg(imgFile.getOriginalFilename());
-            // 실제 파일 저장은 필요하면 구현
         }
 
+        // 저장
         resumeRepository.save(resume);
 
+        // ResumeContent 저장
+        if (resumeDto.getResumeContents() != null) {
+            for (ResumeContentDTO contentDto : resumeDto.getResumeContents()) {
+                ResumeContent content = ResumeContent.builder()
+                  .resume(resume)
+                  .question(contentDto.getQuestion())
+                  .context(contentDto.getContext())
+                  .build();
+                resumeContentRepository.save(content);
+            }
+        }
+
+        // ✅ 저장 성공 시 react_list로 이동
         return "redirect:/mypage/react_list";
     }
+
 
 
     @GetMapping("/react_write")
@@ -152,7 +156,7 @@ public class MyPageController {
         Resume resume = resumeRepository.findById(id)
           .orElseThrow(() -> new IllegalArgumentException("해당 이력서를 찾을 수 없습니다."));
         model.addAttribute("resume", resume);
-        return "mypage/react_detail";
+        return "mypage/react_detail";  // => /templates/mypage/react_detail.html 로 이동
     }
 
     //삭제
