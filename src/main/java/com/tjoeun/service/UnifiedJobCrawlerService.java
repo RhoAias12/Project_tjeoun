@@ -1,6 +1,7 @@
 package com.tjoeun.service;
 
 import com.tjoeun.entity.Recruitment;
+import com.tjoeun.repository.RecruitmentRepository;
 import org.jsoup.Jsoup;
 import org.jsoup.Connection;
 import org.jsoup.nodes.Document;
@@ -31,13 +32,11 @@ import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import com.tjoeun.repository.JobPostingRepository;
-
 @Service
 public class UnifiedJobCrawlerService {
 
   @Autowired
-  private JobPostingRepository repository;
+  private RecruitmentRepository repository;
 
   private final String logoSaveDir = "src/main/resources/static/images/logos/";
   @Scheduled(cron = "0 06 15 * * *", zone = "Asia/Seoul")
