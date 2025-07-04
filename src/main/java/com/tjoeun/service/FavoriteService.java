@@ -4,7 +4,6 @@ import com.tjoeun.entity.Favorite;
 import com.tjoeun.entity.Recruitment;
 import com.tjoeun.entity.Users;
 import com.tjoeun.repository.FavoriteRepository;
-import com.tjoeun.repository.JobPostingRepository;
 import com.tjoeun.repository.RecruitmentRepository;
 import com.tjoeun.repository.UserRepository;
 import lombok.RequiredArgsConstructor;

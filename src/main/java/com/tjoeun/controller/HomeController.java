@@ -1,8 +1,8 @@
 package com.tjoeun.controller;
 
 import com.tjoeun.entity.Recruitment;
+import com.tjoeun.repository.RecruitmentRepository;
 import org.springframework.ui.Model;
-import com.tjoeun.repository.JobPostingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,7 +13,7 @@ import java.util.List;
 public class HomeController {
 
   @Autowired
-  private JobPostingRepository repository;
+  private RecruitmentRepository repository;
 
   @GetMapping("/")
   public String index(Model model) {

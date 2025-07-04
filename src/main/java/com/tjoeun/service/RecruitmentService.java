@@ -3,7 +3,7 @@ package com.tjoeun.service;
 import com.tjoeun.dto.RecruitmentDTO;
 import com.tjoeun.entity.Recruitment;
 import com.tjoeun.repository.FavoriteRepository;
-import com.tjoeun.repository.JobPostingRepository;
+import com.tjoeun.repository.RecruitmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,13 +19,13 @@ import java.util.stream.Collectors;
 public class RecruitmentService {
 
     @Autowired
-    private JobPostingRepository jobPostingRepository;
+    private RecruitmentRepository recruitmentRepository;
 
     @Autowired
     private FavoriteRepository favoriteRepository;
 
     public List<RecruitmentDTO> getAllPosts() {
-        List<Recruitment> list = jobPostingRepository.findAll();
+        List<Recruitment> list = recruitmentRepository.findAll();
 
         for (Recruitment r : list) {
             int count = favoriteRepository.countByRecruitment(r);
@@ -40,7 +40,7 @@ public class RecruitmentService {
 
     // 🔽 customSort에 따른 정렬 리스트 반환
     public List<RecruitmentDTO> getAllPosts(String customSort) {
-        List<Recruitment> list = jobPostingRepository.findAll();
+        List<Recruitment> list = recruitmentRepository.findAll();
 
         // scrapCount 채우기
         for (Recruitment r : list) {
@@ -80,7 +80,7 @@ public class RecruitmentService {
     }
 
     public Page<RecruitmentDTO> getPagedPosts(Pageable pageable) {
-        return jobPostingRepository.findAll(pageable)
+        return recruitmentRepository.findAll(pageable)
                 .map(this::convertToDTO);
     }
 
@@ -88,7 +88,7 @@ public class RecruitmentService {
     public Page<RecruitmentDTO> getPagedPosts(Pageable pageable, String customSort) {
         Sort sort = resolveSort(customSort);
         Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
-        return jobPostingRepository.findAll(sortedPageable)
+        return recruitmentRepository.findAll(sortedPageable)
                 .map(this::convertToDTO);
     }
 
@@ -126,7 +126,7 @@ public class RecruitmentService {
     }
 
     public RecruitmentDTO getPostById(Long id) {
-        return jobPostingRepository.findById(id)
+        return recruitmentRepository.findById(id)
                 .map(this::convertToDTO)
                 .orElse(null);
     }
