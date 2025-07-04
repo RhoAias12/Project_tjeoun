@@ -1,6 +1,5 @@
 package com.tjoeun.entity;
 
-import com.tjoeun.converter.ApplyStatusConverter;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -32,7 +31,7 @@ public class ApplyHistory {
   @JoinColumn(name = "recruitment_idx", nullable = false)
   private Recruitment recruitment;
 
-  @Convert(converter = ApplyStatusConverter.class)
+  @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private ApplyStatus status;
 
@@ -56,17 +55,9 @@ public class ApplyHistory {
 
     public static ApplyStatus fromDisplay(String display) {
       return Arrays.stream(values())
-        .filter(v -> v.display.equals(display))
-        .findFirst()
-        .orElseThrow(() -> new IllegalArgumentException("Unknown display value: " + display));
-    }
-
-    public String toDbValue() {
-      return display;
-    }
-
-    public static ApplyStatus fromDbValue(String dbValue) {
-      return fromDisplay(dbValue);
+              .filter(v -> v.display.equals(display))
+              .findFirst()
+              .orElseThrow(() -> new IllegalArgumentException("Unknown display value: " + display));
     }
   }
 }
