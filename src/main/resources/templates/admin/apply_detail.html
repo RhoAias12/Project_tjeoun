@@ -45,7 +45,12 @@
 
       if (statusChanged) {
         alert(statusChanged + "으로 변경되었습니다.");
-        window.history.replaceState({}, document.title, window.location.pathname);
+
+        urlParams.delete("statusChanged");
+
+        const newQuery = urlParams.toString();
+        const newUrl = window.location.pathname + (newQuery ? "?" + newQuery : "");
+        window.history.replaceState({}, document.title, newUrl);
       }
     </script>
   </head>
@@ -86,7 +91,7 @@
         <form id="statusForm" th:action="@{/admin/apply_detail/{id}/updateStatus(id=${applyHistoryId})}" method="post">
           <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
           <input type="hidden" name="page" th:value="${page}" />
-          <input type="hidden" name="sort" th:value="${sort}" />
+          <input type="hidden" name="sortOption" th:value="${sortOption}" />
 
           <select class="status-select" name="newStatus" id="statusSelect">
             <option value="SUBMITTED" th:selected="${applyDetail.statusDisplay == '진행중'}">진행중</option>
