@@ -115,21 +115,13 @@ public class AdminService {
     userRepository.save(user);
   }
 
-  public Page<ApplyHistoryDTO> getPagedApplyHistory(int page, int size, String applySort, String deadlineSort) {
+  public Page<ApplyHistoryDTO> getPagedApplyHistory(int page, int size, String applySort) {
     Sort sort = Sort.unsorted();
 
     if ("apply_latest".equals(applySort)) {
       sort = Sort.by(Sort.Direction.DESC, "apply");
     } else if ("apply_oldest".equals(applySort)) {
       sort = Sort.by(Sort.Direction.ASC, "apply");
-    }
-
-    if ("deadline_latest".equals(deadlineSort)) {
-      Sort deadlineSortObj = Sort.by(Sort.Direction.DESC, "recruitment.deadline");
-      sort = sort.isSorted() ? sort.and(deadlineSortObj) : deadlineSortObj;
-    } else if ("deadline_oldest".equals(deadlineSort)) {
-      Sort deadlineSortObj = Sort.by(Sort.Direction.ASC, "recruitment.deadline");
-      sort = sort.isSorted() ? sort.and(deadlineSortObj) : deadlineSortObj;
     }
 
     Pageable pageable = PageRequest.of(page, size, sort);
