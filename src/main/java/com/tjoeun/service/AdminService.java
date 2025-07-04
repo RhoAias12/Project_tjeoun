@@ -6,7 +6,6 @@ import com.tjoeun.dto.UserListDto;
 import com.tjoeun.entity.ApplyHistory;
 import com.tjoeun.entity.Users;
 import com.tjoeun.repository.ApplyHistoryRepository;
-import com.tjoeun.repository.RecruitmentRepository;
 import com.tjoeun.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
@@ -27,43 +26,41 @@ public class AdminService {
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
   private final ApplyHistoryRepository applyHistoryRepository;
-  private final RecruitmentRepository recruitmentRepository;
 
   // 모든 회원 리스트 조회
-  public Page<UserListDto> getPagedUsers(int page, int size, String primarySort, String secondarySort) {
-    Sort sort = createSort(primarySort, secondarySort);
+  public Page<UserListDto> getPagedUsers(int page, int size, String sortBy) {
+    Sort sort;
+    switch (sortBy) {
+      case "latest":
+        sort = Sort.by(Sort.Direction.DESC, "userIdx");
+        break;
+      case "oldest":
+        sort = Sort.by(Sort.Direction.ASC, "userIdx");
+        break;
+      case "email":
+        sort = Sort.by(Sort.Direction.ASC, "userEmail");
+        break;
+      case "emailDesc":
+        sort = Sort.by(Sort.Direction.DESC, "userEmail");
+        break;
+      case "nickname":
+        sort = Sort.by(Sort.Direction.ASC, "userNickname");
+        break;
+      case "nicknameDesc":
+        sort = Sort.by(Sort.Direction.DESC, "userNickname");
+        break;
+      default:
+        sort = Sort.by(Sort.Direction.DESC, "userIdx");
+        break;
+    }
     Pageable pageable = PageRequest.of(page - 1, size, sort);
     Page<Users> userPage = userRepository.findAll(pageable);
-
     return userPage.map(user -> new UserListDto(
       user.getUserIdx(),
       user.getUserEmail(),
       user.getUserNickname()
     ));
   }
-
-  private Sort createSort(String primarySort, String secondarySort) {
-    Sort sort = parseSort(primarySort);
-
-    if (secondarySort != null && !secondarySort.isBlank()) {
-      sort = sort.and(parseSort(secondarySort));
-    }
-
-    return sort;
-  }
-
-  private Sort parseSort(String sortKey) {
-    return switch (sortKey) {
-      case "userIdxDesc" -> Sort.by(Sort.Direction.DESC, "userIdx");
-      case "userIdxAsc" -> Sort.by(Sort.Direction.ASC, "userIdx");
-      case "emailAsc" -> Sort.by(Sort.Direction.ASC, "userEmail");
-      case "emailDesc" -> Sort.by(Sort.Direction.DESC, "userEmail");
-      case "nicknameAsc" -> Sort.by(Sort.Direction.ASC, "userNickname");
-      case "nicknameDesc" -> Sort.by(Sort.Direction.DESC, "userNickname");
-      default -> Sort.by(Sort.Direction.DESC, "userIdx"); // fallback
-    };
-  }
-
 
 
 
@@ -148,13 +145,5 @@ public class AdminService {
   }
 
 
-
-  public void deleteRecruitmentById(Long recruitmentIdx) {
-    recruitmentRepository.deleteById(recruitmentIdx);
-  }
-
-  public int countRecruitments() {
-    return (int) recruitmentRepository.count();
-  }
 
 }
