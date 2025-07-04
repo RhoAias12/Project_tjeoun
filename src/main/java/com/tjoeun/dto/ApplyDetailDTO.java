@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 @Builder
@@ -25,6 +26,7 @@ public class ApplyDetailDTO {
   private String resumeAntecedents;
   private String resumeAwards;
   private String resumeContext;
+  private List<ResumeContentDTO> resumeContentList;
 
   private String userName;
   private String userEmail;

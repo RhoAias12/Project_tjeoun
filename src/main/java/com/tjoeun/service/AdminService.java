@@ -1,9 +1,6 @@
 package com.tjoeun.service;
 
-import com.tjoeun.dto.ApplyDetailDTO;
-import com.tjoeun.dto.ApplyHistoryDTO;
-import com.tjoeun.dto.UserFormDto;
-import com.tjoeun.dto.UserListDto;
+import com.tjoeun.dto.*;
 import com.tjoeun.entity.ApplyHistory;
 import com.tjoeun.entity.Recruitment;
 import com.tjoeun.entity.Resume;
@@ -172,6 +169,13 @@ public class AdminService {
     Resume resume = applyHistory.getResume();
     Users user = applyHistory.getUser();
 
+    List<ResumeContentDTO> resumeContentList = resume.getResumeContents().stream()
+      .map(content -> ResumeContentDTO.builder()
+        .question(content.getQuestion())
+        .context(content.getContext())
+        .build())
+      .collect(Collectors.toList());
+
     return ApplyDetailDTO.builder()
       .recruitmentTitle(recruitment.getTitle())
       .recruitmentCompany(recruitment.getCompany())
@@ -192,8 +196,11 @@ public class AdminService {
       .userName(user.getUserName())
       .userEmail(user.getUserEmail())
       .userBirth(user.getUserBirth())
+
+      .resumeContentList(resumeContentList)
       .build();
   }
+
 
 
 

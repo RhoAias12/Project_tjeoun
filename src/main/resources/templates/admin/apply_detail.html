@@ -134,31 +134,14 @@
             </td>
           </tr>
 
-          <tr>
+          <tr th:each="content : ${applyDetail.resumeContentList}">
             <th>
               <div class="question">
-                <p>질문1.</p>
-                <p>본인 소개 부탁드립니다.</p>
+                <p th:text="'질문: ' + ${content.question}"></p>
               </div>
             </th>
             <td>
-              <p class="content">
-                안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-              </p>
-            </td>
-          </tr>
-
-          <tr>
-            <th>
-              <div class="question">
-                <p>질문1.</p>
-                <p>본인 소개 부탁드립니다.</p>
-              </div>
-            </th>
-            <td>
-              <p class="content">
-                안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-              </p>
+              <p class="content" th:text="${content.context}"></p>
             </td>
           </tr>
 

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 @Entity
 @Table(name = "resume")
@@ -49,5 +50,8 @@ public class Resume {
 
   @Column(columnDefinition = "TEXT")
   private String awards;
+
+  @OneToMany(mappedBy = "resume", fetch = FetchType.LAZY)
+  private List<ResumeContent> resumeContents;
 }
 
