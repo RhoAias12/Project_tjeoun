@@ -13,24 +13,29 @@
   />
   <script>
     window.addEventListener('DOMContentLoaded', () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const sortBy = urlParams.get('sortBy') || 'latest'; // 기본값 맞춰서
+     const urlParams = new URLSearchParams(window.location.search);
+     const primarySort = urlParams.get('primarySort') || 'userIdxDesc';
+     const secondarySort = urlParams.get('secondarySort') || '';
 
-    document.querySelectorAll('.pagination a').forEach(link => {
-      const linkUrl = new URL(link.href);
-      linkUrl.searchParams.set('sortBy', sortBy);
-      link.href = linkUrl.toString();
-    });
-  });
+     document.querySelectorAll('.pagination a').forEach(link => {
+       const url = new URL(link.href);
+       url.searchParams.set('primarySort', primarySort);
+       url.searchParams.set('secondarySort', secondarySort);
+       link.href = url.toString();
+     });
+   });
 
-    function handleSortChange(selectElement) {
-      const selectedSort = selectElement.value;
-      // 정렬 시 항상 1페이지로 이동
-      const url = new URL(window.location.href);
-      url.searchParams.set("sortBy", selectedSort);
-      url.searchParams.set("page", 1);
-      window.location.href = url.toString();
-    }
+   function handleSortChange(selectElement) {
+     const selectedSort = selectElement.value;
+     // 정렬 시 항상 1페이지로 이동
+     const url = new URL(window.location.href);
+     url.searchParams.set("sortBy", selectedSort);
+     url.searchParams.set("page", 1);
+     window.location.href = url.toString();
+   }
+   function handleSortChange() {
+   document.getElementById("sortForm").submit();
+ }
   </script>
   <title>회원관리</title>
 </head>
@@ -54,16 +59,19 @@
       <!-- ✅ 정렬 폼 -->
       <div class="sort-wrapper">
         <form id="sortForm" method="get" th:action="@{/admin/member_list}">
-          <select name="sortBy" class="sort-select" onchange="handleSortChange(this)">
-            <option value="latest" th:selected="${sortBy == 'latest'}">최신순</option>
-            <option value="oldest" th:selected="${sortBy == 'oldest'}">오래된순</option>
-            <option value="email" th:selected="${sortBy == 'email'}">이메일순(오름차순)</option>
-            <option value="emailDesc" th:selected="${sortBy == 'emailDesc'}">이메일순(내림차순)</option>
-            <option value="nickname" th:selected="${sortBy == 'nickname'}">닉네임순(오름차순)</option>
-            <option value="nicknameDesc" th:selected="${sortBy == 'nicknameDesc'}">닉네임순(내림차순)</option>
+          <select name="primarySort" onchange="handleSortChange()">
+            <option value="userIdxDesc" th:selected="${primarySort == 'userIdxDesc'}">가입: 최신순</option>
+            <option value="userIdxAsc" th:selected="${primarySort == 'userIdxAsc'}">가입: 오래된순</option>
           </select>
 
-          <!-- 페이지 파라미터 유지 (0으로 보내면 1페이지로 이동됨) -->
+          <select name="secondarySort" onchange="handleSortChange()">
+            <option value="">-- 보조 정렬 없음 --</option>
+            <option value="emailAsc" th:selected="${secondarySort == 'emailAsc'}">이메일 오름차순</option>
+            <option value="emailDesc" th:selected="${secondarySort == 'emailDesc'}">이메일 내림차순</option>
+            <option value="nicknameAsc" th:selected="${secondarySort == 'nicknameAsc'}">닉네임 오름차순</option>
+            <option value="nicknameDesc" th:selected="${secondarySort == 'nicknameDesc'}">닉네임 내림차순</option>
+          </select>
+
           <input type="hidden" name="page" th:value="${userPage.number + 1}" />
         </form>
       </div>
@@ -73,7 +81,7 @@
     <div class="apply-list" th:if="${userList}">
       <div class="apply-card" th:each="user : ${userList}">
         <div class="apply-info">
-          <a th:href="@{'/admin/member_modify'(userIdx=${user.userIdx}, page=${userPage.number + 1}, sortBy=${sortBy})}"
+          <a th:href="@{'/admin/member_modify'(userIdx=${user.userIdx}, page=${page}, primarySort=${primarySort}, secondarySort=${secondarySort})}"
              style="text-decoration:none; color:inherit; display:block;">
             <div class="job-title" th:text="${user.userEmail}">이메일</div>
             <div class="company-name" th:text="${user.userNickname}">닉네임</div>
@@ -84,7 +92,8 @@
                 onsubmit="return confirm('정말 삭제하시겠습니까?');">
             <input type="hidden" name="userIdx" th:value="${user.userIdx}" />
             <input type="hidden" name="page" th:value="${page}" />
-            <input type="hidden" name="sortBy" th:value="${sortBy}" />
+            <input type="hidden" name="primarySort" th:value="${primarySort}" />
+            <input type="hidden" name="secondarySort" th:value="${secondarySort}" />
             <button type="submit" class="cancel-btn">삭제</button>
           </form>
 

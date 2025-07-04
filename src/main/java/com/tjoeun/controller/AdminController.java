@@ -26,18 +26,20 @@ public class AdminController {
 
     @GetMapping("/member_list")
     public String memberList(@RequestParam(defaultValue = "1") int page,
-                             @RequestParam(defaultValue = "latest") String sortBy,
+                             @RequestParam(defaultValue = "userIdxDesc") String primarySort,
+                             @RequestParam(defaultValue = "") String secondarySort,
                              @PageableDefault(size = 10) Pageable pageable,
                              Model model) {
 
-        // 정렬은 서비스에 위임
-        Page<UserListDto> userPage = adminService.getPagedUsers(page, pageable.getPageSize(), sortBy);
+        Page<UserListDto> userPage = adminService.getPagedUsers(page, pageable.getPageSize(), primarySort, secondarySort);
 
-        PaginationUtil.setPaging(model, userPage, "/admin/member_list?sortBy=" + sortBy);
+        String queryParams = String.format("?primarySort=%s&secondarySort=%s", primarySort, secondarySort);
+        PaginationUtil.setPaging(model, userPage, "/admin/member_list" + queryParams);
 
         model.addAttribute("userList", userPage.getContent());
         model.addAttribute("userPage", userPage);
-        model.addAttribute("sortBy", sortBy);
+        model.addAttribute("primarySort", primarySort);
+        model.addAttribute("secondarySort", secondarySort);
         model.addAttribute("page", page);
 
         return "admin/member_list";
@@ -45,12 +47,15 @@ public class AdminController {
 
 
 
+
     @PostMapping("/member_list/delete")
     public String deleteMember(@RequestParam("userIdx") Integer userIdx,
                                @RequestParam(defaultValue = "1") int page,
-                               @RequestParam(defaultValue = "latest") String sortBy) {
+                               @RequestParam(defaultValue = "userIdxDesc") String primarySort,
+                               @RequestParam(defaultValue = "") String secondarySort) {
         adminService.deleteUserById(userIdx);
-        return "redirect:/admin/member_list?page=" + page + "&sortBy=" + sortBy;
+        return "redirect:/admin/member_list?page=" + page +
+          "&primarySort=" + primarySort + "&secondarySort=" + secondarySort;
     }
 
 
