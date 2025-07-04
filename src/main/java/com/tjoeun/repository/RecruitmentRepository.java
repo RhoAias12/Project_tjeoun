@@ -37,5 +37,4 @@ public interface RecruitmentRepository extends JpaRepository<Recruitment, Long> 
 
   // 마감일 오름차순
   Page<Recruitment> findAllByOrderByDeadlineAsc(Pageable pageable);
-
 }

@@ -53,6 +53,10 @@
   </section>
 
   <section class="job-desc">
+
+    <h3>고용형태</h3>
+    <p th:text="${job.employmentType}" style="white-space: pre-wrap;"></p>
+
     <h3>요구사항</h3>
     <p th:text="${job.qualifications}" style="white-space: pre-wrap;"></p>
 
@@ -61,6 +65,9 @@
 
     <h3>복지 및 혜택</h3>
     <p th:text="${job.benefits}" style="white-space: pre-wrap;"></p>
+
+    <h3>우대사항</h3>
+    <p th:text="${job.preferred}" style="white-space: pre-wrap;"></p>
 
     <h3>연봉</h3>
     <p th:text="${job.salary}" style="white-space: pre-wrap;"></p>

@@ -1,10 +1,12 @@
 package com.tjoeun.controller;
 
 import com.tjoeun.dto.ApplyHistoryDTO;
+import com.tjoeun.dto.RecruitmentDTO;
 import com.tjoeun.dto.UserFormDto;
 import com.tjoeun.dto.UserListDto;
 import com.tjoeun.service.AdminService;
 
+import com.tjoeun.service.RecruitmentService;
 import com.tjoeun.util.PaginationUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -17,12 +19,15 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.List;
+
 
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/admin")
 public class AdminController {
     private final AdminService adminService;
+    private final RecruitmentService recruitmentService;
 
     @GetMapping("/member_list")
     public String memberList(@RequestParam(defaultValue = "1") int page,
@@ -100,13 +105,50 @@ public class AdminController {
 
 
     @GetMapping("/recruit_list")
-    public String recruitList() {
+    public String recruitList(@RequestParam(defaultValue = "1") int page,
+                              @RequestParam(defaultValue = "deadline_all") String deadlineSort,
+                              @PageableDefault(size = 10) Pageable pageable,
+                              Model model) {
+
+        Pageable correctedPageable = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
+
+        Page<RecruitmentDTO> recruitmentPage =
+          recruitmentService.getSortedPagedPosts(correctedPageable, deadlineSort);
+
+        String urlWithParams = "/admin/recruit_list?deadlineSort=" + deadlineSort;
+        PaginationUtil.setPaging(model, recruitmentPage, urlWithParams);
+
+        model.addAttribute("recruitmentList", recruitmentPage.getContent());
+        model.addAttribute("recruitmentPage", recruitmentPage);
+        model.addAttribute("deadlineSort", deadlineSort);
+        model.addAttribute("page", page);
+
         return "admin/recruit_list";
     }
 
     @GetMapping("/recruit_modify")
-    public String recruitModify() {
+    public String recruitModify(@RequestParam("recruitmentIdx") Long recruitmentIdx, Model model) {
+        RecruitmentDTO dto = recruitmentService.getPostById(recruitmentIdx);
+        model.addAttribute("recruit", dto);
         return "admin/recruit_modify";
+    }
+
+    @PostMapping("/recruit_delete")
+    public String deleteRecruit(@RequestParam("recruitmentIdx") Long recruitmentIdx,
+                                @RequestParam(defaultValue = "1") int page,
+                                @RequestParam(defaultValue = "deadline_all") String deadlineSort) {
+
+        adminService.deleteRecruitmentById(recruitmentIdx);
+
+        int totalCount = adminService.countRecruitments();
+        int pageSize = 10;
+
+        int totalPages = (int) Math.ceil((double) totalCount / pageSize);
+
+        int finalPage = Math.min(page, Math.max(totalPages, 1));
+
+        return "redirect:/admin/recruit_list?page=" + finalPage
+          + "&deadlineSort=" + deadlineSort;
     }
 
     @GetMapping("/apply_list")
