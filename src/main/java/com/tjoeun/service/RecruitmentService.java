@@ -4,7 +4,6 @@ import com.tjoeun.dto.RecruitmentDTO;
 import com.tjoeun.entity.Recruitment;
 import com.tjoeun.repository.FavoriteRepository;
 import com.tjoeun.repository.RecruitmentRepository;
-import com.tjoeun.repository.RecruitmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -47,7 +46,6 @@ public class RecruitmentService {
     }
 
     // 🔽 customSort에 따른 정렬 리스트 반환
-
     public List<RecruitmentDTO> getAllPosts(String customSort) {
         List<Recruitment> list = recruitmentRepository.findAll();
 
@@ -92,16 +90,16 @@ public class RecruitmentService {
         return recruitmentRepository.findAll(pageable)
                 .map(this::convertToDTO);
     }
-    // 🔽 customSort에 따른 정렬 Page 반환
 
+    // 🔽 customSort에 따른 정렬 Page 반환
     public Page<RecruitmentDTO> getPagedPosts(Pageable pageable, String customSort) {
         Sort sort = resolveSort(customSort);
         Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
         return recruitmentRepository.findAll(sortedPageable)
                 .map(this::convertToDTO);
     }
-    // 🔽 정렬 조건 처리 메서드
 
+    // 🔽 정렬 조건 처리 메서드
     private Sort resolveSort(String customSort) {
         if (customSort == null || customSort.isEmpty()) {
             return Sort.by(Sort.Direction.DESC, "createdAt"); // 기본 정렬
@@ -134,6 +132,10 @@ public class RecruitmentService {
                 .build();
     }
 
+    public RecruitmentDTO getPostById(Long id) {
+        return recruitmentRepository.findById(id)
+                .map(this::convertToDTO)
+                .orElse(null);
 
 
     public Page<RecruitmentDTO> getSortedPagedPosts(Pageable pageable, String deadlineSort) {
@@ -161,8 +163,6 @@ public class RecruitmentService {
 
         return new PageImpl<>(pageContent, pageable, sortedList.size());
     }
-
-
 
 
 }
