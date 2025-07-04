@@ -8,24 +8,24 @@
     <link rel="stylesheet" th:href="@{/css/header.css}" />
     <link rel="stylesheet" th:href="@{/css/footer.css}" />
     <link rel="stylesheet" th:href="@{/css/apply_detail.css}" />
-    <script defer src="js/header.js"></script>
-    <script defer src="js/footer.js"></script>
+    <script defer th:src="@{/js/header.js}"></script>
+    <script defer th:src="@{/js/footer.js}"></script>
 
     <script>
       document.addEventListener('DOMContentLoaded', function () {
         const logoUpload = document.getElementById('logoUpload');
-        const logoPreview = document.getElementById('logoPreview');
-
-        logoUpload.addEventListener('change', function () {
-          const file = logoUpload.files[0];
-          if (file) {
-            const reader = new FileReader();
-            reader.onload = function (e) {
-              logoPreview.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
-          }
-        });
+        if (logoUpload) {  // 요소가 있을 때만 실행
+          logoUpload.addEventListener('change', function () {
+            const file = logoUpload.files[0];
+            if (file) {
+              const reader = new FileReader();
+              reader.onload = function (e) {
+                document.getElementById('logoPreview').src = e.target.result;
+              };
+              reader.readAsDataURL(file);
+            }
+          });
+        }
       });
     </script>
 

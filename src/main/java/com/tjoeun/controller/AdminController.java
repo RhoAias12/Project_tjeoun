@@ -18,7 +18,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.List;
+import org.springframework.security.web.csrf.CsrfToken;
+import jakarta.servlet.http.HttpServletRequest;
 
 
 @Controller
@@ -161,10 +162,14 @@ public class AdminController {
 
 
     @GetMapping("/apply_detail/{applyHistoryId}")
-    public String applyDetail(@PathVariable Integer applyHistoryId, Model model) {
+    public String applyDetail(@PathVariable Integer applyHistoryId, Model model, HttpServletRequest request) {
         ApplyDetailDTO detailDTO = adminService.getApplyDetailById(applyHistoryId);
         model.addAttribute("applyDetail", detailDTO);
         model.addAttribute("applyDetailId", applyHistoryId);
+
+        CsrfToken token = (CsrfToken) request.getAttribute("_csrf");
+        model.addAttribute("_csrf", token);
+
         return "admin/apply_detail";
     }
 
@@ -172,12 +177,11 @@ public class AdminController {
     public String updateApplyStatus(@PathVariable Integer applyHistoryId,
                                     @RequestParam("newStatus") String newStatus,
                                     RedirectAttributes redirectAttributes) {
-
-
         adminService.updateApplyStatus(applyHistoryId, newStatus);
 
         String displayStatus = ApplyHistory.ApplyStatus.valueOf(newStatus).getDisplay();
         redirectAttributes.addAttribute("statusChanged", displayStatus);
+
         return "redirect:/admin/apply_detail/" + applyHistoryId;
     }
 
