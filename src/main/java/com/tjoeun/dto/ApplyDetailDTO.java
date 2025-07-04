@@ -24,6 +24,7 @@ public class ApplyDetailDTO {
   private String resumeAbility;
   private String resumeAntecedents;
   private String resumeAwards;
+  private String resumeContext;
 
   private String userName;
   private String userEmail;

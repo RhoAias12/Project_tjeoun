@@ -187,6 +187,7 @@ public class AdminService {
       .resumeAbility(resume.getAbility())
       .resumeAntecedents(resume.getAntecedents())
       .resumeAwards(resume.getAwards())
+      .resumeContext(resume.getContext())
 
       .userName(user.getUserName())
       .userEmail(user.getUserEmail())

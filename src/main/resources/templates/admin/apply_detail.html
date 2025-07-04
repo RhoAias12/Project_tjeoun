@@ -163,10 +163,10 @@
           </tr>
 
           <!-- 추가 질문/답변 반복 -->
-          <tr>
+          <tr th:if="${applyDetail.resumeContext != null and !#strings.isEmpty(applyDetail.resumeContext)}">
             <th class="link">포트폴리오 링크를<br />넣어주세요.</th>
             <td>
-              <p class="content link">https://test-portfolio-link.com</p>
+              <p class="content link" th:text="${applyDetail.resumeContext}"></p>
             </td>
           </tr>
         </table>
