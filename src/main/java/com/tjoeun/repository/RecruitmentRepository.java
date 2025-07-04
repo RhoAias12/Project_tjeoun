@@ -6,7 +6,18 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.time.LocalDate;
+
 public interface RecruitmentRepository extends JpaRepository<Recruitment, Long> {
+
+    // 기본 CRUD 메서드 자동 제공
+    int deleteByDeadlineBefore(LocalDate date);
+
+    // 중복 공고 확인용 메서드 추가
+    boolean existsByTitleAndCompanyAndDeadline(String title, String company, LocalDate deadline);
+
+    // 페이징 메서드
+    Page<Recruitment> findAll(Pageable pageable);
 
     // 스크랩된 공고만 가져오는 네이티브 쿼리
     @Query(value = """
