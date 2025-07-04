@@ -6,6 +6,7 @@ import com.tjoeun.dto.UserListDto;
 import com.tjoeun.entity.ApplyHistory;
 import com.tjoeun.entity.Users;
 import com.tjoeun.repository.ApplyHistoryRepository;
+import com.tjoeun.repository.RecruitmentRepository;
 import com.tjoeun.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
@@ -26,6 +27,7 @@ public class AdminService {
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
   private final ApplyHistoryRepository applyHistoryRepository;
+  private final RecruitmentRepository recruitmentRepository;
 
   // 모든 회원 리스트 조회
   public Page<UserListDto> getPagedUsers(int page, int size, String sortBy) {
@@ -145,5 +147,13 @@ public class AdminService {
   }
 
 
+
+  public void deleteRecruitmentById(Long recruitmentIdx) {
+    recruitmentRepository.deleteById(recruitmentIdx);
+  }
+
+  public int countRecruitments() {
+    return (int) recruitmentRepository.count();
+  }
 
 }
