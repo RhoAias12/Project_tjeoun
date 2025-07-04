@@ -1,6 +1,8 @@
 package com.tjoeun.controller;
 
 import com.tjoeun.dto.*;
+import com.tjoeun.entity.ApplyHistory;
+import com.tjoeun.repository.ApplyHistoryRepository;
 import com.tjoeun.service.AdminService;
 
 import com.tjoeun.service.RecruitmentService;
@@ -162,7 +164,20 @@ public class AdminController {
     public String applyDetail(@PathVariable Integer applyHistoryId, Model model) {
         ApplyDetailDTO detailDTO = adminService.getApplyDetailById(applyHistoryId);
         model.addAttribute("applyDetail", detailDTO);
+        model.addAttribute("applyDetailId", applyHistoryId);
         return "admin/apply_detail";
+    }
+
+    @PostMapping("/admin/apply_detail/{applyHistoryId}/updateStatus")
+    public String updateApplyStatus(@PathVariable Integer applyHistoryId,
+                                    @RequestParam("newStatus") String newStatus,
+                                    RedirectAttributes redirectAttributes) {
+
+        adminService.updateApplyStatus(applyHistoryId, newStatus);
+
+        String displayStatus = ApplyHistory.ApplyStatus.valueOf(newStatus).getDisplay();
+        redirectAttributes.addAttribute("statusChanged", displayStatus);
+        return "redirect:/admin/apply_detail/" + applyHistoryId;
     }
 
 

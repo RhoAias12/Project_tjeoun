@@ -28,6 +28,24 @@
         });
       });
     </script>
+
+    <script>
+      function confirmStatusChange() {
+        const select = document.getElementById('statusSelect');
+        const selectedText = select.options[select.selectedIndex].text;
+
+        if (confirm(`${selectedText}(으)로 변경하시겠습니까?`)) {
+          document.getElementById('statusForm').submit();
+        }
+      }
+
+      // 변경 후 alert 메시지 띄우기
+      const urlParams = new URLSearchParams(window.location.search);
+      const statusChanged = urlParams.get("statusChanged");
+      if (statusChanged) {
+        alert(statusChanged + "으로 변경되었습니다.");
+      }
+    </script>
   </head>
 
   <body>
@@ -63,10 +81,10 @@
       </section>
 
       <div class="status-wrapper">
-        <select class="status-select">
-          <option value="ing">진행중</option>
-          <option value="pass" selected>합격</option>
-          <option value="fail">불합격</option>
+        <select class="status-select" name="newStatus" id="statusSelect">
+          <option value="SUBMITTED" th:selected="${applyDetail.statusDisplay == '진행중'}">진행중</option>
+          <option value="FINALIZED" th:selected="${applyDetail.statusDisplay == '합격'}">합격</option>
+          <option value="REJECTED" th:selected="${applyDetail.statusDisplay == '불합격'}">불합격</option>
         </select>
       </div>
 
@@ -155,10 +173,9 @@
         </table>
       </form>
 
-      <!-- ✅ 버튼 그룹 -->
       <div class="button-group">
-        <button type="button" onclick="location.href='#'">수정</button>
-        <button type="button" onclick="location.href='/admin/apply_list'">목록</button>
+        <button type="button" onclick="confirmStatusChange()">수정</button>
+        <button type="button" th:onclick="|location.href='@{/admin/apply_list}'|">목록</button>
       </div>
 
     </div>

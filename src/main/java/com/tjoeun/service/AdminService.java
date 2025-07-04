@@ -198,11 +198,20 @@ public class AdminService {
       .userBirth(user.getUserBirth())
 
       .resumeContentList(resumeContentList)
+      .statusDisplay(applyHistory.getStatus().getDisplay())
       .build();
   }
 
 
+  @Transactional
+  public void updateApplyStatus(Integer applyHistoryId, String newStatus) {
+    ApplyHistory applyHistory = applyHistoryRepository.findById(applyHistoryId)
+      .orElseThrow(() -> new IllegalArgumentException("지원 내역을 찾을 수 없습니다."));
 
+    ApplyHistory.ApplyStatus status = ApplyHistory.ApplyStatus.valueOf(newStatus);
+    applyHistory.setStatus(status);
+    applyHistoryRepository.save(applyHistory);
+  }
 
 
 }

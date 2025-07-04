@@ -31,4 +31,6 @@ public class ApplyDetailDTO {
   private String userName;
   private String userEmail;
   private LocalDate userBirth;
+
+  private String statusDisplay;
 }
