@@ -163,6 +163,16 @@ public class MyPageService {
     return new PageImpl<>(dtoList, pageable, rawPage.getTotalElements());
   }
 
+  public List<Resume> getResumesByUserId(Long userIdx) {
+    return resumeRepository.findByUser_UserIdx(userIdx);
+  }
+
+  public Resume getResumeById(Long resumeIdx) {
+    return resumeRepository.findById(resumeIdx)
+            .orElseThrow(() -> new IllegalArgumentException("이력서를 찾을 수 없습니다."));
+  }
+
+
 
   @Transactional(readOnly = true)
   public ResumeDto getResumeDetail(Long id) {

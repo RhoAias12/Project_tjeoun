@@ -55,9 +55,9 @@ public class ApplyHistory {
 
     public static ApplyStatus fromDisplay(String display) {
       return Arrays.stream(values())
-        .filter(v -> v.display.equals(display))
-        .findFirst()
-        .orElseThrow(() -> new IllegalArgumentException("Unknown display value: " + display));
+              .filter(v -> v.display.equals(display))
+              .findFirst()
+              .orElseThrow(() -> new IllegalArgumentException("Unknown display value: " + display));
     }
   }
 }

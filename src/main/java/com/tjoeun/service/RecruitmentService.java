@@ -159,5 +159,10 @@ public class RecruitmentService {
         return new PageImpl<>(pageContent, pageable, sortedList.size());
     }
 
+    public Recruitment getEntityById(Long id) {
+        return recruitmentRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("채용공고 없음"));
+    }
+
 
 }

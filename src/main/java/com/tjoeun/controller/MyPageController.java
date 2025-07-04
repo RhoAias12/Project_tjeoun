@@ -1,6 +1,9 @@
 package com.tjoeun.controller;
 
-import com.tjoeun.dto.*;
+import com.tjoeun.dto.ApplyHistoryDTO;
+import com.tjoeun.dto.FavoriteDTO;
+import com.tjoeun.dto.ResumeDto;
+import com.tjoeun.dto.UserFormDto;
 import com.tjoeun.entity.*;
 import com.tjoeun.repository.*;
 import com.tjoeun.service.MyPageService;
@@ -13,6 +16,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -28,11 +33,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 
 import java.security.Principal;
+import java.sql.Timestamp;
 import java.util.List;
 
-@RequiredArgsConstructor
 @Controller
 @RequestMapping("/mypage")
+@RequiredArgsConstructor
 public class MyPageController {
 
     private final ApplyHistoryRepository applyHistoryRepository;
@@ -46,6 +52,7 @@ public class MyPageController {
     private final ResumeContentRepository resumeContentRepository;
 
 
+    private final RecruitmentService recruitmentService;
 
     @GetMapping("/member_modify")
     public String showMemberModifyForm(Model model, Principal principal) {
@@ -99,6 +106,7 @@ public class MyPageController {
         Resume resume = new Resume();
         resume.setUser(user);
         resume.setTitle(resumeDto.getTitle());
+        resume.setContext(resumeDto.getContext());
         resume.setAddress(resumeDto.getAddress());
         resume.setPhoneNum(resumeDto.getPhoneNum());
         resume.setEducation(resumeDto.getEducation());
@@ -129,7 +137,6 @@ public class MyPageController {
         // ✅ 저장 성공 시 react_list로 이동
         return "redirect:/mypage/react_list";
     }
-
 
 
     @GetMapping("/react_write")
@@ -228,4 +235,51 @@ public class MyPageController {
         myPageService.deleteScrap(favoriteDTO);
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/choice_list/{recruitmentIdx}")
+    public String getResumeList(@PathVariable Long recruitmentIdx, Model model, @AuthenticationPrincipal UserDetails userDetails) {
+        String email = userDetails.getUsername();
+        System.out.println("로그인된 이메일: " + email);
+
+        Users user = userService.findByUserEmail(email);
+        System.out.println("조회된 userIdx: " + user.getUserIdx());
+
+        Long userIdx = user.getUserIdx().longValue();
+        List<Resume> resumes = myPageService.getResumesByUserId(userIdx);
+        System.out.println("불러온 이력서 수: " + resumes.size());
+
+        model.addAttribute("resumeList", resumes);
+        model.addAttribute("recruitmentIdx", recruitmentIdx);
+        return "mypage/choice_list";
+    }
+
+    @PostMapping("/submit")
+    public String submitApply(@RequestParam("recruitmentIdx") List<Long> recruitmentIds,
+                              @RequestParam Long resumeIdx,
+                              @AuthenticationPrincipal UserDetails userDetails) {
+
+        String email = userDetails.getUsername();
+        Users user = userService.findByUserEmail(email);
+
+        Resume resume = myPageService.getResumeById(resumeIdx); // ✅ 1개의 이력서만 선택
+
+        for (Long recruitmentId : recruitmentIds) {
+            Recruitment recruitment = recruitmentService.getEntityById(recruitmentId); // ✅ 일관된 서비스 사용
+
+            ApplyHistory history = ApplyHistory.builder()
+                    .user(user)
+                    .recruitment(recruitment)
+                    .status(ApplyHistory.ApplyStatus.SUBMITTED)
+                    .apply(new Timestamp(System.currentTimeMillis()))
+                    .build();
+
+            applyHistoryRepository.save(history);
+        }
+
+        return "redirect:/mypage/apply_status";
+    }
+
+
+
+
 }
