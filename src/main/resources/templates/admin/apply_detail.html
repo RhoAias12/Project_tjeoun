@@ -38,33 +38,30 @@
     </div>
 
     <div class="container">
-      <!-- ✅ 공고 정보 -->
+      <!-- 공고 정보 -->
       <section class="job-info">
         <div class="info-left">
           <div class="title">
-            <p class="readonly-box">
-              공고명
-            </p>
+            <p class="readonly-box" th:text="${applyDetail.recruitmentTitle}"></p>
           </div>
           <div class="company">
-            <p class="readonly-box">회사명</p>
+            <p class="readonly-box" th:text="${applyDetail.recruitmentCompany}"></p>
           </div>
           <div class="meta">
             <span class="deadline">
-              마감일:마감일
-              <p class="readonly-box-inline"></p>
+              마감일: <p class="readonly-box-inline" th:text="${applyDetail.recruitmentDeadline}"></p>
             </span>
             &nbsp; &nbsp; &nbsp;
             <span class="region">
-              지역:
-              <p class="readonly-box-inline">근무지역</p>
+              지역: <p class="readonly-box-inline" th:text="${applyDetail.recruitmentLocation}"></p>
             </span>
           </div>
         </div>
         <div class="info-right">
-          <img src="/images/tjoeun.jpg" alt="회사 로고" class="logo" />
+          <img th:src="@{${applyDetail.recruitmentLogoUrl}}" alt="회사 로고" class="logo" />
         </div>
       </section>
+
       <div class="status-wrapper">
         <select class="status-select">
           <option value="ing">진행중</option>
@@ -73,74 +70,66 @@
         </select>
       </div>
 
-      <!-- ✅ 상세 테이블 -->
+      <!-- 상세 테이블 -->
       <form>
         <table class="resume-table">
-          <!-- 첫 줄: 이미지 텍스트 -->
+          <!-- 제목 -->
           <tr>
             <th scope="row">제목</th>
             <td class="centered-cell">
               <div class="form-group">
-                <p class="readonly-box1">여러분들의 일개미가 되겠습니다!</p>
+                <p class="readonly-box1" th:text="${applyDetail.resumeTitle}"></p>
               </div>
             </td>
           </tr>
 
           <tr>
-            <!-- 왼쪽: 이미지 + 파일 선택 -->
+            <!-- 이미지 -->
             <th style="text-align: center">
-              <img id="preview" src="/images/가나디.jpg" alt="미리보기 없음" />
-<!--              <input type="file" id="imageUpload" accept="image/*" />-->
+              <img th:src="@{${applyDetail.resumeImg}}" alt="이미지" />
               <div id="fileName" style="margin-top: 4px"></div>
             </th>
 
             <!-- 오른쪽: 개인정보 출력 -->
             <td>
+              <!-- 유저 정보 -->
               <div class="form-group">
                 <label>이름</label>
-                <p class="readonly-box1">홍길동</p>
+                <p class="readonly-box1" th:text="${applyDetail.userName}"></p>
               </div>
-
               <div class="form-group">
                 <label>이메일</label>
-                <p class="readonly-box1">honggildong@example.com</p>
+                <p class="readonly-box1" th:text="${applyDetail.userEmail}"></p>
               </div>
-
               <div class="form-group">
                 <label>생년월일</label>
-                <p class="readonly-box1">1995-07-01</p>
+                <p class="readonly-box1" th:text="${applyDetail.userBirth}"></p>
               </div>
 
+              <!-- Resume 상세 -->
               <div class="form-group">
                 <label>주소</label>
-                <p class="readonly-box1">서울특별시 성동구 성수동</p>
+                <p class="readonly-box1" th:text="${applyDetail.resumeAddress}"></p>
               </div>
-
               <div class="form-group">
                 <label>전화번호</label>
-                <p class="readonly-box1">010-1234-5678</p>
+                <p class="readonly-box1" th:text="${applyDetail.resumePhoneNum}"></p>
               </div>
-
               <div class="form-group">
                 <label>학력</label>
-                <p class="readonly-box1">서울대학교 컴퓨터공학과 졸업</p>
+                <p class="readonly-box1" th:text="${applyDetail.resumeEducation}"></p>
               </div>
-
               <div class="form-group">
                 <label>자격증 및 스킬</label>
-                <p class="readonly-box1">python, SQL</p>
+                <p class="readonly-box1" th:text="${applyDetail.resumeAbility}"></p>
               </div>
-
               <div class="form-group">
                 <label>경력</label>
-                <p class="readonly-box1">
-                  2021 ~ 2024 (주)코드랩 백엔드 개발자
-                </p>
+                <p class="readonly-box1" th:text="${applyDetail.resumeAntecedents}"></p>
               </div>
-
               <div class="form-group">
                 <label>수상이력</label>
-                <p class="readonly-box1">2023 SW창의력대회 최우수상 수상</p>
+                <p class="readonly-box1" th:text="${applyDetail.resumeAwards}"></p>
               </div>
             </td>
           </tr>
@@ -177,7 +166,7 @@
           <tr>
             <th class="link">포트폴리오 링크를<br />넣어주세요.</th>
             <td>
-              <p class="content link">https://github.com/yourname/portfolio</p>
+              <p class="content link">https://test-portfolio-link.com</p>
             </td>
           </tr>
         </table>

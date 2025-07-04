@@ -1,12 +1,16 @@
 package com.tjoeun.service;
 
+import com.tjoeun.dto.ApplyDetailDTO;
 import com.tjoeun.dto.ApplyHistoryDTO;
 import com.tjoeun.dto.UserFormDto;
 import com.tjoeun.dto.UserListDto;
 import com.tjoeun.entity.ApplyHistory;
+import com.tjoeun.entity.Recruitment;
+import com.tjoeun.entity.Resume;
 import com.tjoeun.entity.Users;
 import com.tjoeun.repository.ApplyHistoryRepository;
 import com.tjoeun.repository.RecruitmentRepository;
+import com.tjoeun.repository.ResumeRepository;
 import com.tjoeun.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
@@ -17,6 +21,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,6 +33,7 @@ public class AdminService {
   private final PasswordEncoder passwordEncoder;
   private final ApplyHistoryRepository applyHistoryRepository;
   private final RecruitmentRepository recruitmentRepository;
+  private final ResumeRepository resumeRepository;
 
   // 모든 회원 리스트 조회
   public Page<UserListDto> getPagedUsers(int page, int size, String sortBy) {
@@ -147,9 +153,6 @@ public class AdminService {
       .build());
   }
 
-
-
-
   public void deleteRecruitmentById(Long recruitmentIdx) {
     recruitmentRepository.deleteById(recruitmentIdx);
   }
@@ -157,5 +160,41 @@ public class AdminService {
   public int countRecruitments() {
     return (int) recruitmentRepository.count();
   }
+
+
+
+  @Transactional(readOnly = true)
+  public ApplyDetailDTO getApplyDetailById(Integer applyHistoryId) {
+    ApplyHistory applyHistory = applyHistoryRepository.findById(applyHistoryId)
+      .orElseThrow(() -> new IllegalArgumentException("해당 지원 기록을 찾을 수 없습니다. id=" + applyHistoryId));
+
+    Recruitment recruitment = applyHistory.getRecruitment();
+    Resume resume = applyHistory.getResume();
+    Users user = applyHistory.getUser();
+
+    return ApplyDetailDTO.builder()
+      .recruitmentTitle(recruitment.getTitle())
+      .recruitmentCompany(recruitment.getCompany())
+      .recruitmentDeadline(recruitment.getDeadline())
+      .recruitmentLocation(recruitment.getLocation())
+      .recruitmentLogoUrl(recruitment.getLogoUrl())
+
+      .resumeTitle(resume.getTitle())
+      .resumeImg(resume.getImg())
+      .resumeAddress(resume.getAddress())
+      .resumePhoneNum(resume.getPhoneNum())
+      .resumeEducation(resume.getEducation())
+      .resumeAbility(resume.getAbility())
+      .resumeAntecedents(resume.getAntecedents())
+      .resumeAwards(resume.getAwards())
+
+      .userName(user.getUserName())
+      .userEmail(user.getUserEmail())
+      .userBirth(user.getUserBirth())
+      .build();
+  }
+
+
+
 
 }

@@ -6,6 +6,7 @@ import lombok.*;
 import java.sql.Timestamp;
 import java.util.Arrays;
 
+@Data
 @Entity
 @Table(name = "apply_history")
 @Getter @Setter
@@ -17,6 +18,10 @@ public class ApplyHistory {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Integer optionalIdx;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "resume_idx")
+  private Resume resume;
 
   @ManyToOne
   @JoinColumn(name = "user_idx", nullable = false)

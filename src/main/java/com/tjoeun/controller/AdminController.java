@@ -1,9 +1,6 @@
 package com.tjoeun.controller;
 
-import com.tjoeun.dto.ApplyHistoryDTO;
-import com.tjoeun.dto.RecruitmentDTO;
-import com.tjoeun.dto.UserFormDto;
-import com.tjoeun.dto.UserListDto;
+import com.tjoeun.dto.*;
 import com.tjoeun.service.AdminService;
 
 import com.tjoeun.service.RecruitmentService;
@@ -161,9 +158,12 @@ public class AdminController {
     }
 
 
-
-    @GetMapping("/apply_detail")
-    public String applyDetail() {
+    @GetMapping("/apply_detail/{applyHistoryId}")
+    public String applyDetail(@PathVariable Integer applyHistoryId, Model model) {
+        ApplyDetailDTO detailDTO = adminService.getApplyDetailById(applyHistoryId);
+        model.addAttribute("applyDetail", detailDTO);
         return "admin/apply_detail";
     }
+
+
 }
