@@ -34,7 +34,7 @@ public class ApplyHistory {
   private Timestamp apply;
 
   public enum ApplyStatus {
-    SUBMITTED("접수중"),
+    SUBMITTED("진행중"),
     FINALIZED("합격"),
     REJECTED("불합격");
 

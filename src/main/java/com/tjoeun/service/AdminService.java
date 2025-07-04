@@ -115,13 +115,22 @@ public class AdminService {
     userRepository.save(user);
   }
 
-  public Page<ApplyHistoryDTO> getPagedApplyHistory(int page, int size, String applySort) {
+  public Page<ApplyHistoryDTO> getPagedApplyHistory(int page, int size, String sortOption) {
     Sort sort = Sort.unsorted();
 
-    if ("apply_latest".equals(applySort)) {
-      sort = Sort.by(Sort.Direction.DESC, "apply");
-    } else if ("apply_oldest".equals(applySort)) {
-      sort = Sort.by(Sort.Direction.ASC, "apply");
+    switch (sortOption) {
+      case "apply_latest":
+        sort = Sort.by(Sort.Direction.DESC, "apply");
+        break;
+      case "apply_oldest":
+        sort = Sort.by(Sort.Direction.ASC, "apply");
+        break;
+      case "deadline_latest":
+        sort = Sort.by(Sort.Direction.DESC, "recruitment.deadline");
+        break;
+      case "deadline_oldest":
+        sort = Sort.by(Sort.Direction.ASC, "recruitment.deadline");
+        break;
     }
 
     Pageable pageable = PageRequest.of(page, size, sort);
@@ -137,6 +146,7 @@ public class AdminService {
       .userNickname(applyHistory.getUser().getUserNickname())
       .build());
   }
+
 
 
 

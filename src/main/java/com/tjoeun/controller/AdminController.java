@@ -147,27 +147,16 @@ public class AdminController {
     }
 
     @GetMapping("/apply_list")
-    public String showApplyList(@RequestParam(defaultValue = "1") int page,
-                                @RequestParam(defaultValue = "apply_all") String applySort,
-                                @PageableDefault(size = 10) Pageable pageable,
-                                Model model)
-    {
-        Pageable correctedPageable = PageRequest.of(page - 1, pageable.getPageSize());
-
-        Page<ApplyHistoryDTO> applyPage = adminService.getPagedApplyHistory(
-          page - 1,
-          pageable.getPageSize(),
-          applySort
-        );
-
-        // 페이징 정보 설정 (정렬 유지)
-        String urlWithParams = "/admin/apply_list?applySort=" + applySort;
-        PaginationUtil.setPaging(model, applyPage, urlWithParams);
+    public String applyListPage(@RequestParam(defaultValue = "1") int page,
+                                @RequestParam(defaultValue = "10") int size,
+                                @RequestParam(defaultValue = "all") String sortOption,
+                                Model model) {
+        Page<ApplyHistoryDTO> applyPage = adminService.getPagedApplyHistory(page - 1, size, sortOption);
+        PaginationUtil.setPaging(model, applyPage, "/admin/apply_list");
 
         model.addAttribute("applyList", applyPage.getContent());
         model.addAttribute("applyPage", applyPage);
-        model.addAttribute("applySort", applySort);
-
+        model.addAttribute("sortOption", sortOption);  // 선택 상태 유지용
         return "admin/apply_list";
     }
 
