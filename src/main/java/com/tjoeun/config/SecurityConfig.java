@@ -26,18 +26,18 @@ public class SecurityConfig {
       .csrf(csrf -> csrf
         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
       )
-      .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
       .authorizeHttpRequests(auth -> auth
         .requestMatchers("/css/**", "/js/**", "/images/**", "/static/**").permitAll()
         .requestMatchers("/", "/user/signup", "/user/login", "/api/user/**", "/user/login/error").permitAll()
         .requestMatchers("/empl/empl_main", "/empl/empl_detail/**").permitAll()
         .requestMatchers("/admin/**").hasRole("ADMIN")
+        .requestMatchers("/mypage/**").authenticated()  // 마이페이지는 로그인 사용자만
         .anyRequest().authenticated()
       )
       .formLogin(form -> form
         .loginPage("/user/login")
         .defaultSuccessUrl("/", true)
-        .usernameParameter("userEmail") // <- dto에 맞춰서
+        .usernameParameter("userEmail")
         .failureHandler(new FormLoginAuthenticationFailureHandler())
       )
       .logout(logout -> logout

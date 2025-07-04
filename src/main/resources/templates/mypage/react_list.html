@@ -32,18 +32,15 @@
 
         <!-- 게시물 리스트 -->
         <div class="resume-list">
-          <a href="/mypage/react_list/1" class="resume-card">
-            <span class="resume-title">이력서 1</span>
-            <button class="delete-button" onclick="event.stopPropagation();">삭제</button>
-          </a>
-          <a href="/mypage/react_list/2" class="resume-card">
-            <span class="resume-title">이력서 2</span>
-            <button class="delete-button" onclick="event.stopPropagation();">삭제</button>
-          </a>
-          <a href="/mypage/react_list/3" class="resume-card">
-            <span class="resume-title">이력서 3</span>
-            <button class="delete-button" onclick="event.stopPropagation();">삭제</button>
-          </a>
+          <div th:each="resume : ${resumes}" class="resume-card-wrapper">
+            <a th:href="@{/mypage/react_detail/{id}(id=${resume.resumeIdx})}" class="resume-card">
+              <span class="resume-title" th:text="${resume.title}"></span>
+            </a>
+            <form th:action="@{/mypage/react_delete/{id}(id=${resume.resumeIdx})}" method="post"
+                  onsubmit="return confirm('정말 삭제하시겠습니까?');">
+              <button type="submit" class="delete-button">삭제</button>
+            </form>
+          </div>
         </div>
 
         <!-- 페이지네이션 -->
