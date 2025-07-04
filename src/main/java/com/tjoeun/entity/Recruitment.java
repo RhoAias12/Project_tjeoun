@@ -7,6 +7,7 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -66,8 +67,11 @@ public class Recruitment {
     this.createdAt = LocalDateTime.now();
   }
 
+//  @OneToMany(mappedBy = "recruitment", cascade = CascadeType.ALL, orphanRemoval = true)
+//  private List<Favorite> favorites;
+
+
+
   @OneToMany(mappedBy = "recruitment", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<Favorite> favorites;
-
-
+  private List<Favorite> favorites = new ArrayList<>();
 }
