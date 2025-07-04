@@ -66,7 +66,7 @@
 
     <!-- 게시물 리스트 -->
     <div class="apply-list" th:each="apply : ${applyList}">
-      <a th:href="@{/admin/apply_detail/{applyHistoryId}(applyHistoryId=${apply.applyHistoryId})}" class="apply-card">
+      <a th:href="|/admin/apply_detail/${apply.applyHistoryId}?page=${applyPage.number + 1}&sortOption=${sortOption}|" class="apply-card">
       <div class="apply-info">
           <div class="job-title" th:text="${apply.recruitmentTitle}">공고명</div>
           <div class="company-name" th:text="${apply.recruitmentCompany}">회사명</div>

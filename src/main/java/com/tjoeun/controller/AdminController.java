@@ -151,37 +151,47 @@ public class AdminController {
                                 @RequestParam(defaultValue = "10") int size,
                                 @RequestParam(defaultValue = "all") String sortOption,
                                 Model model) {
-        Page<ApplyHistoryDTO> applyPage = adminService.getPagedApplyHistory(page - 1, size, sortOption);
+        int pageIndex = (page < 1) ? 0 : (page - 1);
+
+        Page<ApplyHistoryDTO> applyPage = adminService.getPagedApplyHistory(pageIndex, size, sortOption);
         PaginationUtil.setPaging(model, applyPage, "/admin/apply_list");
 
         model.addAttribute("applyList", applyPage.getContent());
         model.addAttribute("applyPage", applyPage);
-        model.addAttribute("sortOption", sortOption);  // 선택 상태 유지용
+        model.addAttribute("sortOption", sortOption);
+
         return "admin/apply_list";
     }
 
 
+
+    // 상세 페이지 - applyDetail 메서드
     @GetMapping("/apply_detail/{applyHistoryId}")
-    public String applyDetail(@PathVariable Integer applyHistoryId, Model model, HttpServletRequest request) {
-        ApplyDetailDTO detailDTO = adminService.getApplyDetailById(applyHistoryId);
-        model.addAttribute("applyDetail", detailDTO);
-        model.addAttribute("applyDetailId", applyHistoryId);
-
-        CsrfToken token = (CsrfToken) request.getAttribute("_csrf");
-        model.addAttribute("_csrf", token);
-
+    public String applyDetail(
+      @PathVariable Integer applyHistoryId,
+      @RequestParam(value = "page", defaultValue = "1") int page,
+      @RequestParam(value = "sortOption", defaultValue = "all") String sortOption,
+      Model model
+    ) {
+        ApplyDetailDTO applyDetail = adminService.getApplyDetailById(applyHistoryId);
+        model.addAttribute("applyDetail", applyDetail);
+        model.addAttribute("applyHistoryId", applyHistoryId);
+        model.addAttribute("page", page);
+        model.addAttribute("sortOption", sortOption);
         return "admin/apply_detail";
     }
 
+    // 상태 변경 후 리다이렉트 메서드도 파라미터 이름 맞춤
     @PostMapping("/apply_detail/{applyHistoryId}/updateStatus")
     public String updateApplyStatus(@PathVariable Integer applyHistoryId,
                                     @RequestParam("newStatus") String newStatus,
+                                    @RequestParam(value = "page", defaultValue = "0") int page,
+                                    @RequestParam(value = "sortOption", defaultValue = "apply_latest") String sortOption,
                                     RedirectAttributes redirectAttributes) {
         adminService.updateApplyStatus(applyHistoryId, newStatus);
-
-        String displayStatus = ApplyHistory.ApplyStatus.valueOf(newStatus).getDisplay();
-        redirectAttributes.addAttribute("statusChanged", displayStatus);
-
+        redirectAttributes.addAttribute("statusChanged", newStatus);
+        redirectAttributes.addAttribute("page", page);
+        redirectAttributes.addAttribute("sortOption", sortOption);  // 여기 이름 맞춤
         return "redirect:/admin/apply_detail/" + applyHistoryId;
     }
 
