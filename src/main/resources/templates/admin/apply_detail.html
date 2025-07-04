@@ -8,8 +8,8 @@
     <link rel="stylesheet" th:href="@{/css/header.css}" />
     <link rel="stylesheet" th:href="@{/css/footer.css}" />
     <link rel="stylesheet" th:href="@{/css/apply_detail.css}" />
-    <script defer th:src="@{/js/header.js}"></script>
-    <script defer th:src="@{/js/footer.js}"></script>
+<!--    <script defer th:src="@{/js/header.js}"></script>-->
+<!--    <script defer th:src="@{/js/footer.js}"></script>-->
 
     <script>
       document.addEventListener('DOMContentLoaded', function () {
@@ -42,8 +42,10 @@
       // 변경 후 alert 메시지 띄우기
       const urlParams = new URLSearchParams(window.location.search);
       const statusChanged = urlParams.get("statusChanged");
+
       if (statusChanged) {
         alert(statusChanged + "으로 변경되었습니다.");
+        window.history.replaceState({}, document.title, window.location.pathname);
       }
     </script>
   </head>
@@ -81,12 +83,11 @@
       </section>
 
       <div class="status-wrapper">
-        <form id="statusForm"
-              th:action="@{/admin/apply_detail/{id}/updateStatus(id=${applyHistoryId})}"
-              method="post">
+        <form id="statusForm" th:action="@{/admin/apply_detail/{id}/updateStatus(id=${applyHistoryId})}" method="post">
 <!--    위에거 였는데 처음에 바꾸려고 할때 403 에러뜸      -->
 <!--          <input type="hidden" name="applyHistoryId" th:value="${applyHistoryId}" />-->
           <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+          <input type="hidden" name="__RequestVerificationToken" value="토큰값" />
 
           <select class="status-select" name="newStatus" id="statusSelect">
             <option value="SUBMITTED" th:selected="${applyDetail.statusDisplay == '진행중'}">진행중</option>
@@ -192,3 +193,5 @@
     <div th:replace="include/footer :: footer"></div>
   </body>
 </html>
+
+updateStatus:1  POST http://localhost/admin/apply_detail/2/updateStatus 403 (Forbidden)
