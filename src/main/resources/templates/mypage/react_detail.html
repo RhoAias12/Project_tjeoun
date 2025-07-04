@@ -83,22 +83,18 @@
             </td>
           </tr>
 
-          <tr>
-            <th><div class="question"><p>질문1.</p><p th:text="${resume.question1}"></p></div></th>
-            <td><p class="content" th:text="${resume.answer1}"></p></td>
+          <tr th:each="content, iterStat : ${resume.resumeContents}">
+            <th>
+              <div class="question">
+                <p>질문[[${iterStat.count}]].</p>
+                <p th:text="${content.question}"></p>
+              </div>
+            </th>
+            <td>
+              <p class="content" th:text="${content.context}"></p>
+            </td>
           </tr>
-          <tr>
-            <th><div class="question"><p>질문2.</p><p th:text="${resume.question2}"></p></div></th>
-            <td><p class="content" th:text="${resume.answer2}"></p></td>
-          </tr>
-          <tr>
-            <th><div class="question"><p>질문3.</p><p th:text="${resume.question3}"></p></div></th>
-            <td><p class="content" th:text="${resume.answer3}"></p></td>
-          </tr>
-          <tr>
-            <th><div class="question"><p>질문4.</p><p th:text="${resume.question4}"></p></div></th>
-            <td><p class="content" th:text="${resume.answer4}"></p></td>
-          </tr>
+
 
           <tr>
             <th class="link">포트폴리오 링크</th>
