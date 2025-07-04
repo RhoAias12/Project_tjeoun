@@ -81,11 +81,19 @@
       </section>
 
       <div class="status-wrapper">
-        <select class="status-select" name="newStatus" id="statusSelect">
-          <option value="SUBMITTED" th:selected="${applyDetail.statusDisplay == '진행중'}">진행중</option>
-          <option value="FINALIZED" th:selected="${applyDetail.statusDisplay == '합격'}">합격</option>
-          <option value="REJECTED" th:selected="${applyDetail.statusDisplay == '불합격'}">불합격</option>
-        </select>
+        <form id="statusForm"
+              th:action="@{/admin/apply_detail/{id}/updateStatus(id=${applyHistoryId})}"
+              method="post">
+<!--    위에거 였는데 처음에 바꾸려고 할때 403 에러뜸      -->
+<!--          <input type="hidden" name="applyHistoryId" th:value="${applyHistoryId}" />-->
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+          <select class="status-select" name="newStatus" id="statusSelect">
+            <option value="SUBMITTED" th:selected="${applyDetail.statusDisplay == '진행중'}">진행중</option>
+            <option value="FINALIZED" th:selected="${applyDetail.statusDisplay == '합격'}">합격</option>
+            <option value="REJECTED" th:selected="${applyDetail.statusDisplay == '불합격'}">불합격</option>
+          </select>
+        </form>
       </div>
 
       <!-- 상세 테이블 -->

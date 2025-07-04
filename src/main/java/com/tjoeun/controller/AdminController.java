@@ -168,10 +168,11 @@ public class AdminController {
         return "admin/apply_detail";
     }
 
-    @PostMapping("/admin/apply_detail/{applyHistoryId}/updateStatus")
+    @PostMapping("/apply_detail/{applyHistoryId}/updateStatus")
     public String updateApplyStatus(@PathVariable Integer applyHistoryId,
                                     @RequestParam("newStatus") String newStatus,
                                     RedirectAttributes redirectAttributes) {
+
 
         adminService.updateApplyStatus(applyHistoryId, newStatus);
 
