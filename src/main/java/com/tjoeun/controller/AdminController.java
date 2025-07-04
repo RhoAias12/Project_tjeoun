@@ -1,9 +1,8 @@
 package com.tjoeun.controller;
 
-import com.tjoeun.dto.ApplyHistoryDTO;
-import com.tjoeun.dto.RecruitmentDTO;
-import com.tjoeun.dto.UserFormDto;
-import com.tjoeun.dto.UserListDto;
+import com.tjoeun.dto.*;
+import com.tjoeun.entity.ApplyHistory;
+import com.tjoeun.repository.ApplyHistoryRepository;
 import com.tjoeun.service.AdminService;
 
 import com.tjoeun.service.RecruitmentService;
@@ -19,7 +18,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.List;
+import org.springframework.security.web.csrf.CsrfToken;
+import jakarta.servlet.http.HttpServletRequest;
 
 
 @Controller
@@ -147,36 +147,53 @@ public class AdminController {
     }
 
     @GetMapping("/apply_list")
-    public String applyList(@RequestParam(defaultValue = "1") int page,
-                            @RequestParam(defaultValue = "apply_all") String applySort,
-                            @RequestParam(defaultValue = "deadline_all") String deadlineSort,
-                            @PageableDefault(size = 10) Pageable pageable,
-                            Model model) {
+    public String applyListPage(@RequestParam(defaultValue = "1") int page,
+                                @RequestParam(defaultValue = "10") int size,
+                                @RequestParam(defaultValue = "all") String sortOption,
+                                Model model) {
+        int pageIndex = (page < 1) ? 0 : (page - 1);
 
-        Pageable correctedPageable = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
-
-        Page<ApplyHistoryDTO> applyPage = adminService.getPagedApplyHistory(
-          page - 1,
-          pageable.getPageSize(),
-          applySort,
-          deadlineSort
-        );
-
-        // 페이징 정보 설정
+        Page<ApplyHistoryDTO> applyPage = adminService.getPagedApplyHistory(pageIndex, size, sortOption);
         PaginationUtil.setPaging(model, applyPage, "/admin/apply_list");
 
-        // 리스트 및 정렬값 전달
         model.addAttribute("applyList", applyPage.getContent());
         model.addAttribute("applyPage", applyPage);
-        model.addAttribute("applySort", applySort);
-        model.addAttribute("deadlineSort", deadlineSort);
+        model.addAttribute("sortOption", sortOption);
 
         return "admin/apply_list";
     }
 
 
-    @GetMapping("/apply_detail")
-    public String applyDetail() {
+
+    // 상세 페이지 - applyDetail 메서드
+    @GetMapping("/apply_detail/{applyHistoryId}")
+    public String applyDetail(
+      @PathVariable Integer applyHistoryId,
+      @RequestParam(value = "page", defaultValue = "1") int page,
+      @RequestParam(value = "sortOption", defaultValue = "all") String sortOption,
+      Model model
+    ) {
+        ApplyDetailDTO applyDetail = adminService.getApplyDetailById(applyHistoryId);
+        model.addAttribute("applyDetail", applyDetail);
+        model.addAttribute("applyHistoryId", applyHistoryId);
+        model.addAttribute("page", page);
+        model.addAttribute("sortOption", sortOption);
         return "admin/apply_detail";
     }
+
+    // 상태 변경 후 리다이렉트 메서드도 파라미터 이름 맞춤
+    @PostMapping("/apply_detail/{applyHistoryId}/updateStatus")
+    public String updateApplyStatus(@PathVariable Integer applyHistoryId,
+                                    @RequestParam("newStatus") String newStatus,
+                                    @RequestParam(value = "page", defaultValue = "0") int page,
+                                    @RequestParam(value = "sortOption", defaultValue = "apply_latest") String sortOption,
+                                    RedirectAttributes redirectAttributes) {
+        adminService.updateApplyStatus(applyHistoryId, newStatus);
+        redirectAttributes.addAttribute("statusChanged", newStatus);
+        redirectAttributes.addAttribute("page", page);
+        redirectAttributes.addAttribute("sortOption", sortOption);  // 여기 이름 맞춤
+        return "redirect:/admin/apply_detail/" + applyHistoryId;
+    }
+
+
 }
