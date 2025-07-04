@@ -1,0 +1,36 @@
+<!-- pagination.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head></head>
+<body>
+
+<div th:fragment="fragment (jobPage, startPage, endPage, url, customSort)"
+     class="pagination">
+  <ul class="pagination-list">
+
+    <!-- 이전 버튼 -->
+    <li th:if="${jobPage.number > 0}">
+      <a class="page-btn"
+         th:href="@{${url}(page=${jobPage.number}, customSort=${customSort})}">〈</a>
+    </li>
+
+    <!-- 페이지 번호 -->
+    <li th:if="${endPage >= startPage}"
+        th:each="i : ${#numbers.sequence(startPage + 1, endPage + 1)}">
+      <a class="page-btn"
+         th:href="@{${url}(page=${i}, customSort=${customSort})}"
+         th:classappend="${i} == ${jobPage.number + 1} ? ' active' : ''"
+         th:text="${i}">1</a>
+    </li>
+
+    <!-- 다음 버튼 -->
+    <li th:if="${jobPage.number < jobPage.totalPages - 1}">
+      <a class="page-btn"
+         th:href="@{${url}(page=${jobPage.number + 2}, customSort=${customSort})}">〉</a>
+    </li>
+
+  </ul>
+</div>
+
+</body>
+</html>

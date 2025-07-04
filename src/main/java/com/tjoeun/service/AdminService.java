@@ -42,6 +42,15 @@ public class AdminService {
       case "email":
         sort = Sort.by(Sort.Direction.ASC, "userEmail");
         break;
+      case "emailDesc":
+        sort = Sort.by(Sort.Direction.DESC, "userEmail");
+        break;
+      case "nickname":
+        sort = Sort.by(Sort.Direction.ASC, "userNickname");
+        break;
+      case "nicknameDesc":
+        sort = Sort.by(Sort.Direction.DESC, "userNickname");
+        break;
       default:
         sort = Sort.by(Sort.Direction.DESC, "userIdx");
         break;
@@ -54,6 +63,7 @@ public class AdminService {
       user.getUserNickname()
     ));
   }
+
 
 
   // 회원 삭제

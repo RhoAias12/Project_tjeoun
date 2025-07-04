@@ -9,6 +9,7 @@ import com.tjoeun.repository.*;
 import com.tjoeun.service.MyPageService;
 import com.tjoeun.service.UserService;
 import com.tjoeun.util.PaginationUtil;
+import com.tjoeun.util.PaginationUtil2;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -65,6 +66,7 @@ public class MyPageController {
     public String reactList() {
         return "mypage/react_list";
     }
+
     // 이력서 저장
     @PostMapping("/mypage/react_write")
     public String saveResume(@ModelAttribute("resumeDto") @Valid ResumeDto resumeDto, BindingResult bindingResult, Principal principal) {
@@ -133,6 +135,7 @@ public class MyPageController {
 
     @GetMapping("/apply_status")
     public String applyStatus(@RequestParam(defaultValue = "1") int page,
+                              @RequestParam(required = false) String customSort,
                               @PageableDefault(size = 10) Pageable pageable,
                               Model model,
                               Principal principal) {
@@ -146,12 +149,14 @@ public class MyPageController {
         PaginationUtil.setPaging(model, historyPage, "/mypage/apply_status");
 
         model.addAttribute("historyList", historyPage.getContent());
+        model.addAttribute("jobPage", historyPage);
 
         return "mypage/apply_status";
     }
 
     @GetMapping("/scrap")
     public String scrapPage(@RequestParam(defaultValue = "1") int page,
+                            @RequestParam(required = false) String customSort,
                             @PageableDefault(size = 8) Pageable pageable,
                             Model model,
                             Principal principal) {
@@ -160,8 +165,15 @@ public class MyPageController {
         Pageable correctedPageable = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
         Page<FavoriteDTO> jobPage = myPageService.getPagedFavorites(email, correctedPageable);
 
+        System.out.println("📌 로그인 유저: " + email);
+        System.out.println("📌 스크랩 개수: " + jobPage.getTotalElements());
+        System.out.println("📌 스크랩 리스트: " + jobPage.getContent());
+
+
         model.addAttribute("favorites", jobPage.getContent());
-        PaginationUtil.setPaging(model, jobPage, "/mypage/scrap");
+        model.addAttribute("jobPage", jobPage);
+        model.addAttribute("customSort", customSort);
+        PaginationUtil2.setPaging(model, jobPage, "/mypage/scrap", customSort, 5);
 
         return "mypage/scrap";
     }
