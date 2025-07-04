@@ -156,8 +156,9 @@ public class MyPageController {
         Resume resume = resumeRepository.findById(id)
           .orElseThrow(() -> new IllegalArgumentException("해당 이력서를 찾을 수 없습니다."));
         model.addAttribute("resume", resume);
-        return "mypage/react_detail";  // => /templates/mypage/react_detail.html 로 이동
+        return "mypage/react_detail";
     }
+
 
     //삭제
     @PostMapping("/react_delete/{id}")
