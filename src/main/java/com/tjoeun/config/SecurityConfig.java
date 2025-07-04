@@ -24,9 +24,12 @@ public class SecurityConfig {
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     return http
       .csrf(csrf -> csrf
-        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+        .csrfTokenRepository(new CookieCsrfTokenRepository())
       )
-      .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
+//      .csrf(csrf -> csrf
+//        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+//      )
+//      .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
       .authorizeHttpRequests(auth -> auth
         .requestMatchers("/css/**", "/js/**", "/images/**", "/static/**").permitAll()
         .requestMatchers("/", "/user/signup", "/user/login", "/api/user/**", "/user/login/error").permitAll()

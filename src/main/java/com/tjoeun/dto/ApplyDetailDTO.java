@@ -1,40 +1,22 @@
 package com.tjoeun.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
-public class ApplyHistoryDTO {
-
-  private Integer applyHistoryId;
-
-  private String statusDisplay;
-
+public class ApplyDetailDTO {
   private String recruitmentTitle;
-
   private String recruitmentCompany;
-
-  private Long recruitmentId;
-
-  private Integer resumeId;
-
-  private String userNickname;
-
-  private String userEmail;
-
-  // 추가 필드들 (Recruitment)
   private LocalDate recruitmentDeadline;
   private String recruitmentLocation;
   private String recruitmentLogoUrl;
 
-  // 추가 필드들 (Resume)
   private String resumeTitle;
   private String resumeImg;
   private String resumeAddress;
@@ -44,8 +26,11 @@ public class ApplyHistoryDTO {
   private String resumeAntecedents;
   private String resumeAwards;
   private String resumeContext;
+  private List<ResumeContentDTO> resumeContentList;
 
-  // 추가 필드들 (Users)
   private String userName;
+  private String userEmail;
   private LocalDate userBirth;
+
+  private String statusDisplay;
 }
