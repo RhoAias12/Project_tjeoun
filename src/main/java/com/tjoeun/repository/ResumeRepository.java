@@ -3,9 +3,16 @@ package com.tjoeun.repository;
 import com.tjoeun.entity.Resume;
 import com.tjoeun.entity.Users;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
 
 import java.util.Optional;
 
+import java.util.List;
+
+@Repository
 public interface ResumeRepository extends JpaRepository<Resume, Long> {
   Optional<Resume> findTopByUserOrderByCreatedAtDesc(Users user);
+
+    List<Resume> findByUser_UserIdx(Long userIdx);
 }
