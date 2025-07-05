@@ -64,7 +64,7 @@
         <div class="apply-list">
           <div th:each="recruit : ${recruitmentList}"
                class="apply-card"
-               th:onclick="|location.href='@{/admin/recruit_modify(recruitmentIdx=${recruit.recruitmentIdx})}'|"
+               th:onclick="|location.href='@{/admin/recruit_modify/{recruitmentIdx}(recruitmentIdx=${recruit.recruitmentIdx}, page=${page}, deadlineSort=${deadlineSort})}'|"
                style="cursor: pointer;">
             <div class="apply-info">
               <div class="job-title" th:text="${recruit.title}">공고명</div>

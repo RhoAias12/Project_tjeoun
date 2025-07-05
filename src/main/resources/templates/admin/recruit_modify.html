@@ -22,13 +22,13 @@
           <div class="title">
             <input
                     type="text"
-                    value="[인텔리전스랩스그룹] 데이터 분석가 (인게임 로그 및 비즈니스 인사이트 분석)"
+                    value="공고명"
             />
           </div>
           <div class="company">
             <input
                     type="text"
-                    value="바이오리서치에이아이"
+                    value="회사명"
                     style="width: 100%; font-size: 15px"
             />
           </div>
@@ -131,7 +131,10 @@ Jira, Confluence • 개발 환경 : AWS 클라우드 [이런 사람을 원해�
       </section>
     </div>
     <div class="button-group">
-      <button type="button">목록보기</button>
+      <button type="button"
+              th:onclick="|location.href='@{/admin/recruit_list(page=${page}, deadlineSort=${deadlineSort})}'|">
+        목록보기
+      </button>
       <button type="button">수정하기</button>
     </div>
     <div th:replace="include/footer :: footer"></div>

@@ -121,10 +121,15 @@ public class AdminController {
         return "admin/recruit_list";
     }
 
-    @GetMapping("/recruit_modify")
-    public String recruitModify(@RequestParam("recruitmentIdx") Long recruitmentIdx, Model model) {
+    @GetMapping("/recruit_modify/{recruitmentIdx}")
+    public String recruitModify(@PathVariable("recruitmentIdx") Long recruitmentIdx,
+                                @RequestParam(defaultValue = "1") int page,
+                                @RequestParam(defaultValue = "deadline_all") String deadlineSort,
+                                Model model) {
         RecruitmentDTO dto = recruitmentService.getPostById(recruitmentIdx);
         model.addAttribute("recruit", dto);
+        model.addAttribute("page", page);
+        model.addAttribute("deadlineSort", deadlineSort);
         return "admin/recruit_modify";
     }
 
