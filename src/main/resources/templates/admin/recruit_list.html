@@ -45,7 +45,7 @@
             <form method="get" th:action="@{/admin/recruit_list}" style="display: flex; gap: 10px;">
 
               <select class="sort-select" name="deadlineSort" onchange="this.form.submit()">
-                <option value="deadline_all" th:selected="${deadlineSort == 'deadline_all'}">마감일: 전체</option>
+                <option value="deadline_all" th:selected="${deadlineSort == 'deadline_all'}">전체</option>
                 <option value="deadline_desc" th:selected="${deadlineSort == 'deadline_desc'}">마감일: 내림차순</option>
                 <option value="deadline_asc" th:selected="${deadlineSort == 'deadline_asc'}">마감일: 오름차순</option>
               </select>
@@ -64,7 +64,7 @@
         <div class="apply-list">
           <div th:each="recruit : ${recruitmentList}"
                class="apply-card"
-               th:onclick="|location.href='@{/admin/recruit_modify(recruitmentIdx=${recruit.recruitmentIdx})}'|"
+               th:onclick="|location.href='@{/admin/recruit_modify/{recruitmentIdx}(recruitmentIdx=${recruit.recruitmentIdx}, page=${page}, deadlineSort=${deadlineSort})}'|"
                style="cursor: pointer;">
             <div class="apply-info">
               <div class="job-title" th:text="${recruit.title}">공고명</div>
