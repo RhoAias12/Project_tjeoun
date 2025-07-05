@@ -233,4 +233,13 @@ public class AdminService {
     recruitmentRepository.save(entity);
   }
 
+  public String getStatusDisplayName(String status) {
+    return switch (status) {
+      case "SUBMITTED" -> "진행중";
+      case "FINALIZED" -> "합격";
+      case "REJECTED"  -> "불합격";
+      default -> "알 수 없음";
+    };
+  }
+
 }
