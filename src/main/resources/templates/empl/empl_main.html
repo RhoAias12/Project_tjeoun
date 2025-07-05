@@ -60,7 +60,7 @@
     <div class="card-grid">
       <div class="job-card" th:each="job : ${jobPage.content}">
         <a th:href="@{'/empl/empl_detail/' + ${job.recruitmentIdx}}">
-          <img th:src="${job.logoUrl}" alt="회사 로고" class="job-logo" />
+          <img th:src="${#uris.escapePath(job.logoUrl)}" alt="회사 로고" class="job-logo" />
           <h3 class="job-title" th:text="${job.title}">공고 제목</h3>
           <p class="job-deadline"
              th:text="${#strings.startsWith(job.deadline.toString(), '9999') ? '상시채용' : '마감일: ' + job.deadline}">
@@ -69,22 +69,6 @@
              </a>
            </div>
          </div>
-
-
-         <!-- 페이지네이션 -->
-<!--         <div class="pagination">-->
-<!--           <ul class="pagination-list">-->
-<!--             <li><a href="#" class="page-btn">〈</a></li>-->
-<!--             <li><a href="#" class="page-btn active">1</a></li>-->
-<!--             <li><a href="#" class="page-btn">2</a></li>-->
-<!--             <li><a href="#" class="page-btn">3</a></li>-->
-<!--             <li><a href="#" class="page-btn">4</a></li>-->
-<!--             <li><a href="#" class="page-btn">5</a></li>-->
-<!--             <li><a href="#" class="page-btn">〉</a></li>-->
-<!--           </ul>-->
-<!--         </div>-->
-<!--       </div>-->
-<!--     </div>-->
 
     <div th:replace="fragments/pagination2 :: fragment(${jobPage},
              ${startPage}, ${endPage}, '/empl/empl_main', ${customSort})">
