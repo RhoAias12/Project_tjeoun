@@ -98,10 +98,13 @@
 
 
   <button type="button"
-          th:onclick="|location.href='/mypage/choice_list/${job.recruitmentIdx}'|"
-          sec:authorize="hasAuthority('ROLE_USER')">
+          class="apply-button"
+          th:attr="data-recruitment-id=${job.recruitmentIdx}"
+          sec:authorize="hasAuthority('ROLE_USER')"
+          onclick="checkAndGoApply(this)">
     지원하기
   </button>
+
 
 
   <button type="button" onclick="location.href='/empl/empl_main'">목록보기</button>
@@ -151,5 +154,28 @@
     });
   }
 </script>
+
+<script>
+  function checkAndGoApply(button) {
+    const recruitmentId = button.getAttribute("data-recruitment-id");
+
+    fetch(`/mypage/check-applied?recruitmentIdx=${recruitmentId}`)
+      .then(response => response.json())
+      .then(isApplied => {
+        if (isApplied) {
+          alert("이미 지원한 공고입니다. 중복 지원은 불가능합니다.");
+        } else {
+          // 이력서 선택 페이지로 이동
+          location.href = `/mypage/choice_list/${recruitmentId}`;
+        }
+      })
+      .catch(err => {
+        console.error("지원 여부 확인 실패:", err);
+        alert("지원 여부 확인 중 오류가 발생했습니다.");
+      });
+  }
+</script>
+
+
 </body>
 </html>
