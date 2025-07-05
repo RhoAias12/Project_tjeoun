@@ -16,129 +16,75 @@
       <p>공고 관리</p>
     </div>
 
-    <div class="container">
-      <section class="job-info">
-        <div class="info-left">
-          <div class="title">
-            <input
-                    type="text"
-                    value="공고명"
-            />
+    <form th:action="@{/admin/recruit_modify}" method="post" enctype="multipart/form-data" id="recruitForm">
+      <input type="hidden" name="recruitmentIdx" th:value="${recruit.recruitmentIdx}" />
+      <input type="hidden" name="page" th:value="${page}" />
+      <input type="hidden" name="deadlineSort" th:value="${deadlineSort}" />
+      <input type="hidden" name="logoUrl" th:value="${recruit.logoUrl}" />
+      <div class="container">
+        <section class="job-info">
+          <div class="info-left">
+            <div class="title">
+              <input type="text" name="title" th:value="${recruit.title}" />
+            </div>
+            <div class="company">
+              <input type="text" name="company" th:value="${recruit.company}" />
+            </div>
+            <div class="meta">
+              <span class="deadline">
+                마감일:
+                <input type="date" name="deadline" th:value="${#temporals.format(recruit.deadline, 'yyyy-MM-dd')}" />
+              </span>
+              <span class="region" style="margin-left: 10px">
+                지역:
+                <input type="text" name="location" th:value="${recruit.location}" />
+              </span>
+            </div>
           </div>
-          <div class="company">
-            <input
-                    type="text"
-                    value="회사명"
-                    style="width: 100%; font-size: 15px"
-            />
+          <div class="info-right">
+            <label for="logoUpload" class="logo-label"></label>
+            <input type="file" id="logoUpload" name="logo" accept="image/*" />
+            <img id="logoPreview" th:src="@{${recruit.logoUrl}}" alt="회사 로고" class="logo" />
           </div>
-          <div class="meta">
-            <span class="deadline">
-              마감일:
-              <input type="date" value="2025-12-31" style="font-size: 13px" />
-            </span>
-            <span class="region" style="margin-left: 10px">
-              지역:
-              <input
-                      type="text"
-                      value="서울시 강남구"
-                      style="font-size: 13px"
-              />
-            </span>
-          </div>
-        </div>
-        <div class="info-right">
-          <label for="logoUpload" class="logo-label"></label>
-          <input type="file" id="logoUpload" accept="image/*" />
-          <img
-                  id="logoPreview"
-                  src="/images/tjoeun.jpg"
-                  alt="회사 로고"
-                  class="logo"
-          />
-        </div>
-      </section>
+        </section>
 
-      <section class="job-desc">
+        <section class="job-desc">
 
-        <h3>고용형태</h3>
-        <textarea>
-정규직 수습 3개월
-        </textarea>
+          <h3>고용형태</h3>
+          <textarea name="employmentType" th:utext="${recruit.employmentType}"></textarea>
 
+          <h3>요구사항</h3>
+          <textarea name="qualifications" th:utext="${recruit.qualifications}"></textarea>
 
-        <h3>요구사항</h3>
-        <textarea>
-경력 : 신입 ~ 2년 이하 웹 프레임워크 백엔드 실무 경험 개발 스택 • Spring Framework 기반 Kotlin / Java • JPA, Querydsl • 데이터베이스 :
-관계형 DB 설계·운영 이해 • 협업 도구 : Git / GitHub 기반 버전 관리,
-Jira, Confluence • 개발 환경 : AWS 클라우드 [이런 사람을 원해요] •
-스타트업의 빠른 사이클에서 비즈니스 목표에 맞춰 설계·개발할 수 있는 분
-• 문서화를 즐기고, 지식 공유에 적극적인 분 • 스스로 일정 관리가
-가능하며 책임감 있는 분 • 새로운 기술 학습에 열려 있고 꾸준히
-성장하려는 분 • 긍정적 사고로 원활한 커뮤니케이션을 하는 분 • 개발
-이야기를 나누고 토론하는 것을 좋아하시는 분
-  </textarea
-  >
+          <h3>주요업무</h3>
+          <textarea name="responsibilities" th:utext="${recruit.responsibilities}"></textarea>
 
-        <h3>주요업무</h3>
-        <textarea>
-• 고가용성, 고확장성 아키텍처 및 API 설계, 개발, 테스트 및 운영 •
-기획단의 요구사항 분석 및 솔루션 제안 • 잠재적인 기술 문제에 대한
-예측, 해결 • 관계형 Database 관리 • 대용량 데이터의 효율적인 관리 •
-서버 및 데이터 보안 • 기술 문서 작성
-  </textarea
-  >
+          <h3>복지 및 혜택</h3>
+          <textarea name="benefits" th:utext="${recruit.benefits}"></textarea>
 
-        <h3>복지 및 혜택</h3>
-        <textarea>
-(함께 성장하는 설렘이 있는 회사를 만들고자 합니다.) • 유연한 근무 시간
-(코어타임: 오전 11시 ~ 오후 5시(8h 근무)) • 게더타운에서 만나요! (매주
-1회 고정 요일 재택근무) • 점심 식사비 지원 평균 11,000원 내외 • 보다
-빠른 성과 인정 (연봉 인상 및 계약 주기 : 6개월) • 자율 연차 지원
-(1시간 단위로 연차 사용 가능) • 멋진 동료는 최고의 복지 (열정적인
-동료들과 분위기로 인한 Motivation) • 서로를 존중하는 수평적 문화 지향
-("oo"님 호칭 및 상호 존댓말 사용) • 우수/장기 근무자 스톡옵션 부여
-(몰입할 수 있는 환경을 제공합니다.) • 최신 맥북Pro (개발자/디자이너) •
-대형 모니터 (34인치 이상) • 무접점 키보드 및 장비 지원 • 고급 가죽
-데스크매트(색 선택 필요) • 폴로 후드 집업, 후리스 등 (With 회사 로고)
-• 고급 영양제 무제한 제공 • 각종 간식 무제한 제공 • 임직원 개별
-시현하다 프로필 사진 촬영 • 쾌적한 편의시설 수면실 • 퍼포먼스 코치 및
-멘토링 시스템 • 기타 업무에 필요한 제품 지원 (짧은 시간 동안 많은
-성과를 내고 있습니다.) • 예비창업패키지 선정 (보건산업진흥원) •
-데이터바우처 수요기업 선정 (AI가공) • KAIST Main Open Venture Lab 선정
-및 최우수상 수상 (1위) • DCAMP 디데이 디캠프상 수상 (1위) •
-아산나눔재단 마루 입주사 선정 • 서울대 더 비기닝 창업경진대회 장려상
-수상 (5위) • 서울창조경제혁신 센터장상 수상 • 카이스트창업투자,
-크릿벤처스, 소풍벤처스와 엔젤투자자 6인으로부터(10억원) Seed 투자유치
-완료 • 데이터바우처 공급기업 선정 • 기업부설연구소 설립 • 신한 스퀘어
-브릿지 주관 신한 인큐베이션 10기 선정 • 초기창업패키지 선정
-(단국대학교) • 양재AI허브 입주사 선정 • 딥테크 팁스 선정 (15억원) •
-카이스트창업투자, 흥국증권, 신한캐피탈, BSK인베스트먼트와 엔젤투자자
-1인으로부터 (20억원) Pre-A 투자유치 • AWS Startup Growth Program – AI
-& Deeptech 선정 • 신한 스퀘어브릿지 2024 멤버십 선정 • 머스트
-엑셀러레이터 글로벌 오픈 이노베이션 「MUST. CONNECT 2024」 선정 •
-중소벤처기업부, 2024년 팁스 해외마케팅 창업기업 선정(1억원)
-  </textarea
-  >
+          <h3>우대사항</h3>
+          <textarea name="preferred" th:utext="${recruit.preferred}"></textarea>
 
-        <h3>우대사항</h3>
-        <textarea>
-연금·보험: 국민연금 , 고용보험, 산재보험, 건강보험, 퇴직연금, 사내시설: 주차장
-        </textarea>
-
-        <h3>연봉</h3>
-        <textarea>면접 후 결정</textarea>
-      </section>
-    </div>
-    <div class="button-group">
-      <button type="button"
-              th:onclick="|location.href='@{/admin/recruit_list(page=${page}, deadlineSort=${deadlineSort})}'|">
-        목록보기
-      </button>
-      <button type="button">수정하기</button>
-    </div>
-    <div th:replace="include/footer :: footer"></div>
+          <h3>연봉</h3>
+          <textarea name="salary" th:utext="${recruit.salary}"></textarea>
+        </section>
+      </div>
+      <div class="button-group">
+        <a th:href="@{/admin/recruit_list(page=${page}, deadlineSort=${deadlineSort})}">
+          <button type="button">목록보기</button>
+        </a>
+        <button type="button" onclick="confirmSubmit()">수정하기</button>
+      </div>
+    </form>
+  <div th:replace="include/footer :: footer"></div>
     <script>
+      function confirmSubmit() {
+        if (confirm("수정하시겠습니까?")) {
+          document.getElementById('recruitForm').submit();
+        }
+      }
+
+      // 로고 이미지 미리보기 기능
       document.addEventListener('DOMContentLoaded', function () {
         const logoUpload = document.getElementById('logoUpload');
         const logoPreview = document.getElementById('logoPreview');

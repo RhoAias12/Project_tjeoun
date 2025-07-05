@@ -16,10 +16,14 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import org.springframework.security.web.csrf.CsrfToken;
 import jakarta.servlet.http.HttpServletRequest;
+
+import java.io.File;
+import java.io.IOException;
 
 
 @Controller
@@ -132,6 +136,28 @@ public class AdminController {
         model.addAttribute("deadlineSort", deadlineSort);
         return "admin/recruit_modify";
     }
+
+    private final String uploadRoot = "C:\\Users\\Ray\\AKDM\\Project_tjeoun\\src\\main\\resources\\static";
+
+    @PostMapping("/recruit_modify")
+    public String modifyRecruit(@ModelAttribute RecruitmentDTO dto,
+                                @RequestParam("logo") MultipartFile logoFile,
+                                @RequestParam("page") int page,
+                                @RequestParam("deadlineSort") String deadlineSort) throws IOException {
+
+        if (!logoFile.isEmpty()) {
+            String logoPath = "/images/logos/" + dto.getCompany() + ".jpg";
+            logoFile.transferTo(new File(uploadRoot + logoPath));
+            dto.setLogoUrl(logoPath);
+        }
+
+        adminService.updateRecruitment(dto);
+
+        return "redirect:/admin/recruit_modify/" + dto.getRecruitmentIdx()
+          + "?page=" + page + "&deadlineSort=" + deadlineSort;
+    }
+
+
 
     @PostMapping("/recruit_delete")
     public String deleteRecruit(@RequestParam("recruitmentIdx") Long recruitmentIdx,
