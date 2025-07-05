@@ -14,7 +14,7 @@
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
   />
 
-  <title>지원관리</title>
+  <title>이력서 선택</title>
 
   <script>
     window.addEventListener('DOMContentLoaded', () => {
@@ -85,11 +85,10 @@
 
     <!-- 페이지네이션 -->
     <div class="pagination">
-      <div th:replace="fragments/pagination :: fragment
-            (${applyPage}, ${startPage}, ${endPage}, '/admin/apply_list')">
+      <div th:replace="fragments/pagination :: fragment (${jobPage}, ${startPage}, ${endPage}, '/mypage/choice_list/' + ${recruitmentIdx})">
       </div>
     </div>
-  </div>
+</div>
 </div>
 
 <!-- 푸터 -->
