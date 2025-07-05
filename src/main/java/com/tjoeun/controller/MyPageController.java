@@ -49,7 +49,6 @@ public class MyPageController {
     private final ResumeRepository resumeRepository;
     private final ResumeContentRepository resumeContentRepository;
 
-
     private final RecruitmentService recruitmentService;
 
     @GetMapping("/member_modify")
@@ -178,6 +177,15 @@ public class MyPageController {
           .orElseThrow(() -> new IllegalArgumentException("해당 이력서를 찾을 수 없습니다."));
         model.addAttribute("resume", resume);
         return "mypage/react_modify";
+    }
+
+    @PostMapping("/react_modify/{id}")
+    public String updateResume(
+      @PathVariable Long id,
+      @ModelAttribute ResumeDto resumeDto
+    ) {
+        myPageService.updateResume(id, resumeDto);
+        return "redirect:/mypage/react_list";
     }
 
 

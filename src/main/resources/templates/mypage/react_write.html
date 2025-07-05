@@ -10,6 +10,38 @@
     <link rel="stylesheet" th:href="@{/css/react.css}" />
 <!--    <script defer src="/js/main.js"></script>-->
 
+      <script>
+          function validateForm() {
+            const title = document.getElementById('title').value.trim();
+            const address = document.getElementById('address').value.trim();
+            const phoneNum = document.getElementById('phone_num').value.trim();
+            const question1 = document.querySelector('textarea[name="resumeContents[0].question"]').value.trim();
+            const context1 = document.querySelector('textarea[name="resumeContents[0].context"]').value.trim();
+
+            if (!title) {
+              alert('제목을 작성해 주세요!');
+              return false;
+            }
+            if (!address) {
+              alert('주소를 작성해 주세요!');
+              return false;
+            }
+            if (!phoneNum) {
+              alert('전화번호를 작성해 주세요!');
+              return false;
+            }
+            if (!question1) {
+              alert('질문 1을 작성해 주세요!');
+              return false;
+            }
+            if (!context1) {
+              alert('답변 1을 작성해 주세요!');
+              return false;
+            }
+            return true; // 통과 시 제출 허용
+          }
+      </script>
+
   </head>
   <body>
     <div th:replace="include/header :: header"></div>
@@ -17,12 +49,12 @@
       <p>마이페이지 &gt; 이력서</p>
     </div>
     <div class="container">
-        <form method="post" th:action="@{/mypage/react_write}" enctype="multipart/form-data">
+        <form method="post" th:action="@{/mypage/react_write}" enctype="multipart/form-data" onsubmit="return validateForm()">
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
         <table class="resume-table">
                 <!-- 첫 줄: 이미지 텍스트 -->
                 <tr>
-                    <th class="img">제목</th>
+                    <th class="img">* 제목</th>
                     <td class="centered-cell">
                         <div class="form-group">
                 <textarea
@@ -61,7 +93,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="address">주소</label>
+                            <label for="address">* 주소</label>
                             <textarea
                                     id="address" name="address"
                                     class="short-text"
@@ -72,7 +104,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="phone_num">전화번호</label>
+                            <label for="phone_num">* 전화번호</label>
                             <textarea
                                     id="phone_num" name="phoneNum"
                                     class="short-text"
@@ -128,8 +160,8 @@
                 </tr>
 
             <tr>
-                <th><textarea name="resumeContents[0].question" placeholder="질문 1을 입력하세요."></textarea></th>
-                <td><textarea name="resumeContents[0].context" placeholder="답변을 입력하세요."></textarea></td>
+                <th><textarea name="resumeContents[0].question" placeholder="* 질문 1을 입력하세요."></textarea></th>
+                <td><textarea name="resumeContents[0].context" placeholder="* 답변을 입력하세요."></textarea></td>
             </tr>
             <tr>
                 <th><textarea name="resumeContents[1].question" placeholder="질문 2을 입력하세요."></textarea></th>

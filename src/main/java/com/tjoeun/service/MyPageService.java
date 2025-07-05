@@ -101,6 +101,25 @@ public class MyPageService {
   }
 
   @Transactional
+  public void updateResume(Long id, ResumeDto dto) {
+    Resume resume = resumeRepository.findById(id)
+      .orElseThrow(() -> new IllegalArgumentException("이력서를 찾을 수 없습니다."));
+
+    resume.setTitle(dto.getTitle());
+    resume.setAddress(dto.getAddress());
+    resume.setPhoneNum(dto.getPhoneNum());
+    resume.setEducation(dto.getEducation());
+    resume.setAbility(dto.getAbility());
+    resume.setAntecedents(dto.getAntecedents());
+    resume.setAwards(dto.getAwards());
+    resume.setContext(dto.getContext());
+
+    // 필요한 경우 ResumeContents 등 연관 엔티티 처리
+
+    resumeRepository.save(resume);
+  }
+
+  @Transactional
   public void deleteScrap(FavoriteDTO favoriteDTO) {
     Users user = userRepository.findById(favoriteDTO.getUserIdx())
             .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
