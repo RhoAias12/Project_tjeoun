@@ -46,28 +46,24 @@ public class EmplController {
         boolean usingScrapSort = scrapSort != null && !scrapSort.isEmpty();
 
         if (usingScrapSort) {
-            // ✅ 1. 전체 가져와서 자바에서 필터/정렬
-            List<RecruitmentDTO> all = recruitmentService.getAllPosts(); // 모든 공고
+            // ✅ 1. 전체 가져오기 + 스크랩 개수 정렬
+            List<RecruitmentDTO> all = recruitmentService.getAllPosts();
 
-            // 🔹 필터: 스크랩 조건
+            // 🔹 스크랩 개수 기준 정렬
             if ("scrap-desc".equals(scrapSort)) {
-                all = all.stream()
-                        .filter(r -> r.getScrapCount() != null && r.getScrapCount() > 0)
-                        .collect(Collectors.toList());
+                all.sort(Comparator.comparing(RecruitmentDTO::getScrapCount, Comparator.nullsFirst(Integer::compareTo)).reversed());
             } else if ("scrap-asc".equals(scrapSort)) {
-                all = all.stream()
-                        .filter(r -> r.getScrapCount() == null || r.getScrapCount() == 0)
-                        .collect(Collectors.toList());
+                all.sort(Comparator.comparing(RecruitmentDTO::getScrapCount, Comparator.nullsFirst(Integer::compareTo)));
             }
 
-            // 🔹 정렬: 마감일 기준
+            // 🔹 추가 정렬: 마감일
             if ("deadline-asc".equals(deadlineSort)) {
                 all.sort(Comparator.comparing(RecruitmentDTO::getDeadline));
             } else if ("deadline-desc".equals(deadlineSort)) {
                 all.sort(Comparator.comparing(RecruitmentDTO::getDeadline).reversed());
             }
 
-            // 🔹 메모리 페이징
+            // 🔹 메모리 페이징 처리
             int start = (page - 1) * pageSize;
             int end = Math.min(start + pageSize, all.size());
             List<RecruitmentDTO> pageContent = all.subList(start, end);
@@ -76,10 +72,13 @@ public class EmplController {
 
             model.addAttribute("jobList", pageContent);
             model.addAttribute("jobPage", jobPage);
-            PaginationUtil2.setPaging(model, jobPage, "/empl/empl_main", scrapSort, 10); // scrapSort로 URL 유지
+
+            // URL 유지: scrapSort와 deadlineSort를 함께 넘김
+            PaginationUtil2.setPaging(model, jobPage, "/empl/empl_main", scrapSort, deadlineSort, 10);
+
 
         } else {
-            // ✅ scrapSort 없으면 → DB 페이징 + 정렬
+            // ✅ scrapSort 없으면 → DB 정렬 + 페이징
             String combinedSort = (deadlineSort != null && !deadlineSort.isEmpty()) ? deadlineSort : null;
 
             Pageable correctedPageable = PageRequest.of(page - 1, pageSize, pageable.getSort());
@@ -87,7 +86,9 @@ public class EmplController {
 
             model.addAttribute("jobList", jobPage.getContent());
             model.addAttribute("jobPage", jobPage);
-            PaginationUtil2.setPaging(model, jobPage, "/empl/empl_main", combinedSort, 10);
+
+            PaginationUtil2.setPaging(model, jobPage, "/empl/empl_main", scrapSort, deadlineSort, 10);
+
         }
 
         // ✅ 드롭다운 유지
@@ -96,6 +97,7 @@ public class EmplController {
 
         return "empl/empl_main";
     }
+
 
 
 

@@ -47,9 +47,10 @@
         <!-- 🟢 스크랩 정렬 -->
         <select class="sort-select" name="scrapSort" onchange="document.getElementById('sortForm').submit()">
           <option value="" th:selected="${scrapSort == null or scrapSort == ''}">전체</option>
-          <option value="scrap-desc" th:selected="${scrapSort == 'scrap-desc'}">스크랩된 순</option>
-          <option value="scrap-asc" th:selected="${scrapSort == 'scrap-asc'}">스크랩 안된 순</option>
+          <option value="scrap-desc" th:selected="${scrapSort == 'scrap-desc'}">스크랩 많은 순</option>
+          <option value="scrap-asc" th:selected="${scrapSort == 'scrap-asc'}">스크랩 적은 순</option>
         </select>
+
 
 
       </div>
@@ -65,10 +66,11 @@
           <p class="job-deadline"
              th:text="${#strings.startsWith(job.deadline.toString(), '9999') ? '상시채용' : '마감일: ' + job.deadline}">
           </p>
+          <p class="job-scrap-count" th:text="'스크랩 수: ' + ${job.scrapCount}"></p>
 
-             </a>
-           </div>
-         </div>
+         </a>
+       </div>
+     </div>
 
 
          <!-- 페이지네이션 -->
@@ -87,12 +89,13 @@
 <!--     </div>-->
 
     <div th:replace="fragments/pagination2 :: fragment(${jobPage},
-             ${startPage}, ${endPage}, '/empl/empl_main', ${customSort})">
+     ${startPage}, ${endPage}, '/empl/empl_main', ${scrapSort}, ${deadlineSort})">
     </div>
 
 
 
 
-         <div th:replace="include/footer :: footer"></div>
+
+    <div th:replace="include/footer :: footer"></div>
   </body>
 </html>

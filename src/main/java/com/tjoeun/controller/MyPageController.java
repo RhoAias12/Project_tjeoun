@@ -191,7 +191,7 @@ public class MyPageController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/choice_list/{recruitmentIdx}")
+    @GetMapping("/choice_list.html/{recruitmentIdx}")
     public String getResumeList(@PathVariable Long recruitmentIdx, Model model, @AuthenticationPrincipal UserDetails userDetails) {
         String email = userDetails.getUsername();
         System.out.println("로그인된 이메일: " + email);
@@ -205,7 +205,7 @@ public class MyPageController {
 
         model.addAttribute("resumeList", resumes);
         model.addAttribute("recruitmentIdx", recruitmentIdx);
-        return "mypage/choice_list";
+        return "mypage/choice_list.html";
     }
 
     @PostMapping("/submit")
