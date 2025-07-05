@@ -8,6 +8,7 @@ import com.tjoeun.service.AdminService;
 import com.tjoeun.service.RecruitmentService;
 import com.tjoeun.util.PaginationUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -32,6 +33,9 @@ import java.io.IOException;
 public class AdminController {
     private final AdminService adminService;
     private final RecruitmentService recruitmentService;
+
+    @Value("${upload.path}")
+    private String uploadRoot;
 
     @GetMapping("/member_list")
     public String memberList(@RequestParam(defaultValue = "1") int page,
@@ -137,8 +141,6 @@ public class AdminController {
         return "admin/recruit_modify";
     }
 
-    private final String uploadRoot = "C:\\Users\\Ray\\AKDM\\Project_tjeoun\\src\\main\\resources\\static";
-
     @PostMapping("/recruit_modify")
     public String modifyRecruit(@ModelAttribute RecruitmentDTO dto,
                                 @RequestParam("logo") MultipartFile logoFile,
@@ -146,9 +148,15 @@ public class AdminController {
                                 @RequestParam("deadlineSort") String deadlineSort) throws IOException {
 
         if (!logoFile.isEmpty()) {
-            String logoPath = "/images/logos/" + dto.getCompany() + ".jpg";
-            logoFile.transferTo(new File(uploadRoot + logoPath));
-            dto.setLogoUrl(logoPath);
+            String filename = dto.getCompany() + ".jpg";
+            String logoPath = "/logos/" + filename;
+            File saveFile = new File(uploadRoot + logoPath);
+
+            saveFile.getParentFile().mkdirs();
+            logoFile.transferTo(saveFile);
+
+            // 업로드한 이미지는 /uploads/ 경로로 URL 설정
+            dto.setLogoUrl("/uploads" + logoPath);
         }
 
         adminService.updateRecruitment(dto);
