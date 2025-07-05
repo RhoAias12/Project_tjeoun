@@ -25,4 +25,12 @@ public class RecruitmentDTO {
     private String salary;
     private String employmentType;
     private Integer scrapCount;
+
+    public RecruitmentDTO(Long recruitmentIdx, String title, String company, LocalDate deadline, Long scrapCount) {
+        this.recruitmentIdx = recruitmentIdx;
+        this.title = title;
+        this.company = company;
+        this.deadline = deadline;
+        this.scrapCount = scrapCount != null ? scrapCount.intValue() : 0;
+    }
 }

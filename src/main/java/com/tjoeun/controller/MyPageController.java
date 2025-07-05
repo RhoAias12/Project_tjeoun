@@ -1,9 +1,6 @@
 package com.tjoeun.controller;
 
-import com.tjoeun.dto.ApplyHistoryDTO;
-import com.tjoeun.dto.FavoriteDTO;
-import com.tjoeun.dto.ResumeDto;
-import com.tjoeun.dto.UserFormDto;
+import com.tjoeun.dto.*;
 import com.tjoeun.entity.*;
 import com.tjoeun.repository.*;
 import com.tjoeun.service.MyPageService;
@@ -30,6 +27,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
 import java.sql.Timestamp;
@@ -192,7 +190,12 @@ public class MyPageController {
     }
 
     @GetMapping("/choice_list/{recruitmentIdx}")
-    public String getResumeList(@PathVariable Long recruitmentIdx, Model model, @AuthenticationPrincipal UserDetails userDetails) {
+    public String getResumeList(@PathVariable Long recruitmentIdx,
+                                Model model,
+                                @AuthenticationPrincipal UserDetails userDetails,
+                                @RequestParam(defaultValue = "1") int page,
+                                @PageableDefault(size = 5) Pageable pageable) {
+
         String email = userDetails.getUsername();
         System.out.println("로그인된 이메일: " + email);
 
@@ -203,36 +206,69 @@ public class MyPageController {
         List<Resume> resumes = myPageService.getResumesByUserId(userIdx);
         System.out.println("불러온 이력서 수: " + resumes.size());
 
-        model.addAttribute("resumeList", resumes);
+        Pageable correctedPageable = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
+        Page<Resume> resumePage = myPageService.getPagedResumesByUserId(userIdx, correctedPageable);
+
+        PaginationUtil.setPaging(model, resumePage, "/mypage/choice_list/" + recruitmentIdx);
+
+        System.out.println("총 페이지 수: " + resumePage.getTotalPages());
+        System.out.println("현재 페이지 데이터 수: " + resumePage.getContent().size());
+
+
+
+        model.addAttribute("resumeList", resumePage.getContent());
+        model.addAttribute("jobPage", resumePage);
         model.addAttribute("recruitmentIdx", recruitmentIdx);
+
         return "mypage/choice_list";
     }
 
     @PostMapping("/submit")
-    public String submitApply(@RequestParam("recruitmentIdx") List<Long> recruitmentIds,
-                              @RequestParam Long resumeIdx,
-                              @AuthenticationPrincipal UserDetails userDetails) {
+    public String submitApply(@RequestParam("recruitmentIdx") Long recruitmentId,
+                              @AuthenticationPrincipal UserDetails userDetails,
+                              RedirectAttributes redirectAttributes) {
 
         String email = userDetails.getUsername();
         Users user = userService.findByUserEmail(email);
+        Recruitment recruitment = recruitmentService.getEntityById(recruitmentId);
 
-        Resume resume = myPageService.getResumeById(resumeIdx); // ✅ 1개의 이력서만 선택
+        // 이미 지원한 이력 있는지 확인 (resume 없이)
+        boolean alreadyApplied = applyHistoryRepository
+                .existsByUser_UserIdxAndRecruitment_RecruitmentIdx(user.getUserIdx(), recruitment.getRecruitmentIdx());
 
-        for (Long recruitmentId : recruitmentIds) {
-            Recruitment recruitment = recruitmentService.getEntityById(recruitmentId); // ✅ 일관된 서비스 사용
-
-            ApplyHistory history = ApplyHistory.builder()
-                    .user(user)
-                    .recruitment(recruitment)
-                    .status(ApplyHistory.ApplyStatus.SUBMITTED)
-                    .apply(new Timestamp(System.currentTimeMillis()))
-                    .build();
-
-            applyHistoryRepository.save(history);
+        if (alreadyApplied) {
+            redirectAttributes.addFlashAttribute("errorMessage", "이미 지원한 공고입니다. 중복 지원은 불가능합니다.");
+            return "redirect:/empl/empl_detail/" + recruitmentId;
         }
 
+        // 지원 이력 저장 (resume 없이)
+        ApplyHistory history = ApplyHistory.builder()
+                .user(user)
+                .recruitment(recruitment)
+                .status(ApplyHistory.ApplyStatus.SUBMITTED)
+                .apply(new Timestamp(System.currentTimeMillis()))
+                .build();
+
+        applyHistoryRepository.save(history);
+        redirectAttributes.addFlashAttribute("successMessage", "정상적으로 지원 완료되었습니다.");
         return "redirect:/mypage/apply_status";
     }
+
+
+    @GetMapping("/check-applied")
+    @ResponseBody
+    public ResponseEntity<Boolean> checkAlreadyApplied(@RequestParam Long recruitmentIdx,
+                                                       @AuthenticationPrincipal UserDetails userDetails) {
+        String email = userDetails.getUsername();
+        Users user = userService.findByUserEmail(email);
+
+        boolean alreadyApplied = applyHistoryRepository
+                .existsByUser_UserIdxAndRecruitment_RecruitmentIdx(user.getUserIdx(), recruitmentIdx);
+
+        return ResponseEntity.ok(alreadyApplied);
+    }
+
+
 
 
 
