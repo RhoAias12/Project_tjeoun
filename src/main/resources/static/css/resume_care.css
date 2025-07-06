@@ -34,7 +34,7 @@
 
 /* 게시물 카드 리스트 */
 .resume-list {
-  display: flex;
+  display: block;
   flex-direction: column;
   gap: 16px;
   margin-top: 30px;
