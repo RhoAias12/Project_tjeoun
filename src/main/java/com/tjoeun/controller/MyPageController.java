@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
 import java.sql.Timestamp;
@@ -69,14 +70,7 @@ public class MyPageController {
     }
 
     @GetMapping("/react_list")
-    public String reactList(Model model, Principal principal) {
-        String email = principal.getName();
-        Users user = userRepository.findByUserEmail(email);
-
-        // 로그인한 사용자에 해당하는 이력서만
-        List<Resume> resumes = resumeRepository.findByUser(user);
-
-        model.addAttribute("resumes", resumes);
+    public String reactList() {
         return "mypage/react_list";
     }
 
@@ -89,17 +83,18 @@ public class MyPageController {
       Principal principal) {
 
         if (bindingResult.hasErrors()) {
-            return "mypage/react_write";  // 유효성 검사 실패 시 다시 폼
+            return "mypage/react_write"; // 에러가 있으면 작성 페이지로 다시 돌아감
         }
 
-        // 사용자 정보 조회
+        // 로그인된 사용자 정보 가져오기
         String email = principal.getName();
         Users user = userRepository.findByUserEmail(email);
+
         if (user == null) {
-            throw new IllegalArgumentException("로그인 사용자가 없습니다.");
+            throw new IllegalArgumentException("로그인한 사용자를 찾을 수 없습니다.");
         }
 
-        // Resume 엔터티 생성
+        // ResumeDto에서 Resume 엔티티로 변환하여 저장
         Resume resume = new Resume();
         resume.setUser(user);
         resume.setTitle(resumeDto.getTitle());
@@ -243,7 +238,12 @@ public class MyPageController {
     }
 
     @GetMapping("/choice_list/{recruitmentIdx}")
-    public String getResumeList(@PathVariable Long recruitmentIdx, Model model, @AuthenticationPrincipal UserDetails userDetails) {
+    public String getResumeList(@PathVariable Long recruitmentIdx,
+                                Model model,
+                                @AuthenticationPrincipal UserDetails userDetails,
+                                @RequestParam(defaultValue = "1") int page,
+                                @PageableDefault(size = 5) Pageable pageable) {
+
         String email = userDetails.getUsername();
         System.out.println("로그인된 이메일: " + email);
 
@@ -254,36 +254,69 @@ public class MyPageController {
         List<Resume> resumes = myPageService.getResumesByUserId(userIdx);
         System.out.println("불러온 이력서 수: " + resumes.size());
 
-        model.addAttribute("resumeList", resumes);
+        Pageable correctedPageable = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
+        Page<Resume> resumePage = myPageService.getPagedResumesByUserId(userIdx, correctedPageable);
+
+        PaginationUtil.setPaging(model, resumePage, "/mypage/choice_list/" + recruitmentIdx);
+
+        System.out.println("총 페이지 수: " + resumePage.getTotalPages());
+        System.out.println("현재 페이지 데이터 수: " + resumePage.getContent().size());
+
+
+
+        model.addAttribute("resumeList", resumePage.getContent());
+        model.addAttribute("jobPage", resumePage);
         model.addAttribute("recruitmentIdx", recruitmentIdx);
+
         return "mypage/choice_list";
     }
 
     @PostMapping("/submit")
-    public String submitApply(@RequestParam("recruitmentIdx") List<Long> recruitmentIds,
-                              @RequestParam Long resumeIdx,
-                              @AuthenticationPrincipal UserDetails userDetails) {
+    public String submitApply(@RequestParam("recruitmentIdx") Long recruitmentId,
+                              @AuthenticationPrincipal UserDetails userDetails,
+                              RedirectAttributes redirectAttributes) {
 
         String email = userDetails.getUsername();
         Users user = userService.findByUserEmail(email);
+        Recruitment recruitment = recruitmentService.getEntityById(recruitmentId);
 
-        Resume resume = myPageService.getResumeById(resumeIdx); // ✅ 1개의 이력서만 선택
+        // 이미 지원한 이력 있는지 확인 (resume 없이)
+        boolean alreadyApplied = applyHistoryRepository
+                .existsByUser_UserIdxAndRecruitment_RecruitmentIdx(user.getUserIdx(), recruitment.getRecruitmentIdx());
 
-        for (Long recruitmentId : recruitmentIds) {
-            Recruitment recruitment = recruitmentService.getEntityById(recruitmentId); // ✅ 일관된 서비스 사용
-
-            ApplyHistory history = ApplyHistory.builder()
-                    .user(user)
-                    .recruitment(recruitment)
-                    .status(ApplyHistory.ApplyStatus.SUBMITTED)
-                    .apply(new Timestamp(System.currentTimeMillis()))
-                    .build();
-
-            applyHistoryRepository.save(history);
+        if (alreadyApplied) {
+            redirectAttributes.addFlashAttribute("errorMessage", "이미 지원한 공고입니다. 중복 지원은 불가능합니다.");
+            return "redirect:/empl/empl_detail/" + recruitmentId;
         }
 
+        // 지원 이력 저장 (resume 없이)
+        ApplyHistory history = ApplyHistory.builder()
+                .user(user)
+                .recruitment(recruitment)
+                .status(ApplyHistory.ApplyStatus.SUBMITTED)
+                .apply(new Timestamp(System.currentTimeMillis()))
+                .build();
+
+        applyHistoryRepository.save(history);
+        redirectAttributes.addFlashAttribute("successMessage", "정상적으로 지원 완료되었습니다.");
         return "redirect:/mypage/apply_status";
     }
+
+
+    @GetMapping("/check-applied")
+    @ResponseBody
+    public ResponseEntity<Boolean> checkAlreadyApplied(@RequestParam Long recruitmentIdx,
+                                                       @AuthenticationPrincipal UserDetails userDetails) {
+        String email = userDetails.getUsername();
+        Users user = userService.findByUserEmail(email);
+
+        boolean alreadyApplied = applyHistoryRepository
+                .existsByUser_UserIdxAndRecruitment_RecruitmentIdx(user.getUserIdx(), recruitmentIdx);
+
+        return ResponseEntity.ok(alreadyApplied);
+    }
+
+
 
 
 

@@ -5,7 +5,7 @@
 <body>
 
 <!-- 🔽 페이징 프래그먼트 -->
-<div th:fragment="fragment (jobPage, startPage, endPage, url)" th:if="${jobPage.totalPages > 1}" class="pagination">
+<div th:fragment="fragment (jobPage, startPage, endPage, url)" th:if="${jobPage != null and jobPage.totalPages > 1}" class="pagination">
   <ul class="pagination-list">
 
     <!-- « 이전 -->

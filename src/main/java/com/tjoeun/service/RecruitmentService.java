@@ -50,42 +50,25 @@ public class RecruitmentService {
     public List<RecruitmentDTO> getAllPosts(String customSort) {
         List<Recruitment> list = recruitmentRepository.findAll();
 
-        // scrapCount 채우기
+        // scrapCount 계산
         for (Recruitment r : list) {
             int count = favoriteRepository.countByRecruitment(r);
             r.setScrapCount(count);
         }
 
-        if ("scrap-desc".equals(customSort)) {
-            // 스크랩 된 것만 필터링
-            list = list.stream()
-                    .filter(r -> r.getScrapCount() != null && r.getScrapCount() > 0)
-                    .collect(Collectors.toList());
-            list.sort(Comparator.comparing(Recruitment::getScrapCount).reversed());
-
-        } else if ("scrap-asc".equals(customSort)) {
-            // 스크랩 안 된 것만 필터링
-            list = list.stream()
-                    .filter(r -> r.getScrapCount() == null || r.getScrapCount() == 0)
-                    .collect(Collectors.toList());
-        }
-
-
-        // 정렬
-        if ("scrap-desc".equals(customSort)) {
-            list.sort(Comparator.comparing(Recruitment::getScrapCount).reversed());
-        } else if ("scrap-asc".equals(customSort)) {
-            list.sort(Comparator.comparing(Recruitment::getScrapCount));
-        } else if ("deadline-asc".equals(customSort)) {
-            list.sort(Comparator.comparing(Recruitment::getDeadline));
-        } else if ("deadline-desc".equals(customSort)) {
-            list.sort(Comparator.comparing(Recruitment::getDeadline).reversed());
+        // 정렬 조건 처리
+        switch (customSort) {
+            case "scrap-desc" -> list.sort(Comparator.comparing(Recruitment::getScrapCount).reversed());
+            case "scrap-asc" -> list.sort(Comparator.comparing(Recruitment::getScrapCount));
+            case "deadline-asc" -> list.sort(Comparator.comparing(Recruitment::getDeadline));
+            case "deadline-desc" -> list.sort(Comparator.comparing(Recruitment::getDeadline).reversed());
         }
 
         return list.stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
+
 
     public Page<RecruitmentDTO> getPagedPosts(Pageable pageable) {
         return recruitmentRepository.findAll(pageable)

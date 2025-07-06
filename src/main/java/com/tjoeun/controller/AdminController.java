@@ -8,6 +8,7 @@ import com.tjoeun.service.AdminService;
 import com.tjoeun.service.RecruitmentService;
 import com.tjoeun.util.PaginationUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -16,10 +17,14 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import org.springframework.security.web.csrf.CsrfToken;
 import jakarta.servlet.http.HttpServletRequest;
+
+import java.io.File;
+import java.io.IOException;
 
 
 @Controller
@@ -28,6 +33,9 @@ import jakarta.servlet.http.HttpServletRequest;
 public class AdminController {
     private final AdminService adminService;
     private final RecruitmentService recruitmentService;
+
+    @Value("${upload.path}")
+    private String uploadRoot;
 
     @GetMapping("/member_list")
     public String memberList(@RequestParam(defaultValue = "1") int page,
@@ -121,12 +129,43 @@ public class AdminController {
         return "admin/recruit_list";
     }
 
-    @GetMapping("/recruit_modify")
-    public String recruitModify(@RequestParam("recruitmentIdx") Long recruitmentIdx, Model model) {
+    @GetMapping("/recruit_modify/{recruitmentIdx}")
+    public String recruitModify(@PathVariable("recruitmentIdx") Long recruitmentIdx,
+                                @RequestParam(defaultValue = "1") int page,
+                                @RequestParam(defaultValue = "deadline_all") String deadlineSort,
+                                Model model) {
         RecruitmentDTO dto = recruitmentService.getPostById(recruitmentIdx);
         model.addAttribute("recruit", dto);
+        model.addAttribute("page", page);
+        model.addAttribute("deadlineSort", deadlineSort);
         return "admin/recruit_modify";
     }
+
+    @PostMapping("/recruit_modify")
+    public String modifyRecruit(@ModelAttribute RecruitmentDTO dto,
+                                @RequestParam("logo") MultipartFile logoFile,
+                                @RequestParam("page") int page,
+                                @RequestParam("deadlineSort") String deadlineSort) throws IOException {
+
+        if (!logoFile.isEmpty()) {
+            String filename = dto.getCompany() + ".jpg";
+            String logoPath = "/logos/" + filename;
+            File saveFile = new File(uploadRoot + logoPath);
+
+            saveFile.getParentFile().mkdirs();
+            logoFile.transferTo(saveFile);
+
+            // 업로드한 이미지는 /uploads/ 경로로 URL 설정
+            dto.setLogoUrl("/uploads" + logoPath);
+        }
+
+        adminService.updateRecruitment(dto);
+
+        return "redirect:/admin/recruit_modify/" + dto.getRecruitmentIdx()
+          + "?page=" + page + "&deadlineSort=" + deadlineSort;
+    }
+
+
 
     @PostMapping("/recruit_delete")
     public String deleteRecruit(@RequestParam("recruitmentIdx") Long recruitmentIdx,
@@ -189,7 +228,8 @@ public class AdminController {
                                     @RequestParam(value = "sortOption", defaultValue = "apply_latest") String sortOption,
                                     RedirectAttributes redirectAttributes) {
         adminService.updateApplyStatus(applyHistoryId, newStatus);
-        redirectAttributes.addAttribute("statusChanged", newStatus);
+        String statusDisplay = adminService.getStatusDisplayName(newStatus);
+        redirectAttributes.addAttribute("statusChanged", statusDisplay);
         redirectAttributes.addAttribute("page", page);
         redirectAttributes.addAttribute("sortOption", sortOption);  // 여기 이름 맞춤
         return "redirect:/admin/apply_detail/" + applyHistoryId;

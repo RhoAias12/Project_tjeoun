@@ -213,5 +213,33 @@ public class AdminService {
     applyHistoryRepository.save(applyHistory);
   }
 
+  @Transactional
+  public void updateRecruitment(RecruitmentDTO dto) {
+    Recruitment entity = recruitmentRepository.findById(dto.getRecruitmentIdx())
+      .orElseThrow(() -> new IllegalArgumentException("해당 공고가 존재하지 않습니다."));
+
+    entity.setTitle(dto.getTitle());
+    entity.setCompany(dto.getCompany());
+    entity.setDeadline(dto.getDeadline());
+    entity.setQualifications(dto.getQualifications());
+    entity.setLogoUrl(dto.getLogoUrl());
+    entity.setResponsibilities(dto.getResponsibilities());
+    entity.setPreferred(dto.getPreferred());
+    entity.setBenefits(dto.getBenefits());
+    entity.setLocation(dto.getLocation());
+    entity.setSalary(dto.getSalary());
+    entity.setEmploymentType(dto.getEmploymentType());
+
+    recruitmentRepository.save(entity);
+  }
+
+  public String getStatusDisplayName(String status) {
+    return switch (status) {
+      case "SUBMITTED" -> "진행중";
+      case "FINALIZED" -> "합격";
+      case "REJECTED"  -> "불합격";
+      default -> "알 수 없음";
+    };
+  }
 
 }

@@ -191,6 +191,10 @@ public class MyPageService {
             .orElseThrow(() -> new IllegalArgumentException("이력서를 찾을 수 없습니다."));
   }
 
+  public Page<Resume> getPagedResumesByUserId(Long userIdx, Pageable pageable) {
+    return resumeRepository.findByUser_UserIdx(userIdx, pageable);
+  }
+
 
 
   @Transactional(readOnly = true)
