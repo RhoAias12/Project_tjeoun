@@ -228,7 +228,8 @@ public class AdminController {
                                     @RequestParam(value = "sortOption", defaultValue = "apply_latest") String sortOption,
                                     RedirectAttributes redirectAttributes) {
         adminService.updateApplyStatus(applyHistoryId, newStatus);
-        redirectAttributes.addAttribute("statusChanged", newStatus);
+        String statusDisplay = adminService.getStatusDisplayName(newStatus);
+        redirectAttributes.addAttribute("statusChanged", statusDisplay);
         redirectAttributes.addAttribute("page", page);
         redirectAttributes.addAttribute("sortOption", sortOption);  // 여기 이름 맞춤
         return "redirect:/admin/apply_detail/" + applyHistoryId;
