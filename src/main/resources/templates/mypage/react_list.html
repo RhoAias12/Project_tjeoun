@@ -31,9 +31,9 @@
         <button class="tab5" onclick="location.href='/mypage/react_write';">추가</button>
 
         <!-- 게시물 리스트 -->
-        <div class="resume-list">
-          <div th:each="resume : ${resumes}" class="resume-card-wrapper">
-            <a th:href="@{/mypage/react_detail/{id}(id=${resume.resumeIdx})}" class="resume-card">
+        <div th:each="resume : ${resumes}" class="resume-list">
+          <div class="resume-card">
+            <a th:href="@{/mypage/react_detail/{id}(id=${resume.resumeIdx})}" class="resume-link">
               <span class="resume-title" th:text="${resume.title}"></span>
             </a>
             <form th:action="@{/mypage/react_delete/{id}(id=${resume.resumeIdx})}" method="post"

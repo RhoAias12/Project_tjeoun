@@ -70,7 +70,13 @@ public class MyPageController {
     }
 
     @GetMapping("/react_list")
-    public String reactList() {
+    public String reactList(Model model, Principal principal) {
+        String email = principal.getName();
+        Users user = userRepository.findByUserEmail(email);
+
+        List<Resume> resumes = resumeRepository.findByUser(user); // 사용자별 이력서만 가져오는지
+
+        model.addAttribute("resumes", resumes);
         return "mypage/react_list";
     }
 
