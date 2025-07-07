@@ -157,7 +157,7 @@ public class MyPageController {
             }
         }
 
-        // ✅ 저장 성공 시 react_list로 이동
+        // 저장 성공 시 react_list로 이동
         return "redirect:/mypage/react_list";
     }
 
@@ -242,7 +242,13 @@ public class MyPageController {
                             Principal principal) {
 
         String email = principal.getName();
-        Pageable correctedPageable = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
+
+        Pageable correctedPageable = PageRequest.of(
+          page - 1,
+          pageable.getPageSize(),
+          Sort.by(Sort.Direction.DESC, "apply")
+        );
+
         Page<FavoriteDTO> jobPage = myPageService.getPagedFavorites(email, correctedPageable);
 
 //        System.out.println("로그인 유저: " + email);
