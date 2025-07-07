@@ -40,6 +40,22 @@
           }
         });
       }
+
+      function checkAndGoApply(recruitmentIdx) {
+        fetch(`/mypage/check_applied/${recruitmentIdx}`)
+          .then(response => response.json())
+          .then(data => {
+            if (data.applied) {
+              alert("이미 지원한 공고입니다. 중복 지원은 불가능합니다.");
+            } else {
+              window.location.href = `/mypage/choice_list/${recruitmentIdx}`;
+            }
+          })
+          .catch(error => {
+            console.error("지원 여부 확인 실패", error);
+            alert("잠시 후 다시 시도해주세요.");
+          });
+      }
     </script>
 
     <style>
@@ -86,9 +102,11 @@
                 <i class="fa-bookmark bookmark-icon fa-solid active"
                    th:onclick="|deleteScrap(${favorite.recruitmentIdx}, ${favorite.userIdx})|">
                 </i>
-                <a th:href="@{/recruit/apply/{id}(id=${favorite.recruitmentIdx})}">
-                  <button class="apply-btn">지원하기</button>
-                </a>
+
+                <button class="apply-btn"
+                        th:onclick="|checkAndGoApply(${favorite.recruitmentIdx})|">
+                  지원하기
+                </button>
               </div>
             </div>
           </div>

@@ -8,13 +8,17 @@ import com.tjoeun.service.RecruitmentService;
 import com.tjoeun.service.UserService;
 import com.tjoeun.util.PaginationUtil;
 import com.tjoeun.util.PaginationUtil2;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -39,6 +43,7 @@ import java.nio.file.Paths;
 import java.security.Principal;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/mypage")
@@ -75,6 +80,14 @@ public class MyPageController {
                                Model model) {
         String email = principal.getName();
         return myPageService.updateUser(dto, email, bindingResult, model, passwordEncoder, userService);
+    }
+    @PostMapping("/member_delete")
+    public String deleteMember(Principal principal, HttpServletRequest request) throws ServletException {
+        String email = principal.getName();
+
+        myPageService.deleteUserByEmail(email);
+        request.logout();
+        return "redirect:/";
     }
 
     @GetMapping("/react_list")
@@ -119,6 +132,7 @@ public class MyPageController {
         if (user == null) {
             throw new IllegalArgumentException("로그인한 사용자를 찾을 수 없습니다.");
         }
+        Timestamp now = new Timestamp(System.currentTimeMillis());
 
         // ResumeDto에서 Resume 엔티티로 변환
         Resume resume = new Resume();
@@ -131,6 +145,8 @@ public class MyPageController {
         resume.setAntecedents(resumeDto.getAntecedents());
         resume.setAwards(resumeDto.getAwards());
         resume.setContext(resumeDto.getContext());
+        resume.setCreatedAt(now);
+        resume.setUpdatedAt(now);
 
         // ✅ 이미지 업로드 처리
         if (!imgFile.isEmpty()) {
@@ -151,7 +167,6 @@ public class MyPageController {
             resume.setImg("/uploads/images/resume/" + fileName);
         }
 
-
         // 저장
         resumeRepository.save(resume);
 
@@ -167,6 +182,7 @@ public class MyPageController {
             }
         }
 
+        // 저장 성공 시 react_list로 이동
         return "redirect:/mypage/react_list";
     }
 
@@ -247,7 +263,11 @@ public class MyPageController {
 
         String email = principal.getName();
 
-        Pageable correctedPageable = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
+        Pageable correctedPageable = PageRequest.of(
+          page - 1,
+          pageable.getPageSize(),
+          Sort.by(Sort.Direction.DESC, "apply")
+        );
 
         Page<ApplyHistoryDTO> historyPage = myPageService.getPagedApplyHistories(email, correctedPageable);
 
@@ -267,12 +287,18 @@ public class MyPageController {
                             Principal principal) {
 
         String email = principal.getName();
-        Pageable correctedPageable = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
+
+        Pageable correctedPageable = PageRequest.of(
+          page - 1,
+          pageable.getPageSize(),
+          Sort.by(Sort.Direction.DESC, "apply")
+        );
+
         Page<FavoriteDTO> jobPage = myPageService.getPagedFavorites(email, correctedPageable);
 
-        System.out.println("📌 로그인 유저: " + email);
-        System.out.println("📌 스크랩 개수: " + jobPage.getTotalElements());
-        System.out.println("📌 스크랩 리스트: " + jobPage.getContent());
+//        System.out.println("로그인 유저: " + email);
+//        System.out.println("스크랩 개수: " + jobPage.getTotalElements());
+//        System.out.println("스크랩 리스트: " + jobPage.getContent());
 
 
         model.addAttribute("favorites", jobPage.getContent());
@@ -327,12 +353,14 @@ public class MyPageController {
 
     @PostMapping("/submit")
     public String submitApply(@RequestParam("recruitmentIdx") Long recruitmentId,
+                              @RequestParam("resumeIdx") Long resumeIdx,
                               @AuthenticationPrincipal UserDetails userDetails,
                               RedirectAttributes redirectAttributes) {
 
         String email = userDetails.getUsername();
         Users user = userService.findByUserEmail(email);
         Recruitment recruitment = recruitmentService.getEntityById(recruitmentId);
+        Resume resume = myPageService.getResumeById(resumeIdx);
 
         // 이미 지원한 이력 있는지 확인 (resume 없이)
         boolean alreadyApplied = applyHistoryRepository
@@ -347,6 +375,7 @@ public class MyPageController {
         ApplyHistory history = ApplyHistory.builder()
                 .user(user)
                 .recruitment(recruitment)
+                .resume(resume)
                 .status(ApplyHistory.ApplyStatus.SUBMITTED)
                 .apply(new Timestamp(System.currentTimeMillis()))
                 .build();
@@ -370,7 +399,16 @@ public class MyPageController {
         return ResponseEntity.ok(alreadyApplied);
     }
 
+    @GetMapping("/check_applied/{recruitmentIdx}")
+    @ResponseBody
+    public ResponseEntity<?> checkApplied(@PathVariable Long recruitmentIdx, Principal principal) {
+        String email = principal.getName();
+        Users user = userRepository.findByUserEmail(email);
+        boolean applied = applyHistoryRepository.existsByUserAndRecruitment(user,
+          recruitmentRepository.findById(recruitmentIdx).orElseThrow());
 
+        return ResponseEntity.ok().body(Map.of("applied", applied));
+    }
 
 
 

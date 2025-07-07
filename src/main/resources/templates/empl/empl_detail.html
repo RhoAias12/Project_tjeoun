@@ -9,11 +9,11 @@
     let isLogin = /*[[${#authorization.expression('isAuthenticated()')}]]*/ false;
   </script>
 
-  <!-- ✅ CSRF 토큰 -->
+  <!-- CSRF 토큰 -->
   <meta name="_csrf" th:content="${_csrf.token}" />
   <meta name="_csrf_header" th:content="${_csrf.headerName}" />
 
-  <!-- ✅ CSS -->
+  <!-- CSS -->
   <link rel="stylesheet" th:href="@{/css/main.css}" />
   <link rel="stylesheet" th:href="@{/css/header.css}" />
   <link rel="stylesheet" th:href="@{/css/footer.css}" />
@@ -53,7 +53,6 @@
   </section>
 
   <section class="job-desc">
-
     <h3>고용형태</h3>
     <p th:text="${job.employmentType}" style="white-space: pre-wrap;"></p>
 
@@ -96,7 +95,6 @@
     <i class="fa-bookmark fa-regular"></i>
   </button>
 
-
   <button type="button"
           class="apply-button"
           th:attr="data-recruitment-id=${job.recruitmentIdx}"
@@ -105,22 +103,14 @@
     지원하기
   </button>
 
-
-
-  <a th:href="@{/empl/empl_main(
-    page=${page != null ? page : 1},
-    scrapSort=${scrapSort != null ? scrapSort : 'scrap-desc'},
-    deadlineSort=${deadlineSort != null ? deadlineSort : 'deadline-asc'}
-)}">
-    <button type="button">목록보기</button>
+  <a th:href="${prevUrl}">
+    <button type="button">목록 보기</button>
   </a>
-
-
 </div>
 
 <div th:replace="include/footer :: footer"></div>
 
-<!-- ✅ JS는 body 끝에 넣기 -->
+<!-- JS는 body 끝에 넣기 -->
 <script>
   function toggleBookmark(button) {
     if (!isLogin) {
@@ -183,7 +173,6 @@
       });
   }
 </script>
-
 
 </body>
 </html>

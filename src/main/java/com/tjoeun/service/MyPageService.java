@@ -1,9 +1,6 @@
 package com.tjoeun.service;
 
-import com.tjoeun.dto.ApplyHistoryDTO;
-import com.tjoeun.dto.FavoriteDTO;
-import com.tjoeun.dto.ResumeDto;
-import com.tjoeun.dto.UserFormDto;
+import com.tjoeun.dto.*;
 import com.tjoeun.entity.*;
 import com.tjoeun.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +26,7 @@ public class MyPageService {
   private final UserRepository userRepository;
   private final ApplyHistoryRepository applyHistoryRepository;
   private final ResumeRepository resumeRepository;
+  private final ResumeContentRepository resumeContentRepository;
 
   public List<ApplyHistoryDTO> getApplyHistoryList(String email) {
     Users user = userRepository.findByUserEmail(email);
@@ -57,13 +55,13 @@ public class MyPageService {
     Page<ApplyHistory> page = applyHistoryRepository.findByUser(user, pageable);
 
     return page.map(history -> ApplyHistoryDTO.builder()
-      .applyHistoryId(history.getOptionalIdx())
-      .statusDisplay(history.getStatus().getDisplay())
-      .recruitmentTitle(history.getRecruitment().getTitle())
-      .recruitmentCompany(history.getRecruitment().getCompany())
-      .recruitmentId(history.getRecruitment().getRecruitmentIdx())
-      .resumeId(history.getOptionalIdx())
-      .build());
+            .applyHistoryId(history.getOptionalIdx())
+            .statusDisplay(history.getStatus().getDisplay())
+            .recruitmentTitle(history.getRecruitment().getTitle())
+            .recruitmentCompany(history.getRecruitment().getCompany())
+            .recruitmentId(history.getRecruitment().getRecruitmentIdx())
+            .resumeId(history.getResume().getResumeIdx())
+            .build());
   }
 
   @Transactional(readOnly = true)
@@ -101,6 +99,21 @@ public class MyPageService {
     return "redirect:/mypage/member_modify?success";
   }
 
+
+
+  @Transactional
+  public void deleteUserByEmail(String email) {
+    Users user = userRepository.findByUserEmail(email);
+    if (user != null) {
+      userRepository.delete(user);
+    } else {
+      throw new IllegalArgumentException("해당 이메일의 사용자가 존재하지 않습니다.");
+    }
+  }
+
+
+
+
   @Transactional
   public void updateResume(Long id, ResumeDto dto) {
     Resume resume = resumeRepository.findById(id)
@@ -114,6 +127,8 @@ public class MyPageService {
     resume.setAntecedents(dto.getAntecedents());
     resume.setAwards(dto.getAwards());
     resume.setContext(dto.getContext());
+
+    resume.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
 
     resume.setTitle(dto.getTitle());
     resume.setAddress(dto.getAddress());
@@ -133,6 +148,22 @@ public class MyPageService {
     );
 
     resume.setContext(dto.getContext());
+
+
+    if (resume.getResumeContents() != null) {
+      resume.getResumeContents().clear();
+    }
+
+    if (dto.getResumeContents() != null) {
+      for (ResumeContentDTO contentDto : dto.getResumeContents()) {
+        ResumeContent content = ResumeContent.builder()
+          .resume(resume)
+          .question(contentDto.getQuestion())
+          .context(contentDto.getContext())
+          .build();
+        resume.getResumeContents().add(content);
+      }
+    }
 
     resumeRepository.save(resume);
   }
