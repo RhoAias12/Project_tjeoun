@@ -40,31 +40,22 @@
         <!-- 게시물 리스트 -->
         <div class="resume-list" th:each="resume : ${resumes}">
           <div class="resume-card"
-               th:onclick="|location.href='@{/mypage/react_detail/{id}(id=${resume.resumeIdx})}'|"
+               th:onclick="|location.href='@{/mypage/react_detail/{id}(id=${resume.resumeIdx})}?page=${jobPage.number + 1}'|"
                style="cursor: pointer;">
             <span th:text="${resume.title}"></span>
 
             <!-- 삭제 버튼 안에서 stopPropagation() 안하면 이 onclick이 무조건 실행됨 -->
-            <form th:action="@{/mypage/react_delete/{id}(id=${resume.resumeIdx})}"
-                  method="post"
+            <form th:action="@{/mypage/react_delete/{id}(id=${resume.resumeIdx})}" method="post"
                   onsubmit="event.stopPropagation(); return confirm('정말 삭제하시겠습니까?');">
-              <button type="submit" class="delete-button">삭제</button>
+              <input type="hidden" name="page" th:value="${jobPage.number + 1}" />
+              <button type="submit" class="delete-button" onclick="event.stopPropagation();">삭제</button>
             </form>
+
           </div>
         </div>
 
         <!-- 페이지네이션 -->
-        <div class="pagination">
-          <ul class="pagination-list">
-            <li><a href="#" class="page-btn">〈</a></li>
-            <li><a href="#" class="page-btn active">1</a></li>
-            <li><a href="#" class="page-btn">2</a></li>
-            <li><a href="#" class="page-btn">3</a></li>
-            <li><a href="#" class="page-btn">4</a></li>
-            <li><a href="#" class="page-btn">5</a></li>
-            <li><a href="#" class="page-btn">〉</a></li>
-          </ul>
-        </div>
+        <div th:replace="fragments/pagination :: fragment(${jobPage}, ${startPage}, ${endPage}, '/mypage/react_list')"></div>
       </div>
     </div>
     <!-- 푸터 -->
