@@ -4,7 +4,6 @@ import com.tjoeun.dto.RecruitmentDTO;
 import com.tjoeun.entity.Recruitment;
 import com.tjoeun.repository.FavoriteRepository;
 import com.tjoeun.repository.RecruitmentRepository;
-import com.tjoeun.repository.RecruitmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -117,8 +116,6 @@ public class RecruitmentService {
                 .build();
     }
 
-
-
     public Page<RecruitmentDTO> getSortedPagedPosts(Pageable pageable, String deadlineSort) {
         List<Recruitment> recruitments = recruitmentRepository.findAll();
 
@@ -149,8 +146,6 @@ public class RecruitmentService {
         return recruitmentRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("채용공고 없음"));
     }
-
-
 
 
 }

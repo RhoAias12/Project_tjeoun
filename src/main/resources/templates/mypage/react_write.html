@@ -10,6 +10,38 @@
     <link rel="stylesheet" th:href="@{/css/react.css}" />
 <!--    <script defer src="/js/main.js"></script>-->
 
+      <script>
+          function validateForm() {
+            const title = document.getElementById('title').value.trim();
+            const address = document.getElementById('address').value.trim();
+            const phoneNum = document.getElementById('phone_num').value.trim();
+            const question1 = document.querySelector('textarea[name="resumeContents[0].question"]').value.trim();
+            const context1 = document.querySelector('textarea[name="resumeContents[0].context"]').value.trim();
+
+            if (!title) {
+              alert('제목을 작성해 주세요!');
+              return false;
+            }
+            if (!address) {
+              alert('주소를 작성해 주세요!');
+              return false;
+            }
+            if (!phoneNum) {
+              alert('전화번호를 작성해 주세요!');
+              return false;
+            }
+            if (!question1) {
+              alert('질문 1을 작성해 주세요!');
+              return false;
+            }
+            if (!context1) {
+              alert('답변 1을 작성해 주세요!');
+              return false;
+            }
+            return true; // 통과 시 제출 허용
+          }
+      </script>
+
   </head>
   <body>
     <div th:replace="include/header :: header"></div>
@@ -17,19 +49,19 @@
       <p>마이페이지 &gt; 이력서</p>
     </div>
     <div class="container">
-        <form>
-            <table class="resume-table">
+        <form method="post" th:action="@{/mypage/react_write}" enctype="multipart/form-data" onsubmit="return validateForm()">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <table class="resume-table">
                 <!-- 첫 줄: 이미지 텍스트 -->
                 <tr>
-                    <th class="img">제목</th>
+                    <th class="img">* 제목</th>
                     <td class="centered-cell">
                         <div class="form-group">
                 <textarea
-                        id="title"
+                        id="title" name="title"
                         class="short-text"
                         placeholder="제목를 입력해 주세요."
-                >
-여러분들의 일개미가 되겠습니다! </textarea
+                ></textarea
                 >
                         </div>
                     </td>
@@ -39,127 +71,110 @@
                 <tr>
                     <th style="text-align: center">
                         <img id="preview" src="" alt="미리보기 없음" />
-
-                        <input type="file" id="imageUpload" accept="image/*" />
+                        <input type="file" id="imageUpload" name="imgFile" accept="image/*" />
                         <div id="fileName" style="margin-top: 4px"></div>
                     </th>
                     <!-- 오른쪽: 개인정보 입력 -->
                     <td>
                         <div class="form-group">
                             <label class="thick">이름</label>
-                            <p class="readonly-box">홍길동</p>
+                            <textarea readonly class="short-text" th:text="${user.userName}"></textarea>
                         </div>
 
                         <div class="form-group">
                             <label class="thick">이메일</label>
-                            <p class="readonly-box">honggildong@example.com</p>
+                            <textarea readonly class="short-text" th:text="${user.userEmail}"></textarea>
                         </div>
 
                         <div class="form-group">
                             <label class="thick">생년월일</label>
-                            <p class="readonly-box">1995-07-01</p>
+                            <textarea readonly class="short-text"
+                                      th:text="${#temporals.format(user.userBirth, 'yyyy-MM-dd')}"></textarea>
                         </div>
 
                         <div class="form-group">
-                            <label for="address">주소</label>
+                            <label for="address">* 주소</label>
                             <textarea
-                                    id="address"
+                                    id="address" name="address"
                                     class="short-text"
                                     placeholder="주소를 입력해 주세요."
                             >
-서울특별시 성동구 성수동</textarea
+</textarea
                             >
                         </div>
 
                         <div class="form-group">
-                            <label for="phone">전화번호</label>
+                            <label for="phone_num">* 전화번호</label>
                             <textarea
-                                    id="phone"
+                                    id="phone_num" name="phoneNum"
                                     class="short-text"
-                                    placeholder="전화번호를 입력해 주세요."
-                            >
-010-1234-5678</textarea
+                                    placeholder="전화번호를 입력해 주세요. ex. 010-0000-0000"
+                            ></textarea
                             >
                         </div>
 
                         <div class="form-group">
                             <label for="education">학력</label>
                             <textarea
-                                    id="education"
+                                    id="education" name="education"
                                     class="short-text"
                                     placeholder="학력을 입력해 주세요."
                             >
-서울대학교 컴퓨터공학과 졸업</textarea
+</textarea
                             >
                         </div>
 
                         <div class="form-group">
-                            <label for="career">자격증 및 스킬</label>
+                            <label for="ability">자격증 및 스킬</label>
                             <textarea
-                                    id="skill"
+                                    id="ability" name="ability"
                                     class="short-text1"
                                     placeholder="자격증 및 스킬을 입력해 주세요."
                             >
-python, SQL</textarea
+</textarea
                             >
                         </div>
 
                         <div class="form-group">
-                            <label for="career">경력</label>
+                            <label for="antecedents">경력</label>
                             <textarea
-                                    id="career"
+                                    id="antecedents" name="antecedents"
                                     class="short-text1"
                                     placeholder="경력을 입력해 주세요."
                             >
-2021 ~ 2024 (주)코드랩 백엔드 개발자</textarea
+</textarea
                             >
                         </div>
 
                         <div class="form-group">
-                            <label for="award">수상이력</label>
+                            <label for="awards">수상이력</label>
                             <textarea
-                                    id="award"
+                                    id="awards" name="awards"
                                     class="short-text1"
                                     placeholder="수상이력을 입력해 주세요."
                             >
-2023 SW창의력대회 최우수상 수상</textarea
+</textarea
                             >
                         </div>
                     </td>
                 </tr>
 
-                <tr>
-                    <th><textarea placeholder="질문 1을 입력하세요."></textarea></th>
-                    <td>
-                        <div class="textarea-wrapper">
-                            <textarea placeholder="내용을 입력하세요."></textarea>
-                        </div>
-                    </td>
-                </tr>
-                <tr>
-                    <th><textarea placeholder="질문 2를 입력하세요."></textarea></th>
-                    <td>
-                        <div class="textarea-wrapper">
-                            <textarea placeholder="내용을 입력하세요."></textarea>
-                        </div>
-                    </td>
-                </tr>
-                <tr>
-                    <th><textarea placeholder="질문 3을 입력하세요."></textarea></th>
-                    <td>
-                        <div class="textarea-wrapper">
-                            <textarea placeholder="내용을 입력하세요."></textarea>
-                        </div>
-                    </td>
-                </tr>
-                <tr>
-                    <th><textarea placeholder="질문 4를 입력하세요."></textarea></th>
-                    <td>
-                        <div class="textarea-wrapper">
-                            <textarea placeholder="내용을 입력하세요."></textarea>
-                        </div>
-                    </td>
-                </tr>
+            <tr>
+                <th><textarea name="resumeContents[0].question" placeholder="* 질문 1을 입력하세요."></textarea></th>
+                <td><textarea name="resumeContents[0].context" placeholder="* 답변을 입력하세요."></textarea></td>
+            </tr>
+            <tr>
+                <th><textarea name="resumeContents[1].question" placeholder="질문 2을 입력하세요."></textarea></th>
+                <td><textarea name="resumeContents[1].context" placeholder="답변을 입력하세요."></textarea></td>
+            </tr>
+            <tr>
+                <th><textarea name="resumeContents[2].question" placeholder="질문 3을 입력하세요."></textarea></th>
+                <td><textarea name="resumeContents[2].context" placeholder="답변을 입력하세요."></textarea></td>
+            </tr>
+            <tr>
+                <th><textarea name="resumeContents[3].question" placeholder="질문 4을 입력하세요."></textarea></th>
+                <td><textarea name="resumeContents[3].context" placeholder="답변을 입력하세요."></textarea></td>
+            </tr>
                 <tr>
                     <th class="link">
                         포트폴리오 링크를<br />
@@ -167,18 +182,20 @@ python, SQL</textarea
                     </th>
                     <td>
               <textarea
+                      id="context" name="context"
                       placeholder="예: https://github.com/yourname/portfolio"
               ></textarea>
                     </td>
                 </tr>
             </table>
+            <div class="button-group">
+                <button type="button" onclick="location.href='/mypage/react_list'">취소</button>
+                <button type="submit">저장</button>
+            </div>
         </form>
 
     </div>
-    <div class="button-group">
-      <button type="button" onclick="location.href='/mypage/react_list'">취소</button>
-      <button type="submit">저장</button>
-    </div>
+
     <div th:replace="include/footer :: footer"></div>
   </body>
 </html>

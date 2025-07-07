@@ -27,6 +27,8 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
@@ -46,6 +48,8 @@ public class MyPageController {
     private final FavoriteRepository favoriteRepository;
     private final RecruitmentRepository recruitmentRepository;
     private final ResumeRepository resumeRepository;
+    private final ResumeContentRepository resumeContentRepository;
+
     private final RecruitmentService recruitmentService;
 
     @GetMapping("/member_modify")
@@ -66,13 +70,24 @@ public class MyPageController {
     }
 
     @GetMapping("/react_list")
-    public String reactList() {
+    public String reactList(Model model, Principal principal) {
+        String email = principal.getName();
+        Users user = userRepository.findByUserEmail(email);
+
+        List<Resume> resumes = resumeRepository.findByUser(user); // 사용자별 이력서만 가져오는지
+
+        model.addAttribute("resumes", resumes);
         return "mypage/react_list";
     }
 
     // 이력서 저장
-    @PostMapping("/mypage/react_write")
-    public String saveResume(@ModelAttribute("resumeDto") @Valid ResumeDto resumeDto, BindingResult bindingResult, Principal principal) {
+    @PostMapping("/react_write")
+    public String saveResume(
+      @ModelAttribute("resumeDto") @Valid ResumeDto resumeDto,
+      @RequestParam("imgFile") MultipartFile imgFile,
+      BindingResult bindingResult,
+      Principal principal) {
+
         if (bindingResult.hasErrors()) {
             return "mypage/react_write"; // 에러가 있으면 작성 페이지로 다시 돌아감
         }
@@ -96,17 +111,37 @@ public class MyPageController {
         resume.setAbility(resumeDto.getAbility());
         resume.setAntecedents(resumeDto.getAntecedents());
         resume.setAwards(resumeDto.getAwards());
-        resume.setImg(resumeDto.getImg());  // 이미지 처리 추가
+        resume.setContext(resumeDto.getContext());
 
-        // DB에 저장
+        if (!imgFile.isEmpty()) {
+            resume.setImg(imgFile.getOriginalFilename());
+        }
+
+        // 저장
         resumeRepository.save(resume);
 
-        return "redirect:/mypage/react_list"; // 저장 후 이력서 리스트로 리다이렉트
+        // ResumeContent 저장
+        if (resumeDto.getResumeContents() != null) {
+            for (ResumeContentDTO contentDto : resumeDto.getResumeContents()) {
+                ResumeContent content = ResumeContent.builder()
+                  .resume(resume)
+                  .question(contentDto.getQuestion())
+                  .context(contentDto.getContext())
+                  .build();
+                resumeContentRepository.save(content);
+            }
+        }
+
+        // ✅ 저장 성공 시 react_list로 이동
+        return "redirect:/mypage/react_list";
     }
 
 
     @GetMapping("/react_write")
-    public String reactWrite() {
+    public String reactWrite(Model model, Principal principal) {
+        Users user = userRepository.findByUserEmail(principal.getName());
+        model.addAttribute("user", user);
+        model.addAttribute("formDto", new ResumeDto());
         return "mypage/react_write";
     }
 
@@ -123,17 +158,36 @@ public class MyPageController {
 
     @GetMapping("/react_detail/{id}")
     public String reactDetail(@PathVariable Long id, Model model) {
-        // id가 null인지 체크
-        if (id == null) {
-            throw new IllegalArgumentException("해당 이력서를 찾을 수 없습니다.");
-        }
-
-        Resume resume = resumeRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("해당 이력서를 찾을 수 없습니다."));
+        Resume resume = resumeRepository.findById(id)
+          .orElseThrow(() -> new IllegalArgumentException("해당 이력서를 찾을 수 없습니다."));
         model.addAttribute("resume", resume);
         return "mypage/react_detail";
     }
 
 
+    //삭제
+    @PostMapping("/react_delete/{id}")
+    public String deleteResume(@PathVariable Long id) {
+        resumeRepository.deleteById(id);
+        return "redirect:/mypage/react_list";
+    }
+   // 수정
+    @GetMapping("/react_modify/{id}")
+    public String reactModify(@PathVariable Long id, Model model) {
+        Resume resume = resumeRepository.findById(id)
+          .orElseThrow(() -> new IllegalArgumentException("해당 이력서를 찾을 수 없습니다."));
+        model.addAttribute("resume", resume);
+        return "mypage/react_modify";
+    }
+
+    @PostMapping("/react_modify/{id}")
+    public String updateResume(
+      @PathVariable Long id,
+      @ModelAttribute ResumeDto resumeDto
+    ) {
+        myPageService.updateResume(id, resumeDto);
+        return "redirect:/mypage/react_list";
+    }
 
 
     @GetMapping("/apply_status")

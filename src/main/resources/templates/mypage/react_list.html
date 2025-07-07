@@ -9,6 +9,13 @@
     <link rel="stylesheet" th:href="@{/css/resume_care.css}" />
 <!--    <link rel="stylesheet" href="./css/resume_care.css" />-->
     <title>이력서관리</title>
+
+    <script>
+      function goDetail(event, id) {
+        window.location.href = '/mypage/react_detail/' + id;
+      }
+    </script>
+
   </head>
   <body>
     <!-- 헤더 -->
@@ -31,19 +38,19 @@
         <button class="tab5" onclick="location.href='/mypage/react_write';">추가</button>
 
         <!-- 게시물 리스트 -->
-        <div class="resume-list">
-          <a href="/mypage/react_list/1" class="resume-card">
-            <span class="resume-title">이력서 1</span>
-            <button class="delete-button" onclick="event.stopPropagation();">삭제</button>
-          </a>
-          <a href="/mypage/react_list/2" class="resume-card">
-            <span class="resume-title">이력서 2</span>
-            <button class="delete-button" onclick="event.stopPropagation();">삭제</button>
-          </a>
-          <a href="/mypage/react_list/3" class="resume-card">
-            <span class="resume-title">이력서 3</span>
-            <button class="delete-button" onclick="event.stopPropagation();">삭제</button>
-          </a>
+        <div class="resume-list" th:each="resume : ${resumes}">
+          <div class="resume-card"
+               th:onclick="|location.href='@{/mypage/react_detail/{id}(id=${resume.resumeIdx})}'|"
+               style="cursor: pointer;">
+            <span th:text="${resume.title}"></span>
+
+            <!-- 삭제 버튼 안에서 stopPropagation() 안하면 이 onclick이 무조건 실행됨 -->
+            <form th:action="@{/mypage/react_delete/{id}(id=${resume.resumeIdx})}"
+                  method="post"
+                  onsubmit="event.stopPropagation(); return confirm('정말 삭제하시겠습니까?');">
+              <button type="submit" class="delete-button">삭제</button>
+            </form>
+          </div>
         </div>
 
         <!-- 페이지네이션 -->

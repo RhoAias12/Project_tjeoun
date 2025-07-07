@@ -8,7 +8,8 @@ import java.util.List;
 
 @Entity
 @Table(name = "resume")
-@Getter @Setter
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -18,10 +19,12 @@ public class Resume {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long resumeIdx;
 
-  @ManyToOne
+  /** 연관 사용자 (필수) **/
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "user_idx", nullable = false)
   private Users user;
 
+  /** 기본 필드 **/
   private String title;
 
   @Column(columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
@@ -51,7 +54,11 @@ public class Resume {
   @Column(columnDefinition = "TEXT")
   private String awards;
 
-  @OneToMany(mappedBy = "resume", fetch = FetchType.LAZY)
+  @OneToMany(mappedBy = "resume", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
   private List<ResumeContent> resumeContents;
-}
 
+//  @PreUpdate
+//  public void onUpdate() {
+//    this.updatedAt = new Timestamp(System.currentTimeMillis());
+//  }
+}
