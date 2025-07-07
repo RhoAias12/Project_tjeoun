@@ -108,17 +108,19 @@
     </table>
 
     <div class="button-group">
-      <form th:action="@{/mypage/react_delete/{id}(id=${resume.resumeIdx})}" method="post"
-            onsubmit="return confirm('정말 삭제하시겠습니까?');">
-        <input type="hidden" name="page" th:value="${page}" />
-        <a th:href="@{/mypage/react_list(page=${page})}" class="button">목록보기</a>
-<!--        <button type="button" th:onclick="|location.href='@{/mypage/react_list(page=${page})}'|">목록보기</button> 이거쓰면 에러남 왤까..-->
-        <button type="submit" class="delete-button">삭제</button>
-      </form>
-      <button type="button"
-              th:onclick="|location.href='@{/mypage/react_modify/{id}(id=${resume.resumeIdx})}?page=${page}'|">
-        수정
-      </button>
+      <a th:href="${prevUrl} != null ? @{${prevUrl}} : @{/mypage/react_list(page=${page})}"
+         class="button">목록보기</a>
+      <div th:if="${!readonly}">
+        <form th:action="@{/mypage/react_delete/{id}(id=${resume.resumeIdx})}" method="post"
+              onsubmit="return confirm('정말 삭제하시겠습니까?');">
+          <input type="hidden" name="page" th:value="${page}" />
+          <button type="submit" class="delete-button">삭제</button>
+        </form>
+        <button type="button"
+                th:onclick="|location.href='@{/mypage/react_modify/{id}(id=${resume.resumeIdx})}?page=${page}'|">
+          수정
+        </button>
+      </div>
     </div>
   </form>
 </div>
