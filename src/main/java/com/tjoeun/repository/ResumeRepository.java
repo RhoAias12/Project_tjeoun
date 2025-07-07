@@ -9,6 +9,8 @@ import org.springframework.data.domain.Pageable;
 
 
 
+import java.util.List;
+
 import java.util.Optional;
 
 import java.util.List;
@@ -16,9 +18,11 @@ import java.util.List;
 @Repository
 public interface ResumeRepository extends JpaRepository<Resume, Long> {
   Optional<Resume> findTopByUserOrderByCreatedAtDesc(Users user);
+  List<Resume> findByUser(Users user);
 
   List<Resume> findByUser_UserIdx(Long userIdx);
 
   Page<Resume> findByUser_UserIdx(Long userIdx, Pageable pageable);
+
 
 }
