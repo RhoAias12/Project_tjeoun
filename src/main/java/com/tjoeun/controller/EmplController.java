@@ -121,12 +121,11 @@ public class EmplController {
                                  @RequestParam(required = false) String prevUrl,
                                  Model model, Principal principal) {
         RecruitmentDTO dto = recruitmentService.getPostById(id);
-
-        boolean isFavorited = false;
         if (dto == null) {
-            return "error/404"; // 404 페이지 (없으면 기본 페이지)
+            return "error/404";
         }
 
+        boolean isFavorited = false;
         if (principal != null) {
             String userEmail = principal.getName();
             isFavorited = favoriteService.isFavorited(userEmail, id);
@@ -139,5 +138,6 @@ public class EmplController {
 
         return "empl/empl_detail";
     }
+
 
 }
