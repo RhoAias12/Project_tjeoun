@@ -74,4 +74,7 @@ public class Recruitment {
 
   @OneToMany(mappedBy = "recruitment", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Favorite> favorites = new ArrayList<>();
+
+  @OneToMany(mappedBy = "recruitment", cascade = CascadeType.REMOVE, orphanRemoval = true)
+  private List<ApplyHistory> applyHistories = new ArrayList<>();
 }

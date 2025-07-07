@@ -46,24 +46,24 @@ public class EmplController {
         boolean usingScrapSort = scrapSort != null && !scrapSort.isEmpty();
 
         if (usingScrapSort) {
-            // ✅ 1. 전체 가져오기 + 스크랩 개수 정렬
+            // 전체 가져오기 + 스크랩 개수 정렬
             List<RecruitmentDTO> all = recruitmentService.getAllPosts();
 
-            // 🔹 스크랩 개수 기준 정렬
+            // 스크랩 개수 기준 정렬
             if ("scrap-desc".equals(scrapSort)) {
                 all.sort(Comparator.comparing(RecruitmentDTO::getScrapCount, Comparator.nullsFirst(Integer::compareTo)).reversed());
             } else if ("scrap-asc".equals(scrapSort)) {
                 all.sort(Comparator.comparing(RecruitmentDTO::getScrapCount, Comparator.nullsFirst(Integer::compareTo)));
             }
 
-            // 🔹 추가 정렬: 마감일
+            // 추가 정렬: 마감일
             if ("deadline-asc".equals(deadlineSort)) {
                 all.sort(Comparator.comparing(RecruitmentDTO::getDeadline));
             } else if ("deadline-desc".equals(deadlineSort)) {
                 all.sort(Comparator.comparing(RecruitmentDTO::getDeadline).reversed());
             }
 
-            // 🔹 메모리 페이징 처리
+            // 메모리 페이징 처리
             int start = (page - 1) * pageSize;
             int end = Math.min(start + pageSize, all.size());
             List<RecruitmentDTO> pageContent = all.subList(start, end);
@@ -78,7 +78,7 @@ public class EmplController {
 
 
         } else {
-            // ✅ scrapSort 없으면 → DB 정렬 + 페이징
+            // scrapSort 없으면 → DB 정렬 + 페이징
             String combinedSort = (deadlineSort != null && !deadlineSort.isEmpty()) ? deadlineSort : null;
 
             Pageable correctedPageable = PageRequest.of(page - 1, pageSize, pageable.getSort());
@@ -91,7 +91,7 @@ public class EmplController {
 
         }
 
-        // ✅ 드롭다운 유지
+        // 드롭다운 유지
         model.addAttribute("scrapSort", scrapSort);
         model.addAttribute("deadlineSort", deadlineSort);
 
