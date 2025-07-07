@@ -184,14 +184,6 @@ public class MyPageController {
         resumeRepository.deleteById(id);
         return "redirect:/mypage/react_list?page=" + page;  // 삭제 후에도 page 유지해서 리스트로 리다이렉트
     }
-
-
-    //삭제
-//    @PostMapping("/react_delete/{id}")
-//    public String deleteResume(@PathVariable Long id) {
-//        resumeRepository.deleteById(id);
-//        return "redirect:/mypage/react_list";
-//    }
    // 수정
     @GetMapping("/react_modify/{id}")
     public String reactModify(@PathVariable Long id, Model model) {
