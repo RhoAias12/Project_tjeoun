@@ -58,11 +58,8 @@
         <p>마이페이지 &gt; 이력서</p>
     </div>
     <div class="container">
-        <form th:action="@{/mypage/react_modify/{id}(id=${resume.resumeIdx})}"
-              method="post"
-              enctype="multipart/form-data"
-              onsubmit="return validateForm()">
-            <input type="hidden" name="page" th:value="${page}" />
+        <form th:action="@{/mypage/react_modify/{id}(id=${resume.resumeIdx})}" method="post">
+        <input type="hidden" name="page" th:value="${page}" />
             <table class="resume-table">
                 <!-- 첫 줄: 이미지 텍스트 -->
                 <tr>
@@ -157,12 +154,14 @@
 
                 <tr th:each="content, iterStat : ${resume.resumeContents}">
                     <th>
-    <textarea name="resumeContents[__${iterStat.index}__].question"
-              th:text="${content.question}"></textarea>
+    <textarea
+            th:name="|resumeContents[${iterStat.index}].question|"
+            th:text="${content.question}"></textarea>
                     </th>
                     <td>
-    <textarea name="resumeContents[__${iterStat.index}__].context"
-              th:text="${content.context}"></textarea>
+    <textarea
+            th:name="|resumeContents[${iterStat.index}].context|"
+            th:text="${content.context}"></textarea>
                     </td>
                 </tr>
 

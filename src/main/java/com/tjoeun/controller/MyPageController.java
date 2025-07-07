@@ -183,15 +183,14 @@ public class MyPageController {
      return "mypage/react_modify";
    }
 
-  @PostMapping("/react_modify/{id}")
-  public String updateResume(
-    @PathVariable Long id,
-    @ModelAttribute ResumeDto resumeDto
-  ) {
-    myPageService.updateResume(id, resumeDto);
-    return "redirect:/mypage/react_detail/";
-  }
-
+    @PostMapping("/react_modify/{id}")
+    public String updateResume(
+      @PathVariable Long id,
+      @ModelAttribute ResumeDto resumeDto
+    ) {
+        myPageService.updateResume(id, resumeDto);
+        return "redirect:/mypage/react_detail/" + id;
+    }
 
     @GetMapping("/apply_status")
     public String applyStatus(@RequestParam(defaultValue = "1") int page,
