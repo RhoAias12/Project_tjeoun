@@ -37,7 +37,6 @@ import java.util.List;
 
 @Controller
 @RequestMapping("/mypage")
-@RequiredArgsConstructor
 public class MyPageController {
 
     private final ApplyHistoryRepository applyHistoryRepository;
@@ -52,7 +51,21 @@ public class MyPageController {
 
     private final RecruitmentService recruitmentService;
 
-    @GetMapping("/member_modify")
+  public MyPageController(ApplyHistoryRepository applyHistoryRepository, UserRepository userRepository, MyPageService myPageService, UserService userService, PasswordEncoder passwordEncoder, FavoriteRepository favoriteRepository, RecruitmentRepository recruitmentRepository, ResumeRepository resumeRepository, ResumeContentRepository resumeContentRepository, RecruitmentService recruitmentService) {
+    this.applyHistoryRepository = applyHistoryRepository;
+    this.userRepository = userRepository;
+    this.myPageService = myPageService;
+    this.userService = userService;
+    this.passwordEncoder = passwordEncoder;
+    this.favoriteRepository = favoriteRepository;
+    this.recruitmentRepository = recruitmentRepository;
+    this.resumeRepository = resumeRepository;
+    this.resumeContentRepository = resumeContentRepository;
+    this.recruitmentService = recruitmentService;
+  }
+
+
+  @GetMapping("/member_modify")
     public String showMemberModifyForm(Model model, Principal principal) {
         String email = principal.getName();
         UserFormDto dto = myPageService.getUserFormDto(email);
