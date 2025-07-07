@@ -46,6 +46,27 @@
     return false;
   }
 
+    const questionEls = document.querySelectorAll('textarea[name^="resumeContents"][name$=".question"]');
+    const contextEls = document.querySelectorAll('textarea[name^="resumeContents"][name$=".context"]');
+
+    for (let i = 0; i < questionEls.length; i++) {
+      const question = questionEls[i].value.trim();
+      const context = contextEls[i].value.trim();
+
+      if (!question && context) {
+        alert(`질문 ${i + 1}이 비어있습니다. 질문을 작성해 주세요!`);
+        questionEls[i].classList.add('required-field');
+        questionEls[i].focus();
+        return false;
+      }
+      if (question && !context) {
+        alert(`질문 ${i + 1}에 대한 답변을 작성해 주세요!`);
+        contextEls[i].classList.add('required-field');
+        contextEls[i].focus();
+        return false;
+      }
+    }
+
   return true; // 모두 통과 시에만 제출 허용
 }
 
@@ -141,15 +162,16 @@
                     <th>
                         <div class="question">
                             <p>질문[[${iterStat.count}]].</p>
-                            <textarea name="resumeContents[[${iterStat.index}]].question"
+                            <textarea th:name="'resumeContents[' + ${iterStat.index} + '].question'"
                                       class="question-textarea" th:text="${content.question}"></textarea>
                         </div>
                     </th>
                     <td>
-            <textarea name="resumeContents[[${iterStat.index}]].context"
-                      class="answer-textarea" th:text="${content.context}"></textarea>
+        <textarea th:name="'resumeContents[' + ${iterStat.index} + '].context'"
+                  class="answer-textarea" th:text="${content.context}"></textarea>
                     </td>
                 </tr>
+
 
                 <tr>
                     <th class="link">포트폴리오 링크</th>
