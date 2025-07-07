@@ -71,9 +71,13 @@
           <p class="job-deadline"
              th:text="${#strings.startsWith(job.deadline.toString(), '9999') ? '상시채용' : '마감일: ' + job.deadline}">
           </p>
-          <p class="job-scrap-count" th:text="'스크랩 수: ' + ${job.scrapCount}"></p>
+          <p class="scrap-count">
+            스크랩 수: <span th:text="${job.scrapCount != null ? job.scrapCount : 0}">0</span>
+          </p>
 
-         </a>
+
+
+        </a>
        </div>
      </div>
 
