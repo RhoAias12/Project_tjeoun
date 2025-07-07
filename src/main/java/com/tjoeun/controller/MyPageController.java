@@ -69,16 +69,6 @@ public class MyPageController {
         return myPageService.updateUser(dto, email, bindingResult, model, passwordEncoder, userService);
     }
 
-//    @GetMapping("/react_list")
-//    public String reactList(Model model, Principal principal) {
-//        String email = principal.getName();
-//        Users user = userRepository.findByUserEmail(email);
-//
-//        List<Resume> resumes = resumeRepository.findByUser(user); // 사용자별 이력서만 가져오는지
-//
-//        model.addAttribute("resumes", resumes);
-//        return "mypage/react_list";
-//    }
     @GetMapping("/react_list")
     public String reactList(@RequestParam(defaultValue = "1") int page,
                             @PageableDefault(size = 5) Pageable pageable,
@@ -174,7 +164,7 @@ public class MyPageController {
         Resume resume = resumeRepository.findById(id)
           .orElseThrow(() -> new IllegalArgumentException("해당 이력서를 찾을 수 없습니다."));
         model.addAttribute("resume", resume);
-        model.addAttribute("page", page);  // 현재 페이지 정보도 넘겨줌
+        model.addAttribute("page", page);
         return "mypage/react_detail";
     }
 
@@ -182,16 +172,19 @@ public class MyPageController {
     public String deleteResume(@PathVariable Long id,
                                @RequestParam(defaultValue = "1") int page) {
         resumeRepository.deleteById(id);
-        return "redirect:/mypage/react_list?page=" + page;  // 삭제 후에도 page 유지해서 리스트로 리다이렉트
+        return "redirect:/mypage/react_list?page=" + page;
     }
-   // 수정
-    @GetMapping("/react_modify/{id}")
-    public String reactModify(@PathVariable Long id, Model model) {
-        Resume resume = resumeRepository.findById(id)
-          .orElseThrow(() -> new IllegalArgumentException("해당 이력서를 찾을 수 없습니다."));
-        model.addAttribute("resume", resume);
-        return "mypage/react_modify";
-    }
+
+   @GetMapping("/react_modify/{id}")
+   public String reactModify(@PathVariable Long id,
+                             @RequestParam(defaultValue = "1") int page,
+                             Model model) {
+       Resume resume = resumeRepository.findById(id)
+         .orElseThrow(() -> new IllegalArgumentException("해당 이력서를 찾을 수 없습니다."));
+       model.addAttribute("resume", resume);
+       model.addAttribute("page", page);
+       return "mypage/react_modify";
+   }
 
     @PostMapping("/react_modify/{id}")
     public String updateResume(
