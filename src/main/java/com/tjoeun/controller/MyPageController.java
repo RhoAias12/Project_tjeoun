@@ -180,10 +180,11 @@ public class MyPageController {
                               Model model) {
         Resume resume = resumeRepository.findById(id)
           .orElseThrow(() -> new IllegalArgumentException("해당 이력서를 찾을 수 없습니다."));
+
         model.addAttribute("resume", resume);
         model.addAttribute("page", page);
         model.addAttribute("readonly", readonly);
-        model.addAttribute("prevUrl", prevUrl); // ← 추가
+        model.addAttribute("prevUrl", prevUrl); // ← 이거 중요!
         return "mypage/react_detail";
     }
 

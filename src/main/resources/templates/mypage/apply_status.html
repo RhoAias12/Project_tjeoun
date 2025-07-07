@@ -39,7 +39,9 @@
           <div class="apply-buttons">
             <div class="situation" th:text="${history.statusDisplay}">지원상태</div>
             <div class="react-btn">
-              <a th:href="@{/mypage/react_detail/{id}(id=${history.resumeId}, readonly=true, page=${page}, prevUrl='/mypage/apply_status')}">지원 이력서</a>
+              <a th:href="@{/mypage/react_detail/{id}(id=${history.resumeId}, readonly=true, page=${jobPage.number + 1}, prevUrl='/mypage/apply_status?page=' + ${jobPage.number + 1})}">
+                지원 이력서
+              </a>
             </div>
           </div>
         </div>
