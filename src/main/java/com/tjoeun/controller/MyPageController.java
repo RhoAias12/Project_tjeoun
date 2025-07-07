@@ -69,16 +69,38 @@ public class MyPageController {
         return myPageService.updateUser(dto, email, bindingResult, model, passwordEncoder, userService);
     }
 
+//    @GetMapping("/react_list")
+//    public String reactList(Model model, Principal principal) {
+//        String email = principal.getName();
+//        Users user = userRepository.findByUserEmail(email);
+//
+//        List<Resume> resumes = resumeRepository.findByUser(user); // 사용자별 이력서만 가져오는지
+//
+//        model.addAttribute("resumes", resumes);
+//        return "mypage/react_list";
+//    }
     @GetMapping("/react_list")
-    public String reactList(Model model, Principal principal) {
+    public String reactList(@RequestParam(defaultValue = "1") int page,
+                            @PageableDefault(size = 5) Pageable pageable,
+                            Model model,
+                            Principal principal) {
         String email = principal.getName();
         Users user = userRepository.findByUserEmail(email);
+        Pageable correctedPageable = PageRequest.of(page - 1, pageable.getPageSize()
+        );
 
-        List<Resume> resumes = resumeRepository.findByUser(user); // 사용자별 이력서만 가져오는지
+        Page<Resume> resumePage = myPageService.getPagedResumesByUserId(user.getUserIdx().longValue(), correctedPageable);
 
-        model.addAttribute("resumes", resumes);
+        model.addAttribute("resumes", resumePage.getContent());
+        model.addAttribute("jobPage", resumePage);
+
+        PaginationUtil.setPaging(model, resumePage, "/mypage/react_list");
+
         return "mypage/react_list";
     }
+
+
+
 
     // 이력서 저장
     @PostMapping("/react_write")
@@ -145,32 +167,31 @@ public class MyPageController {
         return "mypage/react_write";
     }
 
-
-    @GetMapping("/react_modify")
-    public String reactModify() {
-        return "mypage/react_modify";
-    }
-
-    @GetMapping("/react_detail")
-    public String reactDetail() {
-        return "mypage/react_detail";
-    }
-
     @GetMapping("/react_detail/{id}")
-    public String reactDetail(@PathVariable Long id, Model model) {
+    public String reactDetail(@PathVariable Long id,
+                              @RequestParam(defaultValue = "1") int page,
+                              Model model) {
         Resume resume = resumeRepository.findById(id)
           .orElseThrow(() -> new IllegalArgumentException("해당 이력서를 찾을 수 없습니다."));
         model.addAttribute("resume", resume);
+        model.addAttribute("page", page);  // 현재 페이지 정보도 넘겨줌
         return "mypage/react_detail";
+    }
+
+    @PostMapping("/react_delete/{id}")
+    public String deleteResume(@PathVariable Long id,
+                               @RequestParam(defaultValue = "1") int page) {
+        resumeRepository.deleteById(id);
+        return "redirect:/mypage/react_list?page=" + page;  // 삭제 후에도 page 유지해서 리스트로 리다이렉트
     }
 
 
     //삭제
-    @PostMapping("/react_delete/{id}")
-    public String deleteResume(@PathVariable Long id) {
-        resumeRepository.deleteById(id);
-        return "redirect:/mypage/react_list";
-    }
+//    @PostMapping("/react_delete/{id}")
+//    public String deleteResume(@PathVariable Long id) {
+//        resumeRepository.deleteById(id);
+//        return "redirect:/mypage/react_list";
+//    }
    // 수정
     @GetMapping("/react_modify/{id}")
     public String reactModify(@PathVariable Long id, Model model) {

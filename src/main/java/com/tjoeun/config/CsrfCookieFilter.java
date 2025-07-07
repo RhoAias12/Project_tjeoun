@@ -18,6 +18,18 @@ public class CsrfCookieFilter extends OncePerRequestFilter {
                                   HttpServletResponse response,
                                   FilterChain filterChain) throws ServletException, IOException {
 
+//    CsrfToken csrfToken = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
+
+//    //이 부분 추가
+//    if (csrfToken != null) {
+//      // 토큰 강제 생성만 하고 쿠키 직접 설정은 하지 않음
+//      csrfToken.getToken();
+//    }
+//    // 필터 체인 계속 진행
+//    filterChain.doFilter(request, response);
+//    //이 부분 추가
+
+
     String uri = request.getRequestURI();
 
     // ✅ 정적 리소스 요청이면 쿠키 설정 스킵
