@@ -47,7 +47,7 @@ public class EmplController {
         int pageSize = pageable.getPageSize();
         boolean usingScrapSort = scrapSort != null && !scrapSort.isEmpty();
 
-        // ✅ prevUrl 생성 및 인코딩
+        // prevUrl 생성 및 인코딩
         StringBuilder prevUrlBuilder = new StringBuilder("/empl/empl_main?page=" + page);
         if (scrapSort != null && !scrapSort.isEmpty()) {
             prevUrlBuilder.append("&scrapSort=").append(scrapSort);
@@ -58,9 +58,9 @@ public class EmplController {
         String prevUrl = prevUrlBuilder.toString();
         String encodedPrevUrl = URLEncoder.encode(prevUrl, StandardCharsets.UTF_8);
 
-        // ✅ 실제 확인용 출력
-        System.out.println("📦 prevUrl = " + prevUrl);
-        System.out.println("🔐 encodedPrevUrl = " + encodedPrevUrl);
+        // 실제 확인용 출력
+        System.out.println("prevUrl = " + prevUrl);
+        System.out.println("encodedPrevUrl = " + encodedPrevUrl);
 
         model.addAttribute("prevUrl", prevUrl);
         model.addAttribute("encodedPrevUrl", encodedPrevUrl);
@@ -106,7 +106,7 @@ public class EmplController {
         model.addAttribute("scrapSort", scrapSort);
         model.addAttribute("deadlineSort", deadlineSort);
 
-        return "empl/empl_main";  // ✅ 경로 고침
+        return "empl/empl_main";  // 경로 고침
     }
 
 
