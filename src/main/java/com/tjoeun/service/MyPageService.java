@@ -1,6 +1,9 @@
 package com.tjoeun.service;
 
-import com.tjoeun.dto.*;
+import com.tjoeun.dto.ApplyHistoryDTO;
+import com.tjoeun.dto.FavoriteDTO;
+import com.tjoeun.dto.ResumeDto;
+import com.tjoeun.dto.UserFormDto;
 import com.tjoeun.entity.*;
 import com.tjoeun.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 
-import java.sql.Timestamp;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -27,7 +29,6 @@ public class MyPageService {
   private final UserRepository userRepository;
   private final ApplyHistoryRepository applyHistoryRepository;
   private final ResumeRepository resumeRepository;
-  private final ResumeContentRepository resumeContentRepository;
 
   public List<ApplyHistoryDTO> getApplyHistoryList(String email) {
     Users user = userRepository.findByUserEmail(email);
@@ -100,76 +101,40 @@ public class MyPageService {
     return "redirect:/mypage/member_modify?success";
   }
 
-
-
   @Transactional
-  public void deleteUserByEmail(String email) {
-    Users user = userRepository.findByUserEmail(email);
-    if (user != null) {
-      userRepository.delete(user);
-    } else {
-      throw new IllegalArgumentException("해당 이메일의 사용자가 존재하지 않습니다.");
-    }
-  }
-
-
-
-
-  @Transactional
-  public void updateResume(Long id, ResumeDto resumeDto) {
+  public void updateResume(Long id, ResumeDto dto) {
     Resume resume = resumeRepository.findById(id)
       .orElseThrow(() -> new IllegalArgumentException("이력서를 찾을 수 없습니다."));
 
-    // ✅ 기본 필드 업데이트
-    resume.setTitle(resumeDto.getTitle());
-    resume.setAddress(resumeDto.getAddress());
-    resume.setPhoneNum(resumeDto.getPhoneNum());
-    resume.setEducation(resumeDto.getEducation());
-    resume.setAbility(resumeDto.getAbility());
-    resume.setAntecedents(resumeDto.getAntecedents());
-    resume.setAwards(resumeDto.getAwards());
-    resume.setContext(resumeDto.getContext());
+    resume.setTitle(dto.getTitle());
+    resume.setAddress(dto.getAddress());
+    resume.setPhoneNum(dto.getPhoneNum());
+    resume.setEducation(dto.getEducation());
+    resume.setAbility(dto.getAbility());
+    resume.setAntecedents(dto.getAntecedents());
+    resume.setAwards(dto.getAwards());
+    resume.setContext(dto.getContext());
 
-    // ✅ 기존 ResumeContent 리스트 가져오기
-    List<ResumeContent> currentContents = resume.getResumeContents();
-    List<ResumeContent> updatedContents = new java.util.ArrayList<>();
+    resume.setTitle(dto.getTitle());
+    resume.setAddress(dto.getAddress());
+    resume.setPhoneNum(dto.getPhoneNum());
 
-    List<ResumeContentDTO> newContents = resumeDto.getResumeContents();
+    resume.setEducation(
+      dto.getEducation() != null && !dto.getEducation().trim().isEmpty() ? dto.getEducation() : null
+    );
+    resume.setAbility(
+      dto.getAbility() != null && !dto.getAbility().trim().isEmpty() ? dto.getAbility() : null
+    );
+    resume.setAntecedents(
+      dto.getAntecedents() != null && !dto.getAntecedents().trim().isEmpty() ? dto.getAntecedents() : null
+    );
+    resume.setAwards(
+      dto.getAwards() != null && !dto.getAwards().trim().isEmpty() ? dto.getAwards() : null
+    );
 
-    if (newContents != null) {
-      for (ResumeContentDTO dto : newContents) {
-        boolean isQuestionEmpty = dto.getQuestion() == null || dto.getQuestion().trim().isEmpty();
-        boolean isContextEmpty = dto.getContext() == null || dto.getContext().trim().isEmpty();
-        if (isQuestionEmpty && isContextEmpty) continue;
+    resume.setContext(dto.getContext());
 
-        ResumeContent content;
-
-        if (dto.getResumeContentIdx() != null) {
-          // ✅ 기존 항목은 DB에서 찾아서 수정
-          content = resumeContentRepository.findById(dto.getResumeContentIdx().longValue())
-            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 ResumeContent"));
-
-          content.setQuestion(dto.getQuestion());
-          content.setContext(dto.getContext());
-          // createdAt 유지, updatedAt은 @PreUpdate로 갱신됨
-        } else {
-          // ✅ 새 항목이면 새로 생성
-          content = ResumeContent.builder()
-            .question(dto.getQuestion())
-            .context(dto.getContext())
-            .build();
-          content.setResume(resume); // 양방향 연관관계
-        }
-
-    // 필요한 경우 ResumeContents 등 연관 엔티티 처리
-    // updatedAt 갱신
-    resume.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
-        updatedContents.add(content);
-      }
-    }
-
-    currentContents.clear();
-    currentContents.addAll(updatedContents);
+    resumeRepository.save(resume);
   }
 
   @Transactional
