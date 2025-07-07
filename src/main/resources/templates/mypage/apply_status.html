@@ -31,7 +31,7 @@
         <div class="apply-card" th:each="history : ${historyList}">
           <div class="apply-info">
             <div class="job-title">
-              <a th:href="@{/empl/empl_detail/{id}(id=${history.applyHistoryId})}"
+              <a th:href="@{/empl/empl_detail/{id}(id=${history.recruitmentId})}"
                  th:text="${history.recruitmentTitle}">공고명</a>
             </div>
             <div class="company-name" th:text="${history.recruitmentCompany}">회사명</div>

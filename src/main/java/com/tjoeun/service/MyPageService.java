@@ -62,6 +62,7 @@ public class MyPageService {
             .statusDisplay(history.getStatus().getDisplay())
             .recruitmentTitle(history.getRecruitment().getTitle())
             .recruitmentCompany(history.getRecruitment().getCompany())
+            .recruitmentId(history.getRecruitment().getRecruitmentIdx())
             .resumeId(history.getOptionalIdx())
             .build());
   }
