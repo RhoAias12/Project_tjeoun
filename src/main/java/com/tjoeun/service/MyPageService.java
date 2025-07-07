@@ -104,7 +104,7 @@ public class MyPageService {
     Resume resume = resumeRepository.findById(id)
       .orElseThrow(() -> new IllegalArgumentException("이력서를 찾을 수 없습니다."));
 
-    // 기본 필드 업데이트
+    // ✅ 기본 필드 업데이트
     resume.setTitle(resumeDto.getTitle());
     resume.setAddress(resumeDto.getAddress());
     resume.setPhoneNum(resumeDto.getPhoneNum());
@@ -114,27 +114,46 @@ public class MyPageService {
     resume.setAwards(resumeDto.getAwards());
     resume.setContext(resumeDto.getContext());
 
-    // 기존 질문/답변 삭제 (orphanRemoval)
-    resume.getResumeContents().clear();
+    // ✅ 기존 ResumeContent 리스트 가져오기
+    List<ResumeContent> currentContents = resume.getResumeContents();
+    List<ResumeContent> updatedContents = new java.util.ArrayList<>();
 
-    // 새 질문/답변 추가 (빈칸 필터링)
-    if (resumeDto.getResumeContents() != null) {
-      for (ResumeContentDTO dto : resumeDto.getResumeContents()) {
+    List<ResumeContentDTO> newContents = resumeDto.getResumeContents();
+
+    if (newContents != null) {
+      for (ResumeContentDTO dto : newContents) {
         boolean isQuestionEmpty = dto.getQuestion() == null || dto.getQuestion().trim().isEmpty();
         boolean isContextEmpty = dto.getContext() == null || dto.getContext().trim().isEmpty();
         if (isQuestionEmpty && isContextEmpty) continue;
 
-        ResumeContent content = ResumeContent.builder()
-          .question(dto.getQuestion())
-          .context(dto.getContext())
-          .build();
+        ResumeContent content;
 
-        // ✅ 양방향 연관관계 반드시 유지
-        content.setResume(resume);              // 자식 → 부모
-        resume.getResumeContents().add(content); // 부모 → 자식 리스트
+        if (dto.getResumeContentIdx() != null) {
+          // ✅ 기존 항목은 DB에서 찾아서 수정
+          content = resumeContentRepository.findById(dto.getResumeContentIdx().longValue())
+            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 ResumeContent"));
+
+          content.setQuestion(dto.getQuestion());
+          content.setContext(dto.getContext());
+          // createdAt 유지, updatedAt은 @PreUpdate로 갱신됨
+        } else {
+          // ✅ 새 항목이면 새로 생성
+          content = ResumeContent.builder()
+            .question(dto.getQuestion())
+            .context(dto.getContext())
+            .build();
+          content.setResume(resume); // 양방향 연관관계
+        }
+
+        updatedContents.add(content);
       }
     }
+
+    currentContents.clear();
+    currentContents.addAll(updatedContents);
   }
+
+
 
 
   @Transactional

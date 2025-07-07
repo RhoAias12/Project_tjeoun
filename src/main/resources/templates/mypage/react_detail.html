@@ -8,120 +8,127 @@
   <link rel="stylesheet" th:href="@{/css/header.css}" />
   <link rel="stylesheet" th:href="@{/css/footer.css}" />
   <link rel="stylesheet" th:href="@{/css/react.css}" />
-  <!--    <script defer src="js/main.js"></script>-->
 </head>
 <body>
 <div th:replace="include/header :: header"></div>
+
 <div class="page-title">
   <p>마이페이지 &gt; 이력서</p>
 </div>
+
 <div class="container">
-  <form th:action="@{/mypage/react_delete/{id}(id=${resume.resumeIdx})}" method="post">
-    <table class="resume-table">
-      <!-- 첫 줄: 이미지 텍스트 -->
-      <tr>
-        <th scope="row">제목</th>
-        <td class="centered-cell">
-          <div class="form-group">
-            <p class="readonly-box1" th:text="${resume.title}">제목</p>
-          </div>
-        </td>
-      </tr>
+  <table class="resume-table">
+    <!-- 제목 -->
+    <tr>
+      <th scope="row">제목</th>
+      <td class="centered-cell">
+        <div class="form-group">
+          <p class="readonly-box1" th:text="${resume.title}">제목</p>
+        </div>
+      </td>
+    </tr>
 
-      <tr>
-        <!-- 왼쪽: 이미지 + d파일 선택 -->
-        <th style="text-align: center">
-          <div th:if="${resume.img != null}">
-            <img th:src="@{'/uploads/' + ${resume.img}}" alt="이미지 없음" />
-          </div>
-          <div th:if="${resume.img == null}">
-            <p>이미지가 없습니다.</p>
-          </div>
-        </th>
+    <!-- 이미지 -->
+    <tr>
+      <th style="text-align: center">
+        <div th:if="${resume.img != null}">
+          <img th:src="@{'/uploads/' + ${resume.img}}" alt="이미지 없음" />
+        </div>
+        <div th:if="${resume.img == null}">
+          <p>이미지가 없습니다.</p>
+        </div>
+      </th>
 
-        <!-- 오른쪽: 개인정보 출력 -->
-        <td>
-          <div class="form-group">
-            <label class="thick">이름</label>
-            <p class="readonly-box1" th:text="${resume.user.userName}"></p>
-          </div>
+      <!-- 개인정보 -->
+      <td>
+        <div class="form-group">
+          <label class="thick">이름</label>
+          <p class="readonly-box1" th:text="${resume.user.userName}"></p>
+        </div>
 
-          <div class="form-group">
-            <label class="thick">이메일</label>
-            <p class="readonly-box1" th:text="${resume.user.userEmail}"></p>
-          </div>
+        <div class="form-group">
+          <label class="thick">이메일</label>
+          <p class="readonly-box1" th:text="${resume.user.userEmail}"></p>
+        </div>
 
-          <div class="form-group">
-            <label class="thick">생년월일</label>
-            <p class="readonly-box1" th:text="${#temporals.format(resume.user.userBirth, 'yyyy-MM-dd')}"></p>
-          </div>
+        <div class="form-group">
+          <label class="thick">생년월일</label>
+          <p class="readonly-box1" th:text="${#temporals.format(resume.user.userBirth, 'yyyy-MM-dd')}"></p>
+        </div>
 
-          <div class="form-group">
-            <label>주소</label>
-            <p class="readonly-box1" th:text="${resume.address}"></p>
-          </div>
+        <div class="form-group">
+          <label>주소</label>
+          <p class="readonly-box1" th:text="${resume.address}"></p>
+        </div>
 
-          <div class="form-group">
-            <label>전화번호</label>
-            <p class="readonly-box1" th:text="${resume.phoneNum}"></p>
-          </div>
+        <div class="form-group">
+          <label>전화번호</label>
+          <p class="readonly-box1" th:text="${resume.phoneNum}"></p>
+        </div>
 
-          <div class="form-group">
-            <label>학력</label>
-            <p class="readonly-box1" th:text="${resume.education}"></p>
-          </div>
+        <div class="form-group">
+          <label>학력</label>
+          <p class="readonly-box1" th:text="${resume.education}"></p>
+        </div>
 
-          <div class="form-group">
-            <label>자격증 및 스킬</label>
-            <p class="readonly-box1" th:text="${resume.ability}"></p>
-          </div>
+        <div class="form-group">
+          <label>자격증 및 스킬</label>
+          <p class="readonly-box1" th:text="${resume.ability}"></p>
+        </div>
 
-          <div class="form-group">
-            <label>경력</label>
-            <p class="readonly-box1" th:text="${resume.antecedents}"></p>
-          </div>
+        <div class="form-group">
+          <label>경력</label>
+          <p class="readonly-box1" th:text="${resume.antecedents}"></p>
+        </div>
 
-          <div class="form-group">
-            <label>수상이력</label>
-            <p class="readonly-box1" th:text="${resume.awards}"></p>
-          </div>
-        </td>
-      </tr>
+        <div class="form-group">
+          <label>수상이력</label>
+          <p class="readonly-box1" th:text="${resume.awards}"></p>
+        </div>
+      </td>
+    </tr>
 
-      <tr th:each="content, iterStat : ${resume.resumeContents}"
-          th:if="${!#strings.isEmpty(content.question) or !#strings.isEmpty(content.context)}">
-        <th>
-          <div class="question">
-            <p>질문[[${iterStat.count}]].</p>
-            <p th:text="${content.question}"></p>
-          </div>
-        </th>
-        <td>
-          <p class="content" th:text="${content.context}"></p>
-        </td>
-      </tr>
+    <!-- 질문/답변 -->
+    <tr th:each="content, iterStat : ${resume.resumeContents}"
+        th:if="${!#strings.isEmpty(content.question) or !#strings.isEmpty(content.context)}">
+      <th>
+        <div class="question">
+          <p>질문[[${iterStat.count}]].</p>
+          <p th:text="${content.question}"></p>
+        </div>
+      </th>
+      <td>
+        <p class="content" th:text="${content.context}"></p>
+      </td>
+    </tr>
 
-      <tr th:if="${!#strings.isEmpty(resume.context)}">
-        <th class="link">포트폴리오 링크</th>
-        <td><p class="content" th:text="${resume.context}"></p></td>
-      </tr>
-    </table>
+    <!-- 포트폴리오 링크 -->
+    <tr th:if="${!#strings.isEmpty(resume.context)}">
+      <th class="link">포트폴리오 링크</th>
+      <td><p class="content" th:text="${resume.context}"></p></td>
+    </tr>
+  </table>
 
-    <div class="button-group">
-      <form th:action="@{/mypage/react_delete/{id}(id=${resume.resumeIdx})}" method="post"
-            onsubmit="return confirm('정말 삭제하시겠습니까?');">
-        <input type="hidden" name="page" th:value="${page}" />
-<!--        <a th:href="@{/mypage/react_list(page=${page})}" class="button">목록보기</a>-->
-<!--        <button type="button" th:onclick="|location.href='@{/mypage/react_list(page=${page})}'|">목록보기</button> 이거쓰면 에러남 왤까..-->
-        <button type="submit" class="delete-button">삭제</button>
-      </form>
-      <button type="button"
-              th:onclick="|location.href='@{/mypage/react_modify/{id}(id=${resume.resumeIdx})}?page=${page}'|">
-        수정
-      </button>
-    </div>
-  </form>
+  <div class="button-group">
+    <form th:action="@{/mypage/react_delete/{id}(id=${resume.resumeIdx})}"
+          method="post"
+          onsubmit="return confirm('정말 삭제하시겠습니까?');">
+      <input type="hidden" name="page" th:value="${page}" />
+      <button type="submit" class="delete-button">삭제</button>
+    </form>
+
+    <button type="button"
+            th:onclick="|location.href='@{/mypage/react_list(page=${page != null ? page : 1})}'|">
+      목록보기
+    </button>
+
+    <button type="button"
+            th:onclick="|location.href='@{/mypage/react_modify/{id}(id=${resume.resumeIdx})}?page=${page != null ? page : 1}'|">
+      수정
+    </button>
+  </div>
 </div>
+
 <div th:replace="include/footer :: footer"></div>
 </body>
 </html>

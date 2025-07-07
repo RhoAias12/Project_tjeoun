@@ -3,7 +3,7 @@ package com.tjoeun.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -30,11 +30,8 @@ public class Resume {
   /** 기본 필드 **/
   private String title;
 
-  @Column(columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
-  private Timestamp createdAt;
-
-  @Column(columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
-  private Timestamp updatedAt;
+  private LocalDateTime createdAt;
+  private LocalDateTime updatedAt;
 
   @Column(columnDefinition = "TEXT")
   private String context;
@@ -56,5 +53,18 @@ public class Resume {
 
   @Column(columnDefinition = "TEXT")
   private String awards;
+
+  /** 자동 시간 관리 **/
+  @PrePersist
+  public void prePersist() {
+    LocalDateTime now = LocalDateTime.now();
+    this.createdAt = now;
+    this.updatedAt = now;
+  }
+
+  @PreUpdate
+  public void preUpdate() {
+    this.updatedAt = LocalDateTime.now();
+  }
 
 }

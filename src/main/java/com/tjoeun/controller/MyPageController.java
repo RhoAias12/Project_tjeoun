@@ -180,6 +180,7 @@ public class MyPageController {
      Resume resume = resumeRepository.findWithContentsByResumeIdx(id)
        .orElseThrow(() -> new IllegalArgumentException("해당 이력서를 찾을 수 없습니다."));
      model.addAttribute("resume", resume);
+     model.addAttribute("page", page != null ? page : 1);
      return "mypage/react_modify";
    }
 

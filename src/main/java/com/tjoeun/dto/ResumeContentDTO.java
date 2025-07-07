@@ -8,6 +8,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class ResumeContentDTO {
+  private Integer resumeContentIdx;
   private String question;
   private String context;
 }
