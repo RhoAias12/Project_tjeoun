@@ -60,8 +60,13 @@
 
     <div class="card-grid">
       <div class="job-card" th:each="job : ${jobPage.content}">
-        <a th:href="@{'/empl/empl_detail/' + ${job.recruitmentIdx}}">
-          <img th:src="${#uris.escapePath(job.logoUrl)}" alt="회사 로고" class="job-logo" />
+        <a th:href="@{'/empl/empl_detail/' + ${job.recruitmentIdx} +
+              '?page=' + (${jobPage.number + 1}) +
+              '&scrapSort=' + ${scrapSort} +
+              '&deadlineSort=' + ${deadlineSort} }">
+
+
+        <img th:src="${#uris.escapePath(job.logoUrl)}" alt="회사 로고" class="job-logo" />
           <h3 class="job-title" th:text="${job.title}">공고 제목</h3>
           <p class="job-deadline"
              th:text="${#strings.startsWith(job.deadline.toString(), '9999') ? '상시채용' : '마감일: ' + job.deadline}">

@@ -103,7 +103,9 @@ public class EmplController {
 
     // 개별 공고 상세 페이지
     @GetMapping("/empl_detail/{id}")
-    public String emplDetailPage(@PathVariable("id") Long id, Model model, Principal principal) {
+    public String emplDetailPage(@PathVariable("id") Long id,
+                                 @RequestParam(defaultValue = "1") int page,
+                                 Model model, Principal principal) {
         RecruitmentDTO dto = recruitmentService.getPostById(id);
 
         boolean isFavorited = false;
@@ -115,6 +117,8 @@ public class EmplController {
             String userEmail = principal.getName();
             isFavorited = favoriteService.isFavorited(userEmail, id);
         }
+
+        model.addAttribute("page", page);
         model.addAttribute("job", dto);
         model.addAttribute("isFavorited", isFavorited);
 
