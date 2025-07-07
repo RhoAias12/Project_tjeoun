@@ -150,6 +150,7 @@ public class MyPageService {
                       .title(r.getTitle() != null ? r.getTitle() : "제목 없음")
                       .company(r.getCompany() != null ? r.getCompany() : "회사 없음")
                       .deadline(r.getDeadline())
+                      .scrapCount(favoriteRepository.countByRecruitment(r))
                       .build();
             })
             .filter(Objects::nonNull)
@@ -175,6 +176,7 @@ public class MyPageService {
                       .title(r.getTitle())
                       .company(r.getCompany())
                       .deadline(r.getDeadline())
+                      .scrapCount(favoriteRepository.countByRecruitment(r))
                       .build();
             })
             .filter(Objects::nonNull)
