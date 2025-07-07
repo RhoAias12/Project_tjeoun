@@ -43,6 +43,7 @@ public class MyPageService {
                     .statusDisplay(history.getStatus().getDisplay())
                     .recruitmentTitle(history.getRecruitment().getTitle())
                     .recruitmentCompany(history.getRecruitment().getCompany())
+                    .recruitmentId(history.getRecruitment().getRecruitmentIdx())
                     .resumeId(history.getOptionalIdx())
                     .build())
             .toList();
@@ -57,13 +58,12 @@ public class MyPageService {
     Page<ApplyHistory> page = applyHistoryRepository.findByUser(user, pageable);
 
     return page.map(history -> ApplyHistoryDTO.builder()
-      .applyHistoryId(history.getOptionalIdx())
-      .statusDisplay(history.getStatus().getDisplay())
-      .recruitmentTitle(history.getRecruitment().getTitle())
-      .recruitmentCompany(history.getRecruitment().getCompany())
-      .recruitmentId(history.getRecruitment().getRecruitmentIdx())
-      .resumeId(history.getOptionalIdx())
-      .build());
+            .applyHistoryId(history.getOptionalIdx())
+            .statusDisplay(history.getStatus().getDisplay())
+            .recruitmentTitle(history.getRecruitment().getTitle())
+            .recruitmentCompany(history.getRecruitment().getCompany())
+            .resumeId(history.getOptionalIdx())
+            .build());
   }
 
   @Transactional(readOnly = true)

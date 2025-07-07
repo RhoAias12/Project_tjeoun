@@ -58,9 +58,11 @@ public class Users {
       .build();
   }
 
+  @Builder.Default
   @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
   private List<Favorite> favorites = new ArrayList<>();
 
+  @Builder.Default
   @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
   private List<Resume> resumes = new ArrayList<>();
 }
