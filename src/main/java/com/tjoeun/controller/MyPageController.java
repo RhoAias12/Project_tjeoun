@@ -89,8 +89,7 @@ public class MyPageController {
                             Principal principal) {
         String email = principal.getName();
         Users user = userRepository.findByUserEmail(email);
-        Pageable correctedPageable = PageRequest.of(page - 1, pageable.getPageSize()
-        );
+        Pageable correctedPageable = PageRequest.of(page - 1, pageable.getPageSize(), Sort.by(Sort.Direction.DESC, "updatedAt"));
 
         Page<Resume> resumePage = myPageService.getPagedResumesByUserId(user.getUserIdx().longValue(), correctedPageable);
 
@@ -124,6 +123,7 @@ public class MyPageController {
         if (user == null) {
             throw new IllegalArgumentException("로그인한 사용자를 찾을 수 없습니다.");
         }
+        Timestamp now = new Timestamp(System.currentTimeMillis());
 
         // ResumeDto에서 Resume 엔티티로 변환하여 저장
         Resume resume = new Resume();
@@ -137,6 +137,8 @@ public class MyPageController {
         resume.setAntecedents(resumeDto.getAntecedents());
         resume.setAwards(resumeDto.getAwards());
         resume.setContext(resumeDto.getContext());
+        resume.setCreatedAt(now);
+        resume.setUpdatedAt(now);
 
         if (!imgFile.isEmpty()) {
             resume.setImg(imgFile.getOriginalFilename());

@@ -13,7 +13,7 @@
 </head>
 
 <body>
-<div th:replace="include/header :: header"></div>
+<div th:replace="~{include/header :: header}"></div>
 
 <!-- 전체 컨테이너 -->
 <div class="tab-box">
@@ -34,39 +34,33 @@
 
     <!-- 검색 및 정렬 영역 -->
     <form method="get" action="/empl/empl_main" id="sortForm">
-    <div class="search-sort">
-      <div class="search-wrapper">
+      <div class="search-sort">
+        <div class="search-wrapper">
 
-        <!-- 마감일 정렬 -->
-        <select class="sort-select" name="deadlineSort" onchange="document.getElementById('sortForm').submit()">
-          <option value="" th:selected="${deadlineSort == null or deadlineSort == ''}">전체</option>
-          <option value="deadline-asc" th:selected="${deadlineSort == 'deadline-asc'}">마감일 빠른 순</option>
-          <option value="deadline-desc" th:selected="${deadlineSort == 'deadline-desc'}">마감일 늦는 순</option>
-        </select>
+          <!-- 마감일 정렬 -->
+          <select class="sort-select" name="deadlineSort" onchange="document.getElementById('sortForm').submit()">
+            <option value="" th:selected="${deadlineSort == null or deadlineSort == ''}">전체</option>
+            <option value="deadline-asc" th:selected="${deadlineSort == 'deadline-asc'}">마감일 빠른 순</option>
+            <option value="deadline-desc" th:selected="${deadlineSort == 'deadline-desc'}">마감일 늦는 순</option>
+          </select>
 
-        <!-- 스크랩 정렬 -->
-        <select class="sort-select" name="scrapSort" onchange="document.getElementById('sortForm').submit()">
-          <option value="" th:selected="${scrapSort == null or scrapSort == ''}">전체</option>
-          <option value="scrap-desc" th:selected="${scrapSort == 'scrap-desc'}">스크랩 많은 순</option>
-          <option value="scrap-asc" th:selected="${scrapSort == 'scrap-asc'}">스크랩 적은 순</option>
-        </select>
+          <!-- 스크랩 정렬 -->
+          <select class="sort-select" name="scrapSort" onchange="document.getElementById('sortForm').submit()">
+            <option value="" th:selected="${scrapSort == null or scrapSort == ''}">전체</option>
+            <option value="scrap-desc" th:selected="${scrapSort == 'scrap-desc'}">스크랩 많은 순</option>
+            <option value="scrap-asc" th:selected="${scrapSort == 'scrap-asc'}">스크랩 적은 순</option>
+          </select>
 
-
-
+        </div>
       </div>
-    </div>
-  </form>
+    </form>
 
-
+    <!-- 채용 카드 리스트 -->
     <div class="card-grid">
-      <div class="job-card" th:each="job : ${jobPage.content}">
-        <a th:href="@{'/empl/empl_detail/' + ${job.recruitmentIdx} +
-              '?page=' + (${jobPage.number + 1}) +
-              '&scrapSort=' + ${scrapSort} +
-              '&deadlineSort=' + ${deadlineSort} }">
-
-
-        <img th:src="${#uris.escapePath(job.logoUrl)}" alt="회사 로고" class="job-logo" />
+      <div class="job-card"
+           th:each="job : ${jobPage.content}">
+        <a th:href="@{'/empl/empl_detail/' + ${job.recruitmentIdx} + '?prevUrl=' + ${encodedPrevUrl}}">
+          <img th:src="${job.logoUrl}" alt="회사 로고" class="job-logo" />
           <h3 class="job-title" th:text="${job.title}">공고 제목</h3>
           <p class="job-deadline"
              th:text="${#strings.startsWith(job.deadline.toString(), '9999') ? '상시채용' : '마감일: ' + job.deadline}">
@@ -74,21 +68,17 @@
           <p class="scrap-count">
             스크랩 수: <span th:text="${job.scrapCount != null ? job.scrapCount : 0}">0</span>
           </p>
-
-
-
         </a>
-       </div>
-     </div>
+      </div>
 
-    <div th:replace="fragments/pagination2 :: fragment(${jobPage},
-     ${startPage}, ${endPage}, '/empl/empl_main', ${scrapSort}, ${deadlineSort})">
     </div>
 
+    <!-- 페이징 -->
+    <div th:replace="~{fragments/pagination2 :: fragment(${jobPage}, ${startPage}, ${endPage}, '/empl/empl_main', ${scrapSort}, ${deadlineSort})}"></div>
 
+  </div>
+</div>
 
-
-
-    <div th:replace="include/footer :: footer"></div>
-  </body>
+<div th:replace="~{include/footer :: footer}"></div>
+</body>
 </html>

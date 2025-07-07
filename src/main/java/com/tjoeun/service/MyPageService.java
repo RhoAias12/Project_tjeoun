@@ -1,9 +1,6 @@
 package com.tjoeun.service;
 
-import com.tjoeun.dto.ApplyHistoryDTO;
-import com.tjoeun.dto.FavoriteDTO;
-import com.tjoeun.dto.ResumeDto;
-import com.tjoeun.dto.UserFormDto;
+import com.tjoeun.dto.*;
 import com.tjoeun.entity.*;
 import com.tjoeun.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -29,6 +27,7 @@ public class MyPageService {
   private final UserRepository userRepository;
   private final ApplyHistoryRepository applyHistoryRepository;
   private final ResumeRepository resumeRepository;
+  private final ResumeContentRepository resumeContentRepository;
 
   public List<ApplyHistoryDTO> getApplyHistoryList(String email) {
     Users user = userRepository.findByUserEmail(email);
@@ -131,10 +130,28 @@ public class MyPageService {
     resume.setAwards(dto.getAwards());
     resume.setContext(dto.getContext());
 
-    // 필요한 경우 ResumeContents 등 연관 엔티티 처리
+    resume.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
+
+
+    if (resume.getResumeContents() != null) {
+      resume.getResumeContents().clear();
+    }
+
+    if (dto.getResumeContents() != null) {
+      for (ResumeContentDTO contentDto : dto.getResumeContents()) {
+        ResumeContent content = ResumeContent.builder()
+          .resume(resume)
+          .question(contentDto.getQuestion())
+          .context(contentDto.getContext())
+          .build();
+        resume.getResumeContents().add(content);
+      }
+    }
 
     resumeRepository.save(resume);
   }
+
+
 
   @Transactional
   public void deleteScrap(FavoriteDTO favoriteDTO) {
