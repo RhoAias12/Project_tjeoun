@@ -37,14 +37,14 @@
     <div class="search-sort">
       <div class="search-wrapper">
 
-        <!-- 🔵 마감일 정렬 -->
+        <!-- 마감일 정렬 -->
         <select class="sort-select" name="deadlineSort" onchange="document.getElementById('sortForm').submit()">
           <option value="" th:selected="${deadlineSort == null or deadlineSort == ''}">전체</option>
           <option value="deadline-asc" th:selected="${deadlineSort == 'deadline-asc'}">마감일 빠른 순</option>
           <option value="deadline-desc" th:selected="${deadlineSort == 'deadline-desc'}">마감일 늦는 순</option>
         </select>
 
-        <!-- 🟢 스크랩 정렬 -->
+        <!-- 스크랩 정렬 -->
         <select class="sort-select" name="scrapSort" onchange="document.getElementById('sortForm').submit()">
           <option value="" th:selected="${scrapSort == null or scrapSort == ''}">전체</option>
           <option value="scrap-desc" th:selected="${scrapSort == 'scrap-desc'}">스크랩 많은 순</option>

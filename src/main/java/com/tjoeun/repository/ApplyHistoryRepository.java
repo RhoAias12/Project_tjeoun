@@ -2,6 +2,7 @@ package com.tjoeun.repository;
 
 import com.tjoeun.dto.ApplyHistoryDTO;
 import com.tjoeun.entity.ApplyHistory;
+import com.tjoeun.entity.Recruitment;
 import com.tjoeun.entity.Users;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,4 +18,6 @@ public interface ApplyHistoryRepository extends JpaRepository<ApplyHistory, Inte
   Page<ApplyHistory> findAll(Pageable pageable);
 
   boolean existsByUser_UserIdxAndRecruitment_RecruitmentIdx(Integer userIdx, Long recruitmentIdx);
+
+  boolean existsByUserAndRecruitment(Users user, Recruitment recruitment);
 }

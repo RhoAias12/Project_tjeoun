@@ -9,11 +9,11 @@
     let isLogin = /*[[${#authorization.expression('isAuthenticated()')}]]*/ false;
   </script>
 
-  <!-- ✅ CSRF 토큰 -->
+  <!-- CSRF 토큰 -->
   <meta name="_csrf" th:content="${_csrf.token}" />
   <meta name="_csrf_header" th:content="${_csrf.headerName}" />
 
-  <!-- ✅ CSS -->
+  <!-- CSS -->
   <link rel="stylesheet" th:href="@{/css/main.css}" />
   <link rel="stylesheet" th:href="@{/css/header.css}" />
   <link rel="stylesheet" th:href="@{/css/footer.css}" />
@@ -120,7 +120,7 @@
 
 <div th:replace="include/footer :: footer"></div>
 
-<!-- ✅ JS는 body 끝에 넣기 -->
+<!-- JS는 body 끝에 넣기 -->
 <script>
   function toggleBookmark(button) {
     if (!isLogin) {

@@ -38,6 +38,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.security.Principal;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/mypage")
@@ -347,7 +348,16 @@ public class MyPageController {
         return ResponseEntity.ok(alreadyApplied);
     }
 
+    @GetMapping("/check_applied/{recruitmentIdx}")
+    @ResponseBody
+    public ResponseEntity<?> checkApplied(@PathVariable Long recruitmentIdx, Principal principal) {
+        String email = principal.getName();
+        Users user = userRepository.findByUserEmail(email);
+        boolean applied = applyHistoryRepository.existsByUserAndRecruitment(user,
+          recruitmentRepository.findById(recruitmentIdx).orElseThrow());
 
+        return ResponseEntity.ok().body(Map.of("applied", applied));
+    }
 
 
 

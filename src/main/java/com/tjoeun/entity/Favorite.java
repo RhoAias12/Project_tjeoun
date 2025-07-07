@@ -25,6 +25,11 @@ public class Favorite {
   @JoinColumn(name = "recruitment_idx", nullable = false)
   private Recruitment recruitment;
 
-  @Column(columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
+  @Column(nullable = false, updatable = false)
   private Timestamp apply;
+
+  @PrePersist
+  public void onPrePersist() {
+    this.apply = new Timestamp(System.currentTimeMillis());
+  }
 }

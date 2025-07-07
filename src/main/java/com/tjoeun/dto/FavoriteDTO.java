@@ -18,6 +18,7 @@ public class FavoriteDTO {
   private String company;
   private LocalDate deadline;
   private Integer scrapCount;
+  private boolean isApplied;
 
   public void setScrapCount(Integer scrapCount) {
     this.scrapCount = (scrapCount == null) ? 0 : scrapCount;
