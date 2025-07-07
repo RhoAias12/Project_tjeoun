@@ -1,12 +1,13 @@
 package com.tjoeun.service;
 
-import com.tjoeun.dto.ApplyHistoryDTO;
-import com.tjoeun.dto.UserFormDto;
-import com.tjoeun.dto.UserListDto;
+import com.tjoeun.dto.*;
 import com.tjoeun.entity.ApplyHistory;
+import com.tjoeun.entity.Recruitment;
+import com.tjoeun.entity.Resume;
 import com.tjoeun.entity.Users;
 import com.tjoeun.repository.ApplyHistoryRepository;
 import com.tjoeun.repository.RecruitmentRepository;
+import com.tjoeun.repository.ResumeRepository;
 import com.tjoeun.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
@@ -17,6 +18,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,6 +30,7 @@ public class AdminService {
   private final PasswordEncoder passwordEncoder;
   private final ApplyHistoryRepository applyHistoryRepository;
   private final RecruitmentRepository recruitmentRepository;
+  private final ResumeRepository resumeRepository;
 
   // 모든 회원 리스트 조회
   public Page<UserListDto> getPagedUsers(int page, int size, String sortBy) {
@@ -115,21 +118,22 @@ public class AdminService {
     userRepository.save(user);
   }
 
-  public Page<ApplyHistoryDTO> getPagedApplyHistory(int page, int size, String applySort, String deadlineSort) {
+  public Page<ApplyHistoryDTO> getPagedApplyHistory(int page, int size, String sortOption) {
     Sort sort = Sort.unsorted();
 
-    if ("apply_latest".equals(applySort)) {
-      sort = Sort.by(Sort.Direction.DESC, "apply");
-    } else if ("apply_oldest".equals(applySort)) {
-      sort = Sort.by(Sort.Direction.ASC, "apply");
-    }
-
-    if ("deadline_latest".equals(deadlineSort)) {
-      Sort deadlineSortObj = Sort.by(Sort.Direction.DESC, "recruitment.deadline");
-      sort = sort.isSorted() ? sort.and(deadlineSortObj) : deadlineSortObj;
-    } else if ("deadline_oldest".equals(deadlineSort)) {
-      Sort deadlineSortObj = Sort.by(Sort.Direction.ASC, "recruitment.deadline");
-      sort = sort.isSorted() ? sort.and(deadlineSortObj) : deadlineSortObj;
+    switch (sortOption) {
+      case "apply_latest":
+        sort = Sort.by(Sort.Direction.DESC, "apply");
+        break;
+      case "apply_oldest":
+        sort = Sort.by(Sort.Direction.ASC, "apply");
+        break;
+      case "deadline_latest":
+        sort = Sort.by(Sort.Direction.DESC, "recruitment.deadline");
+        break;
+      case "deadline_oldest":
+        sort = Sort.by(Sort.Direction.ASC, "recruitment.deadline");
+        break;
     }
 
     Pageable pageable = PageRequest.of(page, size, sort);
@@ -146,14 +150,96 @@ public class AdminService {
       .build());
   }
 
-
-
   public void deleteRecruitmentById(Long recruitmentIdx) {
     recruitmentRepository.deleteById(recruitmentIdx);
   }
 
   public int countRecruitments() {
     return (int) recruitmentRepository.count();
+  }
+
+
+
+  @Transactional(readOnly = true)
+  public ApplyDetailDTO getApplyDetailById(Integer applyHistoryId) {
+    ApplyHistory applyHistory = applyHistoryRepository.findById(applyHistoryId)
+      .orElseThrow(() -> new IllegalArgumentException("해당 지원 기록을 찾을 수 없습니다. id=" + applyHistoryId));
+
+    Recruitment recruitment = applyHistory.getRecruitment();
+    Resume resume = applyHistory.getResume();
+    Users user = applyHistory.getUser();
+
+    List<ResumeContentDTO> resumeContentList = resume.getResumeContents().stream()
+      .map(content -> ResumeContentDTO.builder()
+        .question(content.getQuestion())
+        .context(content.getContext())
+        .build())
+      .collect(Collectors.toList());
+
+    return ApplyDetailDTO.builder()
+      .recruitmentTitle(recruitment.getTitle())
+      .recruitmentCompany(recruitment.getCompany())
+      .recruitmentDeadline(recruitment.getDeadline())
+      .recruitmentLocation(recruitment.getLocation())
+      .recruitmentLogoUrl(recruitment.getLogoUrl())
+
+      .resumeTitle(resume.getTitle())
+      .resumeImg(resume.getImg())
+      .resumeAddress(resume.getAddress())
+      .resumePhoneNum(resume.getPhoneNum())
+      .resumeEducation(resume.getEducation())
+      .resumeAbility(resume.getAbility())
+      .resumeAntecedents(resume.getAntecedents())
+      .resumeAwards(resume.getAwards())
+      .resumeContext(resume.getContext())
+
+      .userName(user.getUserName())
+      .userEmail(user.getUserEmail())
+      .userBirth(user.getUserBirth())
+
+      .resumeContentList(resumeContentList)
+      .statusDisplay(applyHistory.getStatus().getDisplay())
+      .build();
+  }
+
+
+  @Transactional
+  public void updateApplyStatus(Integer applyHistoryId, String newStatus) {
+    ApplyHistory applyHistory = applyHistoryRepository.findById(applyHistoryId)
+      .orElseThrow(() -> new IllegalArgumentException("지원 내역을 찾을 수 없습니다."));
+
+    ApplyHistory.ApplyStatus status = ApplyHistory.ApplyStatus.valueOf(newStatus);
+    applyHistory.setStatus(status);
+    applyHistoryRepository.save(applyHistory);
+  }
+
+  @Transactional
+  public void updateRecruitment(RecruitmentDTO dto) {
+    Recruitment entity = recruitmentRepository.findById(dto.getRecruitmentIdx())
+      .orElseThrow(() -> new IllegalArgumentException("해당 공고가 존재하지 않습니다."));
+
+    entity.setTitle(dto.getTitle());
+    entity.setCompany(dto.getCompany());
+    entity.setDeadline(dto.getDeadline());
+    entity.setQualifications(dto.getQualifications());
+    entity.setLogoUrl(dto.getLogoUrl());
+    entity.setResponsibilities(dto.getResponsibilities());
+    entity.setPreferred(dto.getPreferred());
+    entity.setBenefits(dto.getBenefits());
+    entity.setLocation(dto.getLocation());
+    entity.setSalary(dto.getSalary());
+    entity.setEmploymentType(dto.getEmploymentType());
+
+    recruitmentRepository.save(entity);
+  }
+
+  public String getStatusDisplayName(String status) {
+    return switch (status) {
+      case "SUBMITTED" -> "진행중";
+      case "FINALIZED" -> "합격";
+      case "REJECTED"  -> "불합격";
+      default -> "알 수 없음";
+    };
   }
 
 }

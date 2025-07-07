@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>이력서 제출</title>
+
+  <!-- ✅ CSS -->
+  <link rel="stylesheet" th:href="@{/css/header.css}" />
+  <link rel="stylesheet" th:href="@{/css/footer.css}" />
+  <link rel="stylesheet" th:href="@{/css/choice_list.css}" />
+</head>
+
+<body>
+<!-- 헤더 -->
+<div th:replace="include/header :: header"></div>
+
+<div class="tab-box">
+  <div class="tab-inner">
+    <h2 class="mypage-title">이력서 선택</h2>
+
+    <!-- ✅ 이력서 제출 폼 -->
+    <form th:action="@{/mypage/submit}" method="POST" onsubmit="return confirmResumeSubmission()">
+      <!-- CSRF 토큰 -->
+      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+      <!-- recruitmentIdx 전달 -->
+      <input type="hidden" name="recruitmentIdx" th:value="${recruitmentIdx}" />
+
+      <!-- ✅ 이력서 리스트 -->
+      <div class="resume-list">
+        <th:block th:each="resume : ${resumeList}">
+          <label class="resume-card">
+            <input type="radio" name="resumeIdx"
+                   th:value="${resume.resumeIdx}"
+                   th:attr="data-title=${resume.title}" />
+            <span class="resume-title" th:text="${resume.title}">이력서 제목</span>
+          </label>
+        </th:block>
+      </div>
+
+      <!-- ✅ 제출 버튼 -->
+      <div class="submit-container">
+        <button type="submit" class="submit-button">제출하기</button>
+        <button type="button" class="cancel-button"
+                th:onclick="|location.href='/empl/empl_detail/${recruitmentIdx}'|">취소</button>
+      </div>
+
+
+    </form>
+  </div>
+</div>
+
+<!-- 페이지네이션 -->
+<div class="pagination">
+  <div th:replace="~{fragments/pagination :: fragment(${jobPage}, ${startPage}, ${endPage}, '/mypage/choice_list/' + ${recruitmentIdx})}"></div>
+</div>
+
+
+</div>
+
+
+<!-- 푸터 -->
+<div th:replace="include/footer :: footer"></div>
+
+<!-- ✅ JavaScript -->
+<script>
+  function confirmResumeSubmission() {
+    const checked = document.querySelector('input[name="resumeIdx"]:checked');
+    if (!checked) {
+      alert("제출할 이력서를 선택해주세요.");
+      return false;
+    }
+
+    const title = checked.getAttribute("data-title");
+    return confirm(`[${title}] 이력서를 제출하시겠습니까?`);
+  }
+</script>
+
+<!-- ✅ 서버로부터 전달된 메시지 출력 -->
+<script th:if="${errorMessage}" th:inline="javascript">
+  alert([[${errorMessage}]]);
+</script>
+
+<script th:if="${successMessage}" th:inline="javascript">
+  alert([[${successMessage}]]);
+</script>
+
+</body>
+</html>

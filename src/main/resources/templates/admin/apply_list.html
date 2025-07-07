@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="js/header.js"></script>
-  <script src="js/footer.js"></script>
+<!--  <script src="js/header.js"></script>-->
+<!--  <script src="js/footer.js"></script>-->
   <link rel="stylesheet" th:href="@{/css/main.css}" />
   <link rel="stylesheet" th:href="@{/css/header.css}" />
   <link rel="stylesheet" th:href="@{/css/footer.css}" />
@@ -14,18 +14,16 @@
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
   />
 
-  <title>지원관리</title>
+  <title>이력서 선택</title>
 
   <script>
     window.addEventListener('DOMContentLoaded', () => {
       const urlParams = new URLSearchParams(window.location.search);
-      const applySort = urlParams.get('applySort') || 'apply_all';
-      const deadlineSort = urlParams.get('deadlineSort') || 'deadline_all';
+      const sortOption = urlParams.get('sortOption') || 'all';
 
       document.querySelectorAll('.pagination a').forEach(link => {
         const linkUrl = new URL(link.href);
-        linkUrl.searchParams.set('applySort', applySort);
-        linkUrl.searchParams.set('deadlineSort', deadlineSort);
+        linkUrl.searchParams.set('sortOption', sortOption);
         link.href = linkUrl.toString();
       });
     });
@@ -54,16 +52,12 @@
       <!-- 정렬 -->
       <div class="sort-wrapper">
         <form method="get" th:action="@{/admin/apply_list}" id="sortForm">
-          <select name="applySort" class="sort-select" onchange="document.getElementById('sortForm').submit()">
-            <option value="apply_all" th:selected="${applySort == 'apply_all'}">지원일: 전체</option>
-            <option value="apply_latest" th:selected="${applySort == 'apply_latest'}">지원일: 최신순</option>
-            <option value="apply_oldest" th:selected="${applySort == 'apply_oldest'}">지원일: 오래된순</option>
-          </select>
-
-          <select name="deadlineSort" class="sort-select" onchange="document.getElementById('sortForm').submit()">
-            <option value="deadline_all" th:selected="${deadlineSort == 'deadline_all'}">마감일: 전체</option>
-            <option value="deadline_latest" th:selected="${deadlineSort == 'deadline_latest'}">마감일: 최신순</option>
-            <option value="deadline_oldest" th:selected="${deadlineSort == 'deadline_oldest'}">마감일: 오래된순</option>
+          <select name="sortOption" class="sort-select" onchange="document.getElementById('sortForm').submit()">
+            <option value="all" th:selected="${sortOption == 'all'}">전체</option>
+            <option value="apply_latest" th:selected="${sortOption == 'apply_latest'}">지원일: 최신순</option>
+            <option value="apply_oldest" th:selected="${sortOption == 'apply_oldest'}">지원일: 오래된순</option>
+            <option value="deadline_latest" th:selected="${sortOption == 'deadline_latest'}">마감일: 최신순</option>
+            <option value="deadline_oldest" th:selected="${sortOption == 'deadline_oldest'}">마감일: 오래된순</option>
           </select>
           <input type="hidden" name="page" value="1" />
         </form>
@@ -72,8 +66,8 @@
 
     <!-- 게시물 리스트 -->
     <div class="apply-list" th:each="apply : ${applyList}">
-      <a th:href="@{'/admin/apply_detail'(applyHistoryId=${apply.applyHistoryId})}" class="apply-card">
-        <div class="apply-info">
+      <a th:href="|/admin/apply_detail/${apply.applyHistoryId}?page=${applyPage.number + 1}&sortOption=${sortOption}|" class="apply-card">
+      <div class="apply-info">
           <div class="job-title" th:text="${apply.recruitmentTitle}">공고명</div>
           <div class="company-name" th:text="${apply.recruitmentCompany}">회사명</div>
           <div class="nickname">
@@ -91,11 +85,10 @@
 
     <!-- 페이지네이션 -->
     <div class="pagination">
-      <div th:replace="fragments/pagination :: fragment
-            (${applyPage}, ${startPage}, ${endPage}, '/admin/apply_list')">
+      <div th:replace="fragments/pagination :: fragment (${jobPage}, ${startPage}, ${endPage}, '/mypage/choice_list/' + ${recruitmentIdx})">
       </div>
     </div>
-  </div>
+</div>
 </div>
 
 <!-- 푸터 -->

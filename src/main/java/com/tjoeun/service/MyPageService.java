@@ -2,15 +2,10 @@ package com.tjoeun.service;
 
 import com.tjoeun.dto.ApplyHistoryDTO;
 import com.tjoeun.dto.FavoriteDTO;
+import com.tjoeun.dto.ResumeDto;
 import com.tjoeun.dto.UserFormDto;
-import com.tjoeun.entity.ApplyHistory;
-import com.tjoeun.entity.Favorite;
-import com.tjoeun.entity.Recruitment;
-import com.tjoeun.entity.Users;
-import com.tjoeun.repository.ApplyHistoryRepository;
-import com.tjoeun.repository.FavoriteRepository;
-import com.tjoeun.repository.RecruitmentRepository;
-import com.tjoeun.repository.UserRepository;
+import com.tjoeun.entity.*;
+import com.tjoeun.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -33,6 +28,7 @@ public class MyPageService {
   private final RecruitmentRepository recruitmentRepository;
   private final UserRepository userRepository;
   private final ApplyHistoryRepository applyHistoryRepository;
+  private final ResumeRepository resumeRepository;
 
   public List<ApplyHistoryDTO> getApplyHistoryList(String email) {
     Users user = userRepository.findByUserEmail(email);
@@ -105,6 +101,25 @@ public class MyPageService {
   }
 
   @Transactional
+  public void updateResume(Long id, ResumeDto dto) {
+    Resume resume = resumeRepository.findById(id)
+      .orElseThrow(() -> new IllegalArgumentException("이력서를 찾을 수 없습니다."));
+
+    resume.setTitle(dto.getTitle());
+    resume.setAddress(dto.getAddress());
+    resume.setPhoneNum(dto.getPhoneNum());
+    resume.setEducation(dto.getEducation());
+    resume.setAbility(dto.getAbility());
+    resume.setAntecedents(dto.getAntecedents());
+    resume.setAwards(dto.getAwards());
+    resume.setContext(dto.getContext());
+
+    // 필요한 경우 ResumeContents 등 연관 엔티티 처리
+
+    resumeRepository.save(resume);
+  }
+
+  @Transactional
   public void deleteScrap(FavoriteDTO favoriteDTO) {
     Users user = userRepository.findById(favoriteDTO.getUserIdx())
             .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
@@ -165,6 +180,37 @@ public class MyPageService {
             .toList();
 
     return new PageImpl<>(dtoList, pageable, rawPage.getTotalElements());
+  }
+
+  public List<Resume> getResumesByUserId(Long userIdx) {
+    return resumeRepository.findByUser_UserIdx(userIdx);
+  }
+
+  public Resume getResumeById(Long resumeIdx) {
+    return resumeRepository.findById(resumeIdx)
+            .orElseThrow(() -> new IllegalArgumentException("이력서를 찾을 수 없습니다."));
+  }
+
+  public Page<Resume> getPagedResumesByUserId(Long userIdx, Pageable pageable) {
+    return resumeRepository.findByUser_UserIdx(userIdx, pageable);
+  }
+
+
+
+  @Transactional(readOnly = true)
+  public ResumeDto getResumeDetail(Long id) {
+    Resume resume = resumeRepository.findById(id)
+      .orElseThrow(() -> new IllegalArgumentException("이력서 없음"));
+
+    // Lazy 필드 강제 로딩
+    resume.getUser().getUserName();
+
+    return ResumeDto.builder()
+      .title(resume.getTitle())
+      .address(resume.getAddress())
+      .phoneNum(resume.getPhoneNum())
+      // 필요한 필드 다 넣기
+      .build();
   }
 
 
