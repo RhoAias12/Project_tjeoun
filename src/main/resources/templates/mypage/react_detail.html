@@ -8,6 +8,7 @@
   <link rel="stylesheet" th:href="@{/css/header.css}" />
   <link rel="stylesheet" th:href="@{/css/footer.css}" />
   <link rel="stylesheet" th:href="@{/css/react.css}" />
+  <!--    <script defer src="js/main.js"></script>-->
 </head>
 <body>
 <div th:replace="include/header :: header"></div>
@@ -15,7 +16,6 @@
 <div class="page-title">
   <p>마이페이지 &gt; 이력서</p>
 </div>
-
 <div class="container">
   <table class="resume-table">
     <!-- 제목 -->
@@ -111,26 +111,23 @@
     </tr>
   </table>
 
-  <div class="button-group">
-    <form th:action="@{/mypage/react_delete/{id}(id=${resume.resumeIdx})}"
-          method="post"
-          onsubmit="return confirm('정말 삭제하시겠습니까?');">
-      <input type="hidden" name="page" th:value="${page}" />
-      <button type="submit" class="delete-button">삭제</button>
-    </form>
-
-    <button type="button"
-            th:onclick="|location.href='@{/mypage/react_list(page=${page != null ? page : 1})}'|">
-      목록보기
-    </button>
-
-    <button type="button"
-            th:onclick="|location.href='@{/mypage/react_modify/{id}(id=${resume.resumeIdx})}?page=${page != null ? page : 1}'|">
-      수정
-    </button>
-  </div>
+    <div class="button-group">
+      <a th:href="${prevUrl} != null ? @{${prevUrl}} : @{/mypage/react_list(page=${page})}"
+         class="button">목록보기</a>
+      <div th:if="${!readonly}">
+        <form th:action="@{/mypage/react_delete/{id}(id=${resume.resumeIdx})}" method="post"
+              onsubmit="return confirm('정말 삭제하시겠습니까?');">
+          <input type="hidden" name="page" th:value="${page}" />
+          <button type="submit" class="delete-button">삭제</button>
+        </form>
+        <button type="button"
+                th:onclick="|location.href='@{/mypage/react_modify/{id}(id=${resume.resumeIdx})}?page=${page}'|">
+          수정
+        </button>
+      </div>
+    </div>
+  </form>
 </div>
-
 <div th:replace="include/footer :: footer"></div>
 </body>
 </html>
