@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -23,6 +24,9 @@ public class Resume {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "user_idx", nullable = false)
   private Users user;
+
+  @OneToMany(mappedBy = "resume", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<ResumeContent> resumeContents;
 
   /** 기본 필드 **/
   private String title;
@@ -54,11 +58,17 @@ public class Resume {
   @Column(columnDefinition = "TEXT")
   private String awards;
 
-  @OneToMany(mappedBy = "resume", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<ResumeContent> resumeContents;
+  /** 자동 시간 관리 **/
+//  @PrePersist
+//  public void prePersist() {
+//    LocalDateTime now = LocalDateTime.now();
+//    this.createdAt = now;
+//    this.updatedAt = now;
+//  }
 
 //  @PreUpdate
-//  public void onUpdate() {
-//    this.updatedAt = new Timestamp(System.currentTimeMillis());
+//  public void preUpdate() {
+//    this.updatedAt = LocalDateTime.now();
 //  }
+
 }

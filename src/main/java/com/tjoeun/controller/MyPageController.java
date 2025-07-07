@@ -12,6 +12,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -35,6 +36,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.Principal;
 import java.sql.Timestamp;
 import java.util.List;
@@ -56,6 +61,9 @@ public class MyPageController {
     private final ResumeContentRepository resumeContentRepository;
 
     private final RecruitmentService recruitmentService;
+
+    @Value("${upload.path}")
+    private String uploadRootPath;
 
     @GetMapping("/member_modify")
     public String showMemberModifyForm(Model model, Principal principal) {
@@ -89,8 +97,12 @@ public class MyPageController {
                             Principal principal) {
         String email = principal.getName();
         Users user = userRepository.findByUserEmail(email);
-        Pageable correctedPageable = PageRequest.of(page - 1, pageable.getPageSize(), Sort.by(Sort.Direction.DESC, "updatedAt"));
 
+        Pageable correctedPageable = PageRequest.of(
+          page - 1,
+          pageable.getPageSize(),
+          Sort.by(Sort.Direction.DESC, "updatedAt")
+        );
         Page<Resume> resumePage = myPageService.getPagedResumesByUserId(user.getUserIdx().longValue(), correctedPageable);
 
         model.addAttribute("resumes", resumePage.getContent());
@@ -110,7 +122,7 @@ public class MyPageController {
       @ModelAttribute("resumeDto") @Valid ResumeDto resumeDto,
       @RequestParam("imgFile") MultipartFile imgFile,
       BindingResult bindingResult,
-      Principal principal) {
+      Principal principal) throws IOException {
 
         if (bindingResult.hasErrors()) {
             return "mypage/react_write"; // 에러가 있으면 작성 페이지로 다시 돌아감
@@ -125,11 +137,10 @@ public class MyPageController {
         }
         Timestamp now = new Timestamp(System.currentTimeMillis());
 
-        // ResumeDto에서 Resume 엔티티로 변환하여 저장
+        // ResumeDto에서 Resume 엔티티로 변환
         Resume resume = new Resume();
         resume.setUser(user);
         resume.setTitle(resumeDto.getTitle());
-        resume.setContext(resumeDto.getContext());
         resume.setAddress(resumeDto.getAddress());
         resume.setPhoneNum(resumeDto.getPhoneNum());
         resume.setEducation(resumeDto.getEducation());
@@ -140,8 +151,23 @@ public class MyPageController {
         resume.setCreatedAt(now);
         resume.setUpdatedAt(now);
 
+        // ✅ 이미지 업로드 처리
         if (!imgFile.isEmpty()) {
-            resume.setImg(imgFile.getOriginalFilename());
+            String fileName = imgFile.getOriginalFilename();
+
+            // 공통 업로드 루트에 /resume 붙여서 사용
+            String uploadDir = uploadRootPath + "/resume";
+
+            Path uploadPath = Paths.get(uploadDir);
+            if (!Files.exists(uploadPath)) {
+                Files.createDirectories(uploadPath);
+            }
+
+            Path filePath = uploadPath.resolve(fileName);
+            imgFile.transferTo(filePath.toFile());
+
+            // DB에는 URL 경로로 저장해야 함
+            resume.setImg("/uploads/images/resume/" + fileName);
         }
 
         // 저장
@@ -207,12 +233,14 @@ public class MyPageController {
    }
 
     @PostMapping("/react_modify/{id}")
-    public String updateResume(
-      @PathVariable Long id,
-      @ModelAttribute ResumeDto resumeDto
-    ) {
-        myPageService.updateResume(id, resumeDto);
-        return "redirect:/mypage/react_list";
+    public String updateResume(@PathVariable Long id,
+                               @ModelAttribute ResumeDto resumeDto,
+                               @RequestParam("imgFile") MultipartFile imgFile) throws IOException {
+
+        // ✅ 서비스 레이어에 모든 로직 위임
+        myPageService.updateResume(id, resumeDto, imgFile);
+
+        return "redirect:/mypage/react_detail/" + id;
     }
 
 

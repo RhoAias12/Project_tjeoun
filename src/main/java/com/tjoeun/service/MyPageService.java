@@ -4,6 +4,7 @@ import com.tjoeun.dto.*;
 import com.tjoeun.entity.*;
 import com.tjoeun.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -12,7 +13,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Objects;
@@ -21,6 +27,9 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class MyPageService {
+
+  @Value("${upload.path}")
+  private String uploadRootPath;
 
   private final FavoriteRepository favoriteRepository;
   private final RecruitmentRepository recruitmentRepository;
@@ -42,7 +51,6 @@ public class MyPageService {
                     .statusDisplay(history.getStatus().getDisplay())
                     .recruitmentTitle(history.getRecruitment().getTitle())
                     .recruitmentCompany(history.getRecruitment().getCompany())
-                    .recruitmentId(history.getRecruitment().getRecruitmentIdx())
                     .resumeId(history.getResume().getResumeIdx())
                     .build())
             .toList();
@@ -117,7 +125,7 @@ public class MyPageService {
 
 
   @Transactional
-  public void updateResume(Long id, ResumeDto dto) {
+  public void updateResume(Long id, ResumeDto dto, MultipartFile imgFile) throws IOException {
     Resume resume = resumeRepository.findById(id)
       .orElseThrow(() -> new IllegalArgumentException("이력서를 찾을 수 없습니다."));
 
@@ -129,10 +137,22 @@ public class MyPageService {
     resume.setAntecedents(dto.getAntecedents());
     resume.setAwards(dto.getAwards());
     resume.setContext(dto.getContext());
-
     resume.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
 
+    // ✅ 이미지 업로드 처리
+    if (imgFile != null && !imgFile.isEmpty()) {
+      String fileName = imgFile.getOriginalFilename();
+      String uploadDir = uploadRootPath + "/resume";
+      Path uploadPath = Paths.get(uploadDir);
+      if (!Files.exists(uploadPath)) {
+        Files.createDirectories(uploadPath);
+      }
+      Path filePath = uploadPath.resolve(fileName);
+      imgFile.transferTo(filePath.toFile());
+      resume.setImg("/uploads/images/resume/" + fileName);
+    }
 
+    // ✅ ResumeContents 갱신
     if (resume.getResumeContents() != null) {
       resume.getResumeContents().clear();
     }
@@ -150,7 +170,6 @@ public class MyPageService {
 
     resumeRepository.save(resume);
   }
-
 
 
   @Transactional

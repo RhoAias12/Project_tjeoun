@@ -11,15 +11,29 @@
 <!--    <script defer src="/js/main.js"></script>-->
 
       <script>
-          function validateForm() {
-  // 대상 요소 가져오기
+// 이미지
+    document.addEventListener('DOMContentLoaded', function () {
+    const imgUpload = document.getElementById('imgUpload');
+    const imgPreview = document.getElementById('imgPreview');
+
+    imgUpload.addEventListener('change', function () {
+      const file = imgUpload.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          imgPreview.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  });
+
+function validateForm() {
+  // 필수 필드 검사
   const titleEl = document.querySelector('textarea[name="title"]');
   const addressEl = document.querySelector('textarea[name="address"]');
   const phoneNumEl = document.querySelector('textarea[name="phoneNum"]');
-  const question1El = document.querySelector('textarea[name="resumeContents[0].question"]');
-  const context1El = document.querySelector('textarea[name="resumeContents[0].context"]');
 
-  // 검사: 빈 항목 있으면 즉시 중단
   if (!titleEl.value.trim()) {
     alert('제목을 작성해 주세요!');
     titleEl.classList.add('required-field');
@@ -35,42 +49,34 @@
     phoneNumEl.classList.add('required-field');
     return false;
   }
-  if (!question1El.value.trim()) {
-    alert('질문 1을 작성해 주세요!');
-    question1El.classList.add('required-field');
-    return false;
-  }
-  if (!context1El.value.trim()) {
-    alert('답변 1을 작성해 주세요!');
-    context1El.classList.add('required-field');
-    return false;
-  }
 
-    const questionEls = document.querySelectorAll('textarea[name^="resumeContents"][name$=".question"]');
-    const contextEls = document.querySelectorAll('textarea[name^="resumeContents"][name$=".context"]');
+  // 질문/답변 쌍 검사: 질문1~n
+  const questionEls = document.querySelectorAll('textarea[name^="resumeContents"][name$=".question"]');
+  const contextEls = document.querySelectorAll('textarea[name^="resumeContents"][name$=".context"]');
 
-    for (let i = 0; i < questionEls.length; i++) {
-      const question = questionEls[i].value.trim();
-      const context = contextEls[i].value.trim();
+  for (let i = 0; i < questionEls.length; i++) {
+    const question = questionEls[i].value.trim();
+    const context = contextEls[i].value.trim();
 
-      if (!question && context) {
-        alert(`질문 ${i + 1}이 비어있습니다. 질문을 작성해 주세요!`);
-        questionEls[i].classList.add('required-field');
-        questionEls[i].focus();
-        return false;
-      }
-      if (question && !context) {
-        alert(`질문 ${i + 1}에 대한 답변을 작성해 주세요!`);
-        contextEls[i].classList.add('required-field');
-        contextEls[i].focus();
-        return false;
-      }
+    if (question && !context) {
+      alert(`질문 ${i + 1}에 대한 답변을 작성해 주세요!`);
+      contextEls[i].classList.add('required-field');
+      contextEls[i].focus();
+      return false;
     }
+    if (!question && context) {
+      alert(`질문 ${i + 1}이 비어있습니다. 질문을 작성해 주세요!`);
+      questionEls[i].classList.add('required-field');
+      questionEls[i].focus();
+      return false;
+    }
+  }
 
-  return true; // 모두 통과 시에만 제출 허용
+  return true;
 }
 
-      </script>
+  </script>
+
 
   </head>
   <body>
@@ -79,11 +85,8 @@
         <p>마이페이지 &gt; 이력서</p>
     </div>
     <div class="container">
-        <form th:action="@{/mypage/react_modify/{id}(id=${resume.resumeIdx})}"
-              method="post"
-              enctype="multipart/form-data"
-              onsubmit="return validateForm()">
-            <input type="hidden" name="page" th:value="${page}" />
+        <form th:action="@{/mypage/react_modify/{id}(id=${resume.resumeIdx})}" method="post" enctype="multipart/form-data" onsubmit="return validateForm()">
+        <input type="hidden" name="page" th:value="${page}" />
             <table class="resume-table">
                 <!-- 첫 줄: 이미지 텍스트 -->
                 <tr>
@@ -96,8 +99,16 @@
                 </tr>
                 <tr>
                     <th style="text-align: center;">
-                        <img id="preview" th:src="@{${resume.img}}" alt="미리보기 없음" />
-                        <input type="file" name="imgFile" accept="image/*" />
+                        <label for="imgUpload" class="logo-label"></label>
+                        <input type="file" id="imgUpload" name="imgFile" accept="image/*" />
+                        <div>
+                            <img id="imgPreview"
+                                 class="img"
+                                 th:if="${resume.img != null}"
+                                 th:src="@{${resume.img}}"
+                                 alt="이미지 미리보기" />
+                            <p th:if="${resume.img == null}">이미지가 없습니다.</p>
+                        </div>
                     </th>
 
                     <!-- 오른쪽: 개인정보 입력 -->
@@ -161,7 +172,6 @@
                 <tr th:each="content, iterStat : ${resume.resumeContents}">
                     <th>
                         <div class="question">
-                            <p>질문[[${iterStat.count}]].</p>
                             <textarea th:name="'resumeContents[' + ${iterStat.index} + '].question'"
                                       class="question-textarea" th:text="${content.question}"></textarea>
                         </div>

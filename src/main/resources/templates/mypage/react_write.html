@@ -58,6 +58,23 @@
             }
             return true; // 통과 시 제출 허용
           }
+
+
+    document.addEventListener('DOMContentLoaded', function () {
+    const imageUpload = document.getElementById('imageUpload');
+    const preview = document.getElementById('preview');
+
+    imageUpload.addEventListener('change', function () {
+      const file = imageUpload.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          preview.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  });
       </script>
 
   </head>
@@ -88,7 +105,12 @@
                 <!-- 둘째 줄: 왼쪽에 이미지 + 파일선택 / 오른쪽은 그대로 -->
                 <tr>
                     <th style="text-align: center">
-                        <img id="preview" src="" alt="미리보기 없음" />
+                        <!-- ✅ 작성 폼에서는 src 기본값 비워두기 -->
+                        <img id="imgPreview"
+                             class="img"
+                             th:if="${formDto.img != null}"
+                             th:src="@{${formDto.img}}"
+                             alt="이미지 미리보기" />
                         <input type="file" id="imageUpload" name="imgFile" accept="image/*" />
                         <div id="fileName" style="margin-top: 4px"></div>
                     </th>
