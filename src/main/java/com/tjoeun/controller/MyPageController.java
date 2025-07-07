@@ -8,12 +8,16 @@ import com.tjoeun.service.RecruitmentService;
 import com.tjoeun.service.UserService;
 import com.tjoeun.util.PaginationUtil;
 import com.tjoeun.util.PaginationUtil2;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -68,6 +72,14 @@ public class MyPageController {
         String email = principal.getName();
         return myPageService.updateUser(dto, email, bindingResult, model, passwordEncoder, userService);
     }
+    @PostMapping("/member_delete")
+    public String deleteMember(Principal principal, HttpServletRequest request) throws ServletException {
+        String email = principal.getName();
+
+        myPageService.deleteUserByEmail(email);
+        request.logout();
+        return "redirect:/";
+    }
 
     @GetMapping("/react_list")
     public String reactList(@RequestParam(defaultValue = "1") int page,
@@ -76,8 +88,7 @@ public class MyPageController {
                             Principal principal) {
         String email = principal.getName();
         Users user = userRepository.findByUserEmail(email);
-        Pageable correctedPageable = PageRequest.of(page - 1, pageable.getPageSize()
-        );
+        Pageable correctedPageable = PageRequest.of(page - 1, pageable.getPageSize(), Sort.by(Sort.Direction.DESC, "updatedAt"));
 
         Page<Resume> resumePage = myPageService.getPagedResumesByUserId(user.getUserIdx().longValue(), correctedPageable);
 
@@ -108,6 +119,7 @@ public class MyPageController {
         if (user == null) {
             throw new IllegalArgumentException("로그인한 사용자를 찾을 수 없습니다.");
         }
+        Timestamp now = new Timestamp(System.currentTimeMillis());
 
         // ResumeDto에서 Resume 엔티티로 변환하여 저장
         Resume resume = new Resume();
@@ -121,6 +133,8 @@ public class MyPageController {
         resume.setAntecedents(resumeDto.getAntecedents());
         resume.setAwards(resumeDto.getAwards());
         resume.setContext(resumeDto.getContext());
+        resume.setCreatedAt(now);
+        resume.setUpdatedAt(now);
 
         if (!imgFile.isEmpty()) {
             resume.setImg(imgFile.getOriginalFilename());

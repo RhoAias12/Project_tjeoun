@@ -63,4 +63,7 @@ public class Users {
 
   @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
   private List<Resume> resumes = new ArrayList<>();
+
+  @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
+  private List<ApplyHistory> applyHistories = new ArrayList<>();
 }

@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -99,6 +100,21 @@ public class MyPageService {
     return "redirect:/mypage/member_modify?success";
   }
 
+
+
+  @Transactional
+  public void deleteUserByEmail(String email) {
+    Users user = userRepository.findByUserEmail(email);
+    if (user != null) {
+      userRepository.delete(user);
+    } else {
+      throw new IllegalArgumentException("해당 이메일의 사용자가 존재하지 않습니다.");
+    }
+  }
+
+
+
+
   @Transactional
   public void updateResume(Long id, ResumeDto resumeDto) {
     Resume resume = resumeRepository.findById(id)
@@ -145,6 +161,9 @@ public class MyPageService {
           content.setResume(resume); // 양방향 연관관계
         }
 
+    // 필요한 경우 ResumeContents 등 연관 엔티티 처리
+    // updatedAt 갱신
+    resume.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
         updatedContents.add(content);
       }
     }
@@ -152,9 +171,6 @@ public class MyPageService {
     currentContents.clear();
     currentContents.addAll(updatedContents);
   }
-
-
-
 
   @Transactional
   public void deleteScrap(FavoriteDTO favoriteDTO) {
