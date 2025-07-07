@@ -1,9 +1,6 @@
 package com.tjoeun.service;
 
-import com.tjoeun.dto.ApplyHistoryDTO;
-import com.tjoeun.dto.FavoriteDTO;
-import com.tjoeun.dto.ResumeDto;
-import com.tjoeun.dto.UserFormDto;
+import com.tjoeun.dto.*;
 import com.tjoeun.entity.*;
 import com.tjoeun.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +26,7 @@ public class MyPageService {
   private final UserRepository userRepository;
   private final ApplyHistoryRepository applyHistoryRepository;
   private final ResumeRepository resumeRepository;
+  private final ResumeContentRepository resumeContentRepository;
 
   public List<ApplyHistoryDTO> getApplyHistoryList(String email) {
     Users user = userRepository.findByUserEmail(email);
@@ -101,23 +99,42 @@ public class MyPageService {
   }
 
   @Transactional
-  public void updateResume(Long id, ResumeDto dto) {
+  public void updateResume(Long id, ResumeDto resumeDto) {
     Resume resume = resumeRepository.findById(id)
       .orElseThrow(() -> new IllegalArgumentException("이력서를 찾을 수 없습니다."));
 
-    resume.setTitle(dto.getTitle());
-    resume.setAddress(dto.getAddress());
-    resume.setPhoneNum(dto.getPhoneNum());
-    resume.setEducation(dto.getEducation());
-    resume.setAbility(dto.getAbility());
-    resume.setAntecedents(dto.getAntecedents());
-    resume.setAwards(dto.getAwards());
-    resume.setContext(dto.getContext());
+    // 기본 필드 업데이트
+    resume.setTitle(resumeDto.getTitle());
+    resume.setAddress(resumeDto.getAddress());
+    resume.setPhoneNum(resumeDto.getPhoneNum());
+    resume.setEducation(resumeDto.getEducation());
+    resume.setAbility(resumeDto.getAbility());
+    resume.setAntecedents(resumeDto.getAntecedents());
+    resume.setAwards(resumeDto.getAwards());
+    resume.setContext(resumeDto.getContext());
 
-    // 필요한 경우 ResumeContents 등 연관 엔티티 처리
+    // 기존 질문/답변 삭제 (orphanRemoval)
+    resume.getResumeContents().clear();
 
-    resumeRepository.save(resume);
+    // 새 질문/답변 추가 (빈칸 필터링)
+    if (resumeDto.getResumeContents() != null) {
+      for (ResumeContentDTO dto : resumeDto.getResumeContents()) {
+        boolean isQuestionEmpty = dto.getQuestion() == null || dto.getQuestion().trim().isEmpty();
+        boolean isContextEmpty = dto.getContext() == null || dto.getContext().trim().isEmpty();
+        if (isQuestionEmpty && isContextEmpty) continue;
+
+        ResumeContent content = ResumeContent.builder()
+          .question(dto.getQuestion())
+          .context(dto.getContext())
+          .build();
+
+        // ✅ 양방향 연관관계 반드시 유지
+        content.setResume(resume);              // 자식 → 부모
+        resume.getResumeContents().add(content); // 부모 → 자식 리스트
+      }
+    }
   }
+
 
   @Transactional
   public void deleteScrap(FavoriteDTO favoriteDTO) {

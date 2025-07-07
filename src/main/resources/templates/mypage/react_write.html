@@ -159,20 +159,21 @@
                     </td>
                 </tr>
 
-            <tr th:each="content, iterStat : ${#numbers.sequence(0, 3)}">
-                <th>
-                    <div class="question">
-                        <p>질문[[${iterStat + 1}]].</p>
-                        <textarea name="resumeContents[[${iterStat}]].question"
-                                  class="question-textarea"
-                                  th:text="${resume.resumeContents[iterStat]?.question}"></textarea>
-                    </div>
-                </th>
-                <td>
-    <textarea name="resumeContents[[${iterStat}]].context"
-              class="answer-textarea"
-              th:text="${resume.resumeContents[iterStat]?.context}"></textarea>
-                </td>
+            <tr>
+                <th><textarea name="resumeContents[0].question" placeholder="* 질문 1을 입력하세요."></textarea></th>
+                <td><textarea name="resumeContents[0].context" placeholder="* 답변을 입력하세요."></textarea></td>
+            </tr>
+            <tr>
+                <th><textarea name="resumeContents[1].question" placeholder="질문 2을 입력하세요."></textarea></th>
+                <td><textarea name="resumeContents[1].context" placeholder="답변을 입력하세요."></textarea></td>
+            </tr>
+            <tr>
+                <th><textarea name="resumeContents[2].question" placeholder="질문 3을 입력하세요."></textarea></th>
+                <td><textarea name="resumeContents[2].context" placeholder="답변을 입력하세요."></textarea></td>
+            </tr>
+            <tr>
+                <th><textarea name="resumeContents[3].question" placeholder="질문 4을 입력하세요."></textarea></th>
+                <td><textarea name="resumeContents[3].context" placeholder="답변을 입력하세요."></textarea></td>
             </tr>
                 <tr>
                     <th class="link">

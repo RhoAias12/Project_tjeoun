@@ -185,22 +185,22 @@ public class MyPageController {
         return "redirect:/mypage/react_list";
     }
    // 수정
-    @GetMapping("/react_modify/{id}")
-    public String reactModify(@PathVariable Long id, Model model) {
-        Resume resume = resumeRepository.findById(id)
-          .orElseThrow(() -> new IllegalArgumentException("해당 이력서를 찾을 수 없습니다."));
-        model.addAttribute("resume", resume);
-        return "mypage/react_modify";
-    }
+   @GetMapping("/react_modify/{id}")
+   public String reactModify(@PathVariable Long id, Model model) {
+     Resume resume = resumeRepository.findWithContentsByResumeIdx(id)
+       .orElseThrow(() -> new IllegalArgumentException("해당 이력서를 찾을 수 없습니다."));
+     model.addAttribute("resume", resume);
+     return "mypage/react_modify";
+   }
 
-    @PostMapping("/react_modify/{id}")
-    public String updateResume(
-      @PathVariable Long id,
-      @ModelAttribute ResumeDto resumeDto
-    ) {
-        myPageService.updateResume(id, resumeDto);
-        return "redirect:/mypage/react_list";
-    }
+  @PostMapping("/react_modify/{id}")
+  public String updateResume(
+    @PathVariable Long id,
+    @ModelAttribute ResumeDto resumeDto
+  ) {
+    myPageService.updateResume(id, resumeDto);
+    return "redirect:/mypage/react_detail/" + id;
+  }
 
 
     @GetMapping("/apply_status")

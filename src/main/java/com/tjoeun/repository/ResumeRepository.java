@@ -2,6 +2,7 @@ package com.tjoeun.repository;
 
 import com.tjoeun.entity.Resume;
 import com.tjoeun.entity.Users;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.domain.Page;
@@ -24,5 +25,7 @@ public interface ResumeRepository extends JpaRepository<Resume, Long> {
 
   Page<Resume> findByUser_UserIdx(Long userIdx, Pageable pageable);
 
+  @EntityGraph(attributePaths = "resumeContents")
+  Optional<Resume> findWithContentsByResumeIdx(Long resumeIdx);
 
 }

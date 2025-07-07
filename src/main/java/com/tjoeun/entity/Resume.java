@@ -24,6 +24,9 @@ public class Resume {
   @JoinColumn(name = "user_idx", nullable = false)
   private Users user;
 
+  @OneToMany(mappedBy = "resume", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<ResumeContent> resumeContents;
+
   /** 기본 필드 **/
   private String title;
 
@@ -54,11 +57,4 @@ public class Resume {
   @Column(columnDefinition = "TEXT")
   private String awards;
 
-  @OneToMany(mappedBy = "resume", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<ResumeContent> resumeContents;
-
-//  @PreUpdate
-//  public void onUpdate() {
-//    this.updatedAt = new Timestamp(System.currentTimeMillis());
-//  }
 }
