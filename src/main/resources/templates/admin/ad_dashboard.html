@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>관리자 대시보드</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" th:href="@{/css/ad_dashboard.css}" />
+    <link rel="stylesheet" th:href="@{/css/header.css}" />
+    <link rel="stylesheet" th:href="@{/css/footer.css}" />
+</head>
+<body>
+
+<div th:replace="include/header :: header"></div>
+
+<div class="admin-dashboard-container">
+    <h2>관리자 대시보드</h2>
+
+    <!-- 지표 요약 -->
+    <div class="admin-metrics">
+        <div class="metric">총 공고 수: <strong th:text="${totalJobs}">0</strong></div>
+        <div class="metric">진행 중 공고: <strong th:text="${activeJobs}">0</strong></div>
+        <div class="metric">마감 공고 수: <strong th:text="${closedJobs}">0</strong></div>
+        <div class="metric">전체 사용자 수: <strong th:text="${userCount}">0</strong></div>
+        <div class="metric">이력서 작성률: <strong th:text="${resumeRate}">0.0</strong>%</div>
+        <div class="metric">크롤링 성공률: <strong th:text="${crawlStatus}">0.0</strong>%</div>
+    </div>
+
+    <!-- 사용자 검색 키워드 순위 -->
+    <div class="chart-container">
+        <h3>사용자 검색 키워드 TOP 5</h3>
+        <canvas id="keywordChart"></canvas>
+    </div>
+</div>
+
+<div th:replace="include/footer :: footer"></div>
+
+<script th:inline="javascript">
+    const keywordLabels = [[${topSearchKeywords}]];
+    const keywordCounts = [[${topSearchCounts}]];
+
+    new Chart(document.getElementById('keywordChart'), {
+      type: 'bar',
+      data: {
+        labels: keywordLabels,
+        datasets: [{
+          label: '검색 횟수',
+          data: keywordCounts,
+          backgroundColor: 'skyblue'
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false },
+          title: {
+            display: false
+          }
+        }
+      }
+    });
+</script>
+</body>
+</html>
