@@ -5,10 +5,7 @@ import com.tjoeun.entity.ApplyHistory;
 import com.tjoeun.entity.Recruitment;
 import com.tjoeun.entity.Resume;
 import com.tjoeun.entity.Users;
-import com.tjoeun.repository.ApplyHistoryRepository;
-import com.tjoeun.repository.RecruitmentRepository;
-import com.tjoeun.repository.ResumeRepository;
-import com.tjoeun.repository.UserRepository;
+import com.tjoeun.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,6 +24,8 @@ import java.util.stream.Collectors;
 public class AdminService {
 
   private final UserRepository userRepository;
+  private final FavoriteRepository favoriteRepository;
+  private final ResumeContentRepository resumeContentRepository;
   private final PasswordEncoder passwordEncoder;
   private final ApplyHistoryRepository applyHistoryRepository;
   private final RecruitmentRepository recruitmentRepository;
@@ -68,10 +67,12 @@ public class AdminService {
   }
 
 
-
   // 회원 삭제
+  @Transactional
   public void deleteUserById(Integer userIdx) {
-    userRepository.deleteById(userIdx);
+    Users user = userRepository.findById(userIdx)
+      .orElseThrow(() -> new IllegalArgumentException("사용자 없음"));
+    userRepository.delete(user);
   }
 
   // 회원 상세 조회
