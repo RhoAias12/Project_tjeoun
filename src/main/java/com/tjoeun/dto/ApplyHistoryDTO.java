@@ -23,7 +23,7 @@ public class ApplyHistoryDTO {
 
   private Long recruitmentId;
 
-  private Integer resumeId;
+  private Long resumeId;
 
   private String userNickname;
 
