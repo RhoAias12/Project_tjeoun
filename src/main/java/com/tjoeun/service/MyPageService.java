@@ -101,6 +101,21 @@ public class MyPageService {
     return "redirect:/mypage/member_modify?success";
   }
 
+
+
+  @Transactional
+  public void deleteUserByEmail(String email) {
+    Users user = userRepository.findByUserEmail(email);
+    if (user != null) {
+      userRepository.delete(user);
+    } else {
+      throw new IllegalArgumentException("해당 이메일의 사용자가 존재하지 않습니다.");
+    }
+  }
+
+
+
+
   @Transactional
   public void updateResume(Long id, ResumeDto dto) {
     Resume resume = resumeRepository.findById(id)
