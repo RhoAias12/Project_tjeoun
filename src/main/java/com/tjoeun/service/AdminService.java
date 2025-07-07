@@ -72,27 +72,8 @@ public class AdminService {
   public void deleteUserById(Integer userIdx) {
     Users user = userRepository.findById(userIdx)
       .orElseThrow(() -> new IllegalArgumentException("사용자 없음"));
-
-    // 1. 이력서 → 컨텐츠 먼저 삭제
-    List<Resume> resumes = resumeRepository.findByUser_UserIdx(Long.valueOf(userIdx));
-    for (Resume resume : resumes) {
-      resumeContentRepository.deleteByResume(resume); // 여기에 메서드 있어야 함
-    }
-
-    // 2. 이력서 삭제
-    resumeRepository.deleteAll(resumes);
-
-    // 3. 지원이력 삭제
-    applyHistoryRepository.deleteByUser(user); // 메서드 있어야 함
-
-    // 4. 스크랩 삭제
-    favoriteRepository.deleteByUser(user); // 이미 있음
-
-    // 5. 유저 삭제
     userRepository.delete(user);
   }
-
-
 
   // 회원 상세 조회
   public UserFormDto getUserFormDtoById(Integer userIdx) {

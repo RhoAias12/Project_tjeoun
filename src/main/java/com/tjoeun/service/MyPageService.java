@@ -107,7 +107,6 @@ public class MyPageService {
   public void deleteUserByEmail(String email) {
     Users user = userRepository.findByUserEmail(email);
     if (user != null) {
-      favoriteRepository.deleteByUser(user);
       userRepository.delete(user);
     } else {
       throw new IllegalArgumentException("해당 이메일의 사용자가 존재하지 않습니다.");
