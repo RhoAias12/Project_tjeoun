@@ -38,6 +38,24 @@
               alert('답변 1을 작성해 주세요!');
               return false;
             }
+            for (let i = 0; i < 4; i++) {
+              const questionEl = document.querySelector(`textarea[name="resumeContents[${i}].question"]`);
+              const contextEl = document.querySelector(`textarea[name="resumeContents[${i}].context"]`);
+
+              const question = questionEl.value.trim();
+              const context = contextEl.value.trim();
+
+              if (!question && context) {
+                alert(`질문 ${i + 1}이 비어있습니다. 질문을 작성해 주세요!`);
+                questionEl.focus();
+                return false;
+              }
+              if (question && !context) {
+                alert(`질문 ${i + 1}에 대한 답변을 작성해 주세요!`);
+                contextEl.focus();
+                return false;
+              }
+            }
             return true; // 통과 시 제출 허용
           }
       </script>
