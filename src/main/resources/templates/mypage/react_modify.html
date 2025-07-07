@@ -49,6 +49,23 @@
   return true; // 모두 통과 시에만 제출 허용
 }
 
+// 이미지
+    document.addEventListener('DOMContentLoaded', function () {
+    const imgUpload = document.getElementById('imgUpload');
+    const imgPreview = document.getElementById('imgPreview');
+
+    imgUpload.addEventListener('change', function () {
+      const file = imgUpload.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          imgPreview.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  });
+
       </script>
 
   </head>
@@ -72,8 +89,16 @@
                 </tr>
                 <tr>
                     <th style="text-align: center;">
-                        <img id="preview" th:src="@{${resume.img}}" alt="미리보기 없음" />
-                        <input type="file" name="imgFile" accept="image/*" />
+                        <label for="imgUpload" class="logo-label"></label>
+                        <input type="file" id="imgUpload" name="imgFile" accept="image/*" />
+                        <div>
+                            <img id="imgPreview"
+                                 class="img"
+                                 th:if="${resume.img != null}"
+                                 th:src="@{${resume.img}}"
+                                 alt="이미지 미리보기" />
+                            <p th:if="${resume.img == null}">이미지가 없습니다.</p>
+                        </div>
                     </th>
 
                     <!-- 오른쪽: 개인정보 입력 -->
@@ -133,24 +158,6 @@
                         </div>
                     </td>
                 </tr>
-
-<!--                <tr>-->
-<!--                    <th><textarea name="resumeContents[0].question" placeholder="* 질문 1을 입력하세요."></textarea></th>-->
-<!--                    <td><textarea name="resumeContents[0].context" placeholder="* 답변을 입력하세요."></textarea></td>-->
-<!--                </tr>-->
-<!--                <tr>-->
-<!--                    <th><textarea name="resumeContents[1].question" placeholder="질문 2을 입력하세요."></textarea></th>-->
-<!--                    <td><textarea name="resumeContents[1].context" placeholder="답변을 입력하세요."></textarea></td>-->
-<!--                </tr>-->
-<!--                <tr>-->
-<!--                    <th><textarea name="resumeContents[2].question" placeholder="질문 3을 입력하세요."></textarea></th>-->
-<!--                    <td><textarea name="resumeContents[2].context" placeholder="답변을 입력하세요."></textarea></td>-->
-<!--                </tr>-->
-<!--                <tr>-->
-<!--                    <th><textarea name="resumeContents[3].question" placeholder="질문 4을 입력하세요."></textarea></th>-->
-<!--                    <td><textarea name="resumeContents[3].context" placeholder="답변을 입력하세요."></textarea></td>-->
-<!--                </tr>-->
-<!--                <tr>-->
 
                 <tr th:each="content, iterStat : ${resume.resumeContents}">
                     <th>

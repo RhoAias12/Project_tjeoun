@@ -10,6 +10,7 @@ import com.tjoeun.util.PaginationUtil;
 import com.tjoeun.util.PaginationUtil2;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -31,6 +32,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.Principal;
 import java.sql.Timestamp;
 import java.util.List;
@@ -51,6 +56,9 @@ public class MyPageController {
     private final ResumeContentRepository resumeContentRepository;
 
     private final RecruitmentService recruitmentService;
+
+    @Value("${upload.path}")
+    private String uploadRootPath;
 
     @GetMapping("/member_modify")
     public String showMemberModifyForm(Model model, Principal principal) {
@@ -98,7 +106,7 @@ public class MyPageController {
       @ModelAttribute("resumeDto") @Valid ResumeDto resumeDto,
       @RequestParam("imgFile") MultipartFile imgFile,
       BindingResult bindingResult,
-      Principal principal) {
+      Principal principal) throws IOException {
 
         if (bindingResult.hasErrors()) {
             return "mypage/react_write"; // 에러가 있으면 작성 페이지로 다시 돌아감
@@ -112,11 +120,10 @@ public class MyPageController {
             throw new IllegalArgumentException("로그인한 사용자를 찾을 수 없습니다.");
         }
 
-        // ResumeDto에서 Resume 엔티티로 변환하여 저장
+        // ResumeDto에서 Resume 엔티티로 변환
         Resume resume = new Resume();
         resume.setUser(user);
         resume.setTitle(resumeDto.getTitle());
-        resume.setContext(resumeDto.getContext());
         resume.setAddress(resumeDto.getAddress());
         resume.setPhoneNum(resumeDto.getPhoneNum());
         resume.setEducation(resumeDto.getEducation());
@@ -125,9 +132,25 @@ public class MyPageController {
         resume.setAwards(resumeDto.getAwards());
         resume.setContext(resumeDto.getContext());
 
+        // ✅ 이미지 업로드 처리
         if (!imgFile.isEmpty()) {
-            resume.setImg(imgFile.getOriginalFilename());
+            String fileName = imgFile.getOriginalFilename();
+
+            // 공통 업로드 루트에 /resume 붙여서 사용
+            String uploadDir = uploadRootPath + "/resume";
+
+            Path uploadPath = Paths.get(uploadDir);
+            if (!Files.exists(uploadPath)) {
+                Files.createDirectories(uploadPath);
+            }
+
+            Path filePath = uploadPath.resolve(fileName);
+            imgFile.transferTo(filePath.toFile());
+
+            // DB에는 URL 경로로 저장해야 함
+            resume.setImg("/uploads/images/resume/" + fileName);
         }
+
 
         // 저장
         resumeRepository.save(resume);
@@ -144,7 +167,6 @@ public class MyPageController {
             }
         }
 
-        // ✅ 저장 성공 시 react_list로 이동
         return "redirect:/mypage/react_list";
     }
 
@@ -187,12 +209,32 @@ public class MyPageController {
    }
 
     @PostMapping("/react_modify/{id}")
-    public String updateResume(
-      @PathVariable Long id,
-      @ModelAttribute ResumeDto resumeDto
-    ) {
-        myPageService.updateResume(id, resumeDto);
-        return "redirect:/mypage/react_list";
+    public String updateResume(@PathVariable Long id,
+                               @ModelAttribute ResumeDto resumeDto,
+                               @RequestParam("imgFile") MultipartFile imgFile) throws IOException {
+        Resume resume = resumeRepository.findById(id)
+          .orElseThrow(() -> new IllegalArgumentException("이력서 없음"));
+
+        // 기본 필드 업데이트
+        resume.setTitle(resumeDto.getTitle());
+        resume.setAddress(resumeDto.getAddress());
+        // 기타 필드들 ...
+
+        // ✅ 이미지 처리
+        if (!imgFile.isEmpty()) {
+            String fileName = imgFile.getOriginalFilename();
+            String uploadDir = uploadRootPath + "/resume";
+            Path uploadPath = Paths.get(uploadDir);
+            if (!Files.exists(uploadPath)) {
+                Files.createDirectories(uploadPath);
+            }
+            Path filePath = uploadPath.resolve(fileName);
+            imgFile.transferTo(filePath.toFile());
+            resume.setImg("/uploads/images/resume/" + fileName);
+        }
+
+        resumeRepository.save(resume);
+        return "redirect:/mypage/react_detail/" + id;
     }
 
 

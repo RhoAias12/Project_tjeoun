@@ -24,6 +24,8 @@ public class ResumeDto {
 
   private MultipartFile imgFile;
 
+
+
   // 새로 추가
   private List<ResumeContentDTO> resumeContents;
 }
