@@ -177,6 +177,12 @@ body {
   color: #777;
 }
 
+.scrap-count {
+  font-size: 13px;
+  color: #777;
+}
+
+
 /* 페이지네이션 */
 .pagination {
   text-align: center;
