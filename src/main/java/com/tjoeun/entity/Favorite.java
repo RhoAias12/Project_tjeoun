@@ -3,6 +3,8 @@ package com.tjoeun.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.sql.Timestamp;
+
 @Entity
 @Table(name = "favorite")
 @Getter @Setter
@@ -22,4 +24,7 @@ public class Favorite {
   @ManyToOne
   @JoinColumn(name = "recruitment_idx", nullable = false)
   private Recruitment recruitment;
+
+  @Column(columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
+  private Timestamp apply;
 }

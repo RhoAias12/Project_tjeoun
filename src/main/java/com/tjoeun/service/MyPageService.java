@@ -44,7 +44,7 @@ public class MyPageService {
                     .recruitmentTitle(history.getRecruitment().getTitle())
                     .recruitmentCompany(history.getRecruitment().getCompany())
                     .recruitmentId(history.getRecruitment().getRecruitmentIdx())
-                    .resumeId(history.getOptionalIdx())
+                    .resumeId(history.getResume().getResumeIdx())
                     .build())
             .toList();
   }
@@ -63,7 +63,7 @@ public class MyPageService {
             .recruitmentTitle(history.getRecruitment().getTitle())
             .recruitmentCompany(history.getRecruitment().getCompany())
             .recruitmentId(history.getRecruitment().getRecruitmentIdx())
-            .resumeId(history.getOptionalIdx())
+            .resumeId(history.getResume().getResumeIdx())
             .build());
   }
 

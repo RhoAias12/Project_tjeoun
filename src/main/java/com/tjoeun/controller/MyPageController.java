@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -216,7 +217,11 @@ public class MyPageController {
 
         String email = principal.getName();
 
-        Pageable correctedPageable = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
+        Pageable correctedPageable = PageRequest.of(
+          page - 1,
+          pageable.getPageSize(),
+          Sort.by(Sort.Direction.DESC, "apply")
+        );
 
         Page<ApplyHistoryDTO> historyPage = myPageService.getPagedApplyHistories(email, correctedPageable);
 
@@ -239,9 +244,9 @@ public class MyPageController {
         Pageable correctedPageable = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
         Page<FavoriteDTO> jobPage = myPageService.getPagedFavorites(email, correctedPageable);
 
-        System.out.println("📌 로그인 유저: " + email);
-        System.out.println("📌 스크랩 개수: " + jobPage.getTotalElements());
-        System.out.println("📌 스크랩 리스트: " + jobPage.getContent());
+//        System.out.println("로그인 유저: " + email);
+//        System.out.println("스크랩 개수: " + jobPage.getTotalElements());
+//        System.out.println("스크랩 리스트: " + jobPage.getContent());
 
 
         model.addAttribute("favorites", jobPage.getContent());
@@ -296,12 +301,14 @@ public class MyPageController {
 
     @PostMapping("/submit")
     public String submitApply(@RequestParam("recruitmentIdx") Long recruitmentId,
+                              @RequestParam("resumeIdx") Long resumeIdx,
                               @AuthenticationPrincipal UserDetails userDetails,
                               RedirectAttributes redirectAttributes) {
 
         String email = userDetails.getUsername();
         Users user = userService.findByUserEmail(email);
         Recruitment recruitment = recruitmentService.getEntityById(recruitmentId);
+        Resume resume = myPageService.getResumeById(resumeIdx);
 
         // 이미 지원한 이력 있는지 확인 (resume 없이)
         boolean alreadyApplied = applyHistoryRepository
@@ -316,6 +323,7 @@ public class MyPageController {
         ApplyHistory history = ApplyHistory.builder()
                 .user(user)
                 .recruitment(recruitment)
+                .resume(resume)
                 .status(ApplyHistory.ApplyStatus.SUBMITTED)
                 .apply(new Timestamp(System.currentTimeMillis()))
                 .build();
