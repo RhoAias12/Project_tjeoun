@@ -96,7 +96,6 @@
         th:if="${!#strings.isEmpty(content.question) or !#strings.isEmpty(content.context)}">
       <th>
         <div class="question">
-          <p>질문[[${iterStat.count}]].</p>
           <p th:text="${content.question}"></p>
         </div>
       </th>

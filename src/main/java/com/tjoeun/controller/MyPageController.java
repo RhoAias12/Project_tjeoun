@@ -97,9 +97,12 @@ public class MyPageController {
                             Principal principal) {
         String email = principal.getName();
         Users user = userRepository.findByUserEmail(email);
-        Pageable correctedPageable = PageRequest.of(page - 1, pageable.getPageSize()
-        );
 
+        Pageable correctedPageable = PageRequest.of(
+          page - 1,
+          pageable.getPageSize(),
+          Sort.by(Sort.Direction.DESC, "updatedAt")
+        );
         Page<Resume> resumePage = myPageService.getPagedResumesByUserId(user.getUserIdx().longValue(), correctedPageable);
 
         model.addAttribute("resumes", resumePage.getContent());
@@ -228,28 +231,10 @@ public class MyPageController {
     public String updateResume(@PathVariable Long id,
                                @ModelAttribute ResumeDto resumeDto,
                                @RequestParam("imgFile") MultipartFile imgFile) throws IOException {
-        Resume resume = resumeRepository.findById(id)
-          .orElseThrow(() -> new IllegalArgumentException("이력서 없음"));
 
-        // 기본 필드 업데이트
-        resume.setTitle(resumeDto.getTitle());
-        resume.setAddress(resumeDto.getAddress());
-        // 기타 필드들 ...
+        // ✅ 서비스 레이어에 모든 로직 위임
+        myPageService.updateResume(id, resumeDto, imgFile);
 
-        // ✅ 이미지 처리
-        if (!imgFile.isEmpty()) {
-            String fileName = imgFile.getOriginalFilename();
-            String uploadDir = uploadRootPath + "/resume";
-            Path uploadPath = Paths.get(uploadDir);
-            if (!Files.exists(uploadPath)) {
-                Files.createDirectories(uploadPath);
-            }
-            Path filePath = uploadPath.resolve(fileName);
-            imgFile.transferTo(filePath.toFile());
-            resume.setImg("/uploads/images/resume/" + fileName);
-        }
-
-        resumeRepository.save(resume);
         return "redirect:/mypage/react_detail/" + id;
     }
 

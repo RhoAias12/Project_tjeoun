@@ -108,8 +108,8 @@
                         <!-- ✅ 작성 폼에서는 src 기본값 비워두기 -->
                         <img id="imgPreview"
                              class="img"
-                             th:if="${resume.img != null}"
-                             th:src="@{${resume.img}}"
+                             th:if="${formDto.img != null}"
+                             th:src="@{${formDto.img}}"
                              alt="이미지 미리보기" />
                         <input type="file" id="imageUpload" name="imgFile" accept="image/*" />
                         <div id="fileName" style="margin-top: 4px"></div>
