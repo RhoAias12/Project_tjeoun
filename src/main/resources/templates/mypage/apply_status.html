@@ -31,7 +31,7 @@
         <div class="apply-card" th:each="history : ${historyList}">
           <div class="apply-info">
             <div class="job-title">
-              <a th:href="@{/empl/empl_detail/{id}(id=${history.recruitmentId})}"
+              <a th:href="@{/empl/empl_detail/{id}(id=${history.recruitmentId}, prevUrl=${'/mypage/apply_status?page=' + (jobPage.number + 1)})}"
                  th:text="${history.recruitmentTitle}">공고명</a>
             </div>
             <div class="company-name" th:text="${history.recruitmentCompany}">회사명</div>
@@ -39,7 +39,9 @@
           <div class="apply-buttons">
             <div class="situation" th:text="${history.statusDisplay}">지원상태</div>
             <div class="react-btn">
-              <a th:href="@{/mypage/react_detail/{id}(id=${history.resumeId})}">지원 이력서</a>
+              <a th:href="@{/mypage/react_detail/{id}(id=${history.resumeId}, readonly=true, page=${jobPage.number + 1}, prevUrl='/mypage/apply_status?page=' + ${jobPage.number + 1})}">
+                지원 이력서
+              </a>
             </div>
           </div>
         </div>

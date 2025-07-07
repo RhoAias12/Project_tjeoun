@@ -175,11 +175,16 @@ public class MyPageController {
     @GetMapping("/react_detail/{id}")
     public String reactDetail(@PathVariable Long id,
                               @RequestParam(defaultValue = "1") int page,
+                              @RequestParam(defaultValue = "false") boolean readonly,
+                              @RequestParam(required = false) String prevUrl,
                               Model model) {
         Resume resume = resumeRepository.findById(id)
           .orElseThrow(() -> new IllegalArgumentException("해당 이력서를 찾을 수 없습니다."));
+
         model.addAttribute("resume", resume);
         model.addAttribute("page", page);
+        model.addAttribute("readonly", readonly);
+        model.addAttribute("prevUrl", prevUrl); // ← 이거 중요!
         return "mypage/react_detail";
     }
 
