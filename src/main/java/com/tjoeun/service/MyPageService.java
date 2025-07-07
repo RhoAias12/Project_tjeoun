@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -131,6 +132,8 @@ public class MyPageService {
     resume.setContext(dto.getContext());
 
     // 필요한 경우 ResumeContents 등 연관 엔티티 처리
+    // updatedAt 갱신
+    resume.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
 
     resumeRepository.save(resume);
   }
