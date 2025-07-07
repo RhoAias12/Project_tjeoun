@@ -8,12 +8,15 @@ import com.tjoeun.service.RecruitmentService;
 import com.tjoeun.service.UserService;
 import com.tjoeun.util.PaginationUtil;
 import com.tjoeun.util.PaginationUtil2;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -67,6 +70,14 @@ public class MyPageController {
                                Model model) {
         String email = principal.getName();
         return myPageService.updateUser(dto, email, bindingResult, model, passwordEncoder, userService);
+    }
+    @PostMapping("/member_delete")
+    public String deleteMember(Principal principal, HttpServletRequest request) throws ServletException {
+        String email = principal.getName();
+
+        myPageService.deleteUserByEmail(email);
+        request.logout();
+        return "redirect:/";
     }
 
     @GetMapping("/react_list")

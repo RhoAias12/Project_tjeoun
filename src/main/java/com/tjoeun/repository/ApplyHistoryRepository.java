@@ -17,8 +17,5 @@ public interface ApplyHistoryRepository extends JpaRepository<ApplyHistory, Inte
   Page<ApplyHistory> findAll(Pageable pageable);
 
   boolean existsByUser_UserIdxAndRecruitment_RecruitmentIdx(Integer userIdx, Long recruitmentIdx);
-
-
-
-
+  void deleteByUser(Users user);//추가
 }
