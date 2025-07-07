@@ -85,7 +85,8 @@
 
     <!-- 페이지네이션 -->
     <div class="pagination">
-      <div th:replace="fragments/pagination :: fragment (${jobPage}, ${startPage}, ${endPage}, '/mypage/choice_list/' + ${recruitmentIdx})">
+      <div th:replace="fragments/pagination :: fragment
+        (${applyPage}, ${startPage}, ${endPage}, ${url})">
       </div>
     </div>
 </div>

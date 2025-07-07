@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>취업 시장 현황 대시보드</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" th:href="@{/css/dashboard.css}" />
+  <link rel="stylesheet" th:href="@{/css/header.css}" />
+  <link rel="stylesheet" th:href="@{/css/footer.css}" />
+</head>
+<body>
+
+<div th:replace="include/header :: header"></div>
+
+<div class="dashboard-container">
+  <h1>취업 시장 현황 대시보드</h1>
+
+  <!-- 주요 지표 요약 -->
+  <div class="metric-boxes">
+    <div class="metric">총 채용 공고 수: <strong th:text="${totalJobCount}">0</strong>건</div>
+    <div class="metric">마감 임박 공고 수: <strong th:text="${closingSoonCount}">0</strong>건</div>
+    <div class="metric">채용 마감률: <strong th:text="${closeRate}">0.0</strong>%</div>
+  </div>
+
+  <!-- 차트 영역 -->
+  <div class="chart-container">
+    <h3>인기 직무</h3>
+    <canvas id="popularRoleChart"></canvas>
+  </div>
+
+  <div class="chart-container">
+    <h3>전체 키워드 TOP 5</h3>
+    <canvas id="keywordChart"></canvas>
+  </div>
+
+
+  <div class="chart-container">
+    <h3>기업 규모별 공고 비율</h3>
+    <canvas id="companySizeChart"></canvas>
+  </div>
+
+  <div class="chart-container">
+    <h3>지역별 채용 분포</h3>
+    <canvas id="regionChart"></canvas>
+  </div>
+
+  <div class="chart-container">
+    <h3>직무별 공고 비율</h3>
+    <canvas id="jobTypeChart"></canvas>
+  </div>
+
+
+
+
+  <div class="chart-container">
+    <h3>일별 공고 등록 추이 (최근 7일)</h3>
+    <canvas id="trendChart"></canvas>
+  </div>
+</div>
+
+<div th:replace="include/footer :: footer"></div>
+
+<script th:inline="javascript">
+  const jobTypeLabels = [[${jobTypeLabels}]];
+  const jobTypeCounts = [[${jobTypeCounts}]];
+
+  const popularRoleLabels = [[${popularRoles}]];
+  const popularRoleCounts = [[${popularRoleCounts}]];
+
+  new Chart(document.getElementById('jobTypeChart'), {
+    type: 'pie',
+    data: {
+      labels: jobTypeLabels,
+      datasets: [{
+        data: jobTypeCounts
+      }]
+    }
+  });
+
+
+  new Chart(document.getElementById('companySizeChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['대기업', '중견기업', '스타트업'],
+      datasets: [{
+        data: [40, 35, 25]
+      }]
+    }
+  });
+
+  new Chart(document.getElementById('regionChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['서울', '경기', '부산', '대전', '기타'],
+      datasets: [{
+        data: [400, 300, 150, 100, 80]
+      }]
+    }
+  });
+
+  new Chart(document.getElementById('stackChart'), {
+    type: 'pie',
+    data: {
+      labels: ['Java', 'Spring', 'React', 'AWS', 'Python'],
+      datasets: [{
+        data: [180, 160, 140, 120, 100]
+      }]
+    }
+  });
+
+  new Chart(document.getElementById('trendChart'), {
+    type: 'line',
+    data: {
+      labels: ['7/1', '7/2', '7/3', '7/4', '7/5', '7/6', '7/7'],
+      datasets: [{
+        label: '일일 등록 수',
+        data: [110, 130, 150, 170, 180, 160, 190],
+        fill: false,
+        tension: 0.2
+      }]
+    }
+  });
+
+  const topKeywordLabels = [[${topKeywordLabels}]];
+  const topKeywordCounts = [[${topKeywordCounts}]];
+
+  new Chart(document.getElementById('keywordChart'), {
+    type: 'bar',
+    data: {
+      labels: topKeywordLabels,
+      datasets: [{
+        label: '검색 횟수',
+        data: topKeywordCounts,
+        backgroundColor: 'skyblue'
+      }]
+    }
+  });
+
+  new Chart(document.getElementById('popularRoleChart'), {
+    type: 'bar',
+    data: {
+      labels: popularRoleLabels,
+      datasets: [{
+        label: '공고 수',
+        data: popularRoleCounts,
+        backgroundColor: 'lightblue'
+      }]
+    },
+    options: {
+      plugins: {
+        legend: {
+          display: false
+        }
+      }
+    }
+  });
+
+</script>
+</body>
+</html>
