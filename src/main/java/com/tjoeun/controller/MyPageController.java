@@ -42,6 +42,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.Principal;
 import java.sql.Timestamp;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -221,16 +222,16 @@ public class MyPageController {
         return "redirect:/mypage/react_list?page=" + page;
     }
 
-   @GetMapping("/react_modify/{id}")
-   public String reactModify(@PathVariable Long id,
-                             @RequestParam(defaultValue = "1") int page,
-                             Model model) {
-       Resume resume = resumeRepository.findById(id)
-         .orElseThrow(() -> new IllegalArgumentException("해당 이력서를 찾을 수 없습니다."));
-       model.addAttribute("resume", resume);
-       model.addAttribute("page", page);
-       return "mypage/react_modify";
-   }
+    @GetMapping("/react_modify/{id}")
+    public String reactModify(@PathVariable Long id,
+                              @RequestParam(defaultValue = "1") int page,
+                              Model model) {
+        Resume resume = resumeRepository.findById(id)
+          .orElseThrow(() -> new IllegalArgumentException("해당 이력서를 찾을 수 없습니다."));
+        model.addAttribute("resume", resume);
+        model.addAttribute("page", page);
+        return "mypage/react_modify";
+    }
 
     @PostMapping("/react_modify/{id}")
     public String updateResume(@PathVariable Long id,
@@ -278,19 +279,23 @@ public class MyPageController {
 
         String email = principal.getName();
 
+        // 1. 우선 제대로 된 Pageable 만들기 (page-1)
         Pageable correctedPageable = PageRequest.of(
-          page - 1,
+          Math.max(page - 1, 0), // 음수 방지
           pageable.getPageSize(),
           Sort.by(Sort.Direction.DESC, "apply")
         );
 
         Page<FavoriteDTO> jobPage = myPageService.getPagedFavorites(email, correctedPageable);
 
-//        System.out.println("로그인 유저: " + email);
-//        System.out.println("스크랩 개수: " + jobPage.getTotalElements());
-//        System.out.println("스크랩 리스트: " + jobPage.getContent());
+        // 2. 페이지 보정 - 요청 페이지가 마지막 페이지보다 크면 마지막 페이지로 보정
+        int totalPages = jobPage.getTotalPages();
+        if (totalPages > 0 && page > totalPages) {
+            // 요청 페이지가 총 페이지 수보다 크면 마지막 페이지로 다시 redirect 처리
+            return "redirect:/mypage/scrap?page=" + totalPages;
+        }
 
-
+        // 3. 정상 처리
         model.addAttribute("favorites", jobPage.getContent());
         model.addAttribute("jobPage", jobPage);
         model.addAttribute("customSort", customSort);
@@ -299,12 +304,28 @@ public class MyPageController {
         return "mypage/scrap";
     }
 
+
     @DeleteMapping("/scrap")
     @ResponseBody
     @Transactional
-    public ResponseEntity<?> deleteScrap(@RequestBody FavoriteDTO favoriteDTO) {
+    public ResponseEntity<?> deleteScrap(@RequestBody FavoriteDTO favoriteDTO,
+                                         @RequestParam(required = false) Integer page,
+                                         @RequestParam(required = false, defaultValue = "8") Integer size) {
         myPageService.deleteScrap(favoriteDTO);
-        return ResponseEntity.ok().build();
+
+        // 삭제 후 현재 페이지에 남은 스크랩 수 확인
+        Users user = userRepository.findById(favoriteDTO.getUserIdx())
+          .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        Pageable pageable = PageRequest.of(Math.max(page - 1, 0), size); // page는 0-based
+        Page<Favorite> resultPage = favoriteRepository.findByUser(user, pageable);
+
+        int currentPage = Math.max(page != null ? page : 1, 1);
+        int newPage = resultPage.getTotalElements() == 0 && currentPage > 1
+          ? currentPage - 1
+          : currentPage;
+
+        return ResponseEntity.ok().body(Map.of("newPage", newPage));
     }
 
     @GetMapping("/choice_list/{recruitmentIdx}")
@@ -354,7 +375,7 @@ public class MyPageController {
 
         // 이미 지원한 이력 있는지 확인 (resume 없이)
         boolean alreadyApplied = applyHistoryRepository
-                .existsByUser_UserIdxAndRecruitment_RecruitmentIdx(user.getUserIdx(), recruitment.getRecruitmentIdx());
+          .existsByUser_UserIdxAndRecruitment_RecruitmentIdx(user.getUserIdx(), recruitment.getRecruitmentIdx());
 
         if (alreadyApplied) {
             redirectAttributes.addFlashAttribute("errorMessage", "이미 지원한 공고입니다. 중복 지원은 불가능합니다.");
@@ -363,12 +384,12 @@ public class MyPageController {
 
         // 지원 이력 저장 (resume 없이)
         ApplyHistory history = ApplyHistory.builder()
-                .user(user)
-                .recruitment(recruitment)
-                .resume(resume)
-                .status(ApplyHistory.ApplyStatus.SUBMITTED)
-                .apply(new Timestamp(System.currentTimeMillis()))
-                .build();
+          .user(user)
+          .recruitment(recruitment)
+          .resume(resume)
+          .status(ApplyHistory.ApplyStatus.SUBMITTED)
+          .apply(new Timestamp(System.currentTimeMillis()))
+          .build();
 
         applyHistoryRepository.save(history);
         redirectAttributes.addFlashAttribute("successMessage", "정상적으로 지원 완료되었습니다.");
@@ -384,7 +405,7 @@ public class MyPageController {
         Users user = userService.findByUserEmail(email);
 
         boolean alreadyApplied = applyHistoryRepository
-                .existsByUser_UserIdxAndRecruitment_RecruitmentIdx(user.getUserIdx(), recruitmentIdx);
+          .existsByUser_UserIdxAndRecruitment_RecruitmentIdx(user.getUserIdx(), recruitmentIdx);
 
         return ResponseEntity.ok(alreadyApplied);
     }
