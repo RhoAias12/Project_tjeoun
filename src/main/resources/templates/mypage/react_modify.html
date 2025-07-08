@@ -212,7 +212,7 @@ function validateForm() {
                                     th:name="'resumeContents[' + ${iterStat.index} + '].question'"
                                     class="question-textarea"
                                     th:text="${content.question}"
-                                    placeholder="* 질문 1을 입력하세요."></textarea>
+                                    placeholder="질문을 입력하세요."></textarea>
                         </div>
                     </th>
                     <td>
@@ -220,7 +220,7 @@ function validateForm() {
                 th:name="'resumeContents[' + ${iterStat.index} + '].context'"
                 class="answer-textarea"
                 th:text="${content.context}"
-                placeholder="* 답변을 입력하세요."></textarea>
+                placeholder="답변을 입력하세요."></textarea>
                     </td>
                 </tr>
 
