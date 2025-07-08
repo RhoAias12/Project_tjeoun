@@ -33,16 +33,16 @@ public class Recruitment {
   private LocalDate deadline;
 
   @Column(columnDefinition = "TEXT")
-  private String qualifications;
+  private String qualifications; //자격요건
 
   @Column(columnDefinition = "TEXT")
   private String logoUrl;
 
   @Column(columnDefinition = "TEXT")
-  private String responsibilities;
+  private String responsibilities; //주요업무
 
   @Column(columnDefinition = "TEXT")
-  private String preferred;
+  private String preferred; //우대사항
 
   @Column(columnDefinition = "TEXT")
   private String benefits;

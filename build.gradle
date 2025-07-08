@@ -53,6 +53,11 @@ dependencies {
     implementation 'org.jsoup:jsoup:1.15.3'
     implementation 'org.seleniumhq.selenium:selenium-java:4.11.0'
 
+
+    // Elasticsearch Client
+    implementation 'co.elastic.clients:elasticsearch-java:8.12.2'
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+    implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
 }
 
 def querydslDir = "$buildDir/generated/querydsl"
