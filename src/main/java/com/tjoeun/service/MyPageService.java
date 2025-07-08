@@ -20,6 +20,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -36,7 +37,7 @@ public class MyPageService {
   private final UserRepository userRepository;
   private final ApplyHistoryRepository applyHistoryRepository;
   private final ResumeRepository resumeRepository;
-  private final ResumeContentRepository resumeContentRepository;
+  private final ApplyHistoryResumeRepository applyHistoryResumeRepository;
 
   public List<ApplyHistoryDTO> getApplyHistoryList(String email) {
     Users user = userRepository.findByUserEmail(email);
@@ -51,7 +52,7 @@ public class MyPageService {
                     .statusDisplay(history.getStatus().getDisplay())
                     .recruitmentTitle(history.getRecruitment().getTitle())
                     .recruitmentCompany(history.getRecruitment().getCompany())
-                    .resumeId(history.getResume().getResumeIdx())
+                    .applyHistoryResumeId(history.getApplyHistoryResume().getApplyHistoryResumeId())
                     .build())
             .toList();
   }
@@ -70,7 +71,7 @@ public class MyPageService {
             .recruitmentTitle(history.getRecruitment().getTitle())
             .recruitmentCompany(history.getRecruitment().getCompany())
             .recruitmentId(history.getRecruitment().getRecruitmentIdx())
-            .resumeId(history.getResume().getResumeIdx())
+            .applyHistoryResumeId(history.getApplyHistoryResume().getApplyHistoryResumeId())
             .build());
   }
 
@@ -139,7 +140,7 @@ public class MyPageService {
     resume.setContext(dto.getContext());
     resume.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
 
-    // ✅ 이미지 업로드 처리
+    // 이미지 업로드 처리
     if (imgFile != null && !imgFile.isEmpty()) {
       String fileName = imgFile.getOriginalFilename();
       String uploadDir = uploadRootPath + "/resume";
@@ -152,7 +153,7 @@ public class MyPageService {
       resume.setImg("/uploads/images/resume/" + fileName);
     }
 
-    // ✅ ResumeContents 갱신
+    // ResumeContents 갱신
     if (resume.getResumeContents() != null) {
       resume.getResumeContents().clear();
     }
@@ -267,6 +268,103 @@ public class MyPageService {
       // 필요한 필드 다 넣기
       .build();
   }
+
+  @Transactional
+  public void saveApplyHistoryWithResumeCopy(Users user, Recruitment recruitment, ResumeDto resumeDto) {
+
+    // 1. ApplyHistory 생성 및 저장
+    ApplyHistory applyHistory = ApplyHistory.builder()
+      .user(user)
+      .recruitment(recruitment)
+      .status(ApplyHistory.ApplyStatus.SUBMITTED)
+      .apply(new Timestamp(System.currentTimeMillis()))
+      .build();
+
+    applyHistoryRepository.save(applyHistory);
+
+    // 2. ApplyHistoryResume 복사본 생성
+    ApplyHistoryResume applyHistoryResume = ApplyHistoryResume.builder()
+      .applyHistory(applyHistory)
+      .user(user)
+      .recruitment(recruitment)
+      .title(resumeDto.getTitle())
+      .context(resumeDto.getContext())
+      .img(resumeDto.getImg())
+      .address(resumeDto.getAddress())
+      .phoneNum(resumeDto.getPhoneNum())
+      .education(resumeDto.getEducation())
+      .antecedents(resumeDto.getAntecedents())
+      .ability(resumeDto.getAbility())
+      .awards(resumeDto.getAwards())
+      .createdAt(resumeDto.getCreatedAt())
+      .updatedAt(resumeDto.getUpdatedAt())
+      .build();
+
+// 기존 리스트 초기화 후 add() 방식으로 질답 복사
+    applyHistoryResume.setContents(new ArrayList<>());
+
+    if (resumeDto.getResumeContents() != null) {
+      for (ResumeContentDTO contentDto : resumeDto.getResumeContents()) {
+        ApplyHistoryResumeContent content = ApplyHistoryResumeContent.builder()
+          .applyHistoryResume(applyHistoryResume)  // 연관관계 설정
+          .question(contentDto.getQuestion())
+          .context(contentDto.getContext())
+          .build();
+        applyHistoryResume.addContent(content);
+      }
+    }
+
+// 4. 저장
+    applyHistoryResumeRepository.save(applyHistoryResume);
+
+    // 5. ApplyHistory에 연관관계 설정 후 저장
+    applyHistory.setApplyHistoryResume(applyHistoryResume);
+    applyHistoryRepository.save(applyHistory);
+  }
+
+
+  public ApplyHistoryResumeDTO toDto(ApplyHistoryResume entity) {
+    if (entity == null) {
+      return null;
+    }
+
+    Users user = entity.getUser();
+
+    UserListDto userDTO = null;
+    if (user != null) {
+      userDTO = UserListDto.builder()
+        .userName(user.getUserName())
+        .userEmail(user.getUserEmail())
+        .userBirth(user.getUserBirth())
+        .build();
+    }
+
+    return ApplyHistoryResumeDTO.builder()
+      .id(entity.getApplyHistoryResumeId())
+      .title(entity.getTitle())
+      .context(entity.getContext())
+      .img(entity.getImg())
+      .address(entity.getAddress())
+      .phoneNum(entity.getPhoneNum())
+      .education(entity.getEducation())
+      .antecedents(entity.getAntecedents())
+      .ability(entity.getAbility())
+      .awards(entity.getAwards())
+      .createdAt(entity.getCreatedAt())
+      .updatedAt(entity.getUpdatedAt())
+      .user(userDTO)
+      .resumeContents(entity.getContents() != null
+        ? entity.getContents().stream()
+        .map(content -> ApplyHistoryResumeContentDTO.builder()
+          .id(content.getId())
+          .question(content.getQuestion())
+          .context(content.getContext())
+          .build())
+        .collect(Collectors.toList())
+        : List.of())
+      .build();
+  }
+
 
 
 }

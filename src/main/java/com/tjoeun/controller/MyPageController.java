@@ -55,12 +55,11 @@ public class MyPageController {
     private final MyPageService myPageService;
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
-    private final FavoriteRepository favoriteRepository;
     private final RecruitmentRepository recruitmentRepository;
     private final ResumeRepository resumeRepository;
     private final ResumeContentRepository resumeContentRepository;
-
     private final RecruitmentService recruitmentService;
+    private final ApplyHistoryResumeRepository applyHistoryResumeRepository;
 
     @Value("${upload.path}")
     private String uploadRootPath;
@@ -269,6 +268,18 @@ public class MyPageController {
         return "mypage/apply_status";
     }
 
+    @GetMapping("/apply_resume_detail/{id}")
+    public String getApplyHistoryResumeDetail(@PathVariable Long id, Model model) {
+        ApplyHistoryResume applyHistoryResume = applyHistoryResumeRepository.findById(id)
+          .orElseThrow(() -> new IllegalArgumentException("복사된 이력서를 찾을 수 없습니다. id=" + id));
+
+        ApplyHistoryResumeDTO dto = myPageService.toDto(applyHistoryResume);
+
+        model.addAttribute("applyResume", dto);
+        return "mypage/apply_resume_detail";
+    }
+
+
     @GetMapping("/scrap")
     public String scrapPage(@RequestParam(defaultValue = "1") int page,
                             @RequestParam(required = false) String customSort,
@@ -350,30 +361,23 @@ public class MyPageController {
         String email = userDetails.getUsername();
         Users user = userService.findByUserEmail(email);
         Recruitment recruitment = recruitmentService.getEntityById(recruitmentId);
-        Resume resume = myPageService.getResumeById(resumeIdx);
 
-        // 이미 지원한 이력 있는지 확인 (resume 없이)
+        ResumeDto resumeDto = myPageService.getResumeDetail(resumeIdx);
+
         boolean alreadyApplied = applyHistoryRepository
-                .existsByUser_UserIdxAndRecruitment_RecruitmentIdx(user.getUserIdx(), recruitment.getRecruitmentIdx());
+          .existsByUser_UserIdxAndRecruitment_RecruitmentIdx(user.getUserIdx(), recruitment.getRecruitmentIdx());
 
         if (alreadyApplied) {
             redirectAttributes.addFlashAttribute("errorMessage", "이미 지원한 공고입니다. 중복 지원은 불가능합니다.");
             return "redirect:/empl/empl_detail/" + recruitmentId;
         }
 
-        // 지원 이력 저장 (resume 없이)
-        ApplyHistory history = ApplyHistory.builder()
-                .user(user)
-                .recruitment(recruitment)
-                .resume(resume)
-                .status(ApplyHistory.ApplyStatus.SUBMITTED)
-                .apply(new Timestamp(System.currentTimeMillis()))
-                .build();
+        myPageService.saveApplyHistoryWithResumeCopy(user, recruitment, resumeDto);
 
-        applyHistoryRepository.save(history);
         redirectAttributes.addFlashAttribute("successMessage", "정상적으로 지원 완료되었습니다.");
         return "redirect:/mypage/apply_status";
     }
+
 
 
     @GetMapping("/check-applied")

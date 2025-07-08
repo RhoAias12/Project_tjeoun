@@ -1,29 +1,33 @@
 package com.tjoeun.dto;
 
-import lombok.*;
-import org.springframework.web.multipart.MultipartFile;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.util.List;
 
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ResumeDto {
-
+@Builder
+public class ApplyHistoryResumeDTO {
+  private Long id;
   private String title;
-  private String context;
   private String img;
   private String address;
   private String phoneNum;
   private String education;
-  private String antecedents;
   private String ability;
+  private String antecedents;
   private String awards;
+  private String context;
+
+  private List<ApplyHistoryResumeContentDTO> resumeContents;
+
   private Timestamp createdAt;
   private Timestamp updatedAt;
 
-  private List<ResumeContentDTO> resumeContents;
+  private UserListDto user;
 }
