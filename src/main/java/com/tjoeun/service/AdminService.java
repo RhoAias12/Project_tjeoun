@@ -74,6 +74,9 @@ public class AdminService {
       .orElseThrow(() -> new IllegalArgumentException("사용자 없음"));
     userRepository.delete(user);
   }
+  public int getTotalUserCount() {
+    return (int) userRepository.count();
+  }
 
   // 회원 상세 조회
   public UserFormDto getUserFormDtoById(Integer userIdx) {
