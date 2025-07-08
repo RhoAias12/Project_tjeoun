@@ -63,6 +63,15 @@ public class AdminController {
                                @RequestParam(defaultValue = "1") int page,
                                @RequestParam(defaultValue = "latest") String sortBy) {
         adminService.deleteUserById(userIdx);
+
+        int totalUsers = adminService.getTotalUserCount();
+        int pageSize = 10;
+        int maxPage = (int) Math.ceil((double) totalUsers / pageSize);
+
+        if (page > maxPage && maxPage > 0) {
+            page = maxPage;
+        }
+
         return "redirect:/admin/member_list?page=" + page + "&sortBy=" + sortBy;
     }
 

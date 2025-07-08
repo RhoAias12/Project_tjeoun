@@ -93,7 +93,13 @@ function validateForm() {
                     <th scope="row">* 제목</th>
                     <td class="centered-cell">
                         <div class="form-group">
-                            <textarea name="title" class="short-text" th:text="${resume.title}"></textarea>
+                            <textarea
+                                    name="title"
+                                    class="short-text"
+                                    th:text="${resume.title}"
+                                    placeholder="제목를 입력해 주세요.">
+
+                            </textarea>
                         </div>
                     </td>
                 </tr>
@@ -133,38 +139,68 @@ function validateForm() {
 
                         <div class="form-group">
                             <label>* 주소</label>
-                            <textarea name="address" class="short-text"
-                                      th:text="${resume.address}"></textarea>
+                            <textarea
+                                    name="address"
+                                    class="short-text"
+                                    th:text="${resume.address}"
+                                    placeholder="주소를 입력해 주세요.">
+
+                            </textarea>
                         </div>
 
                         <div class="form-group">
                             <label>* 전화번호</label>
-                            <textarea name="phoneNum" class="short-text"
-                                      th:text="${resume.phoneNum}"></textarea>
+                            <textarea
+                                    name="phoneNum"
+                                    class="short-text"
+                                    th:text="${resume.phoneNum}"
+                                    placeholder="전화번호를 입력해 주세요. ex. 010-0000-0000">
+
+                            </textarea>
                         </div>
 
                         <div class="form-group">
                             <label>학력</label>
-                            <textarea name="education" class="short-text"
-                                      th:text="${resume.education}"></textarea>
+                            <textarea
+                                    name="education"
+                                    class="short-text"
+                                    th:text="${resume.education}"
+                                    placeholder="학력을 입력해 주세요.">
+
+                            </textarea>
                         </div>
 
                         <div class="form-group">
                             <label>자격증 및 스킬</label>
-                            <textarea name="ability" class="short-text1"
-                                      th:text="${resume.ability}"></textarea>
+                            <textarea
+                                    name="ability"
+                                    class="short-text1"
+                                    th:text="${resume.ability}"
+                                    placeholder="자격증 및 스킬을 입력해 주세요.">
+
+                            </textarea>
                         </div>
 
                         <div class="form-group">
                             <label>경력</label>
-                            <textarea name="antecedents" class="short-text1"
-                                      th:text="${resume.antecedents}"></textarea>
+                            <textarea
+                                    name="antecedents"
+                                    class="short-text1"
+                                    th:text="${resume.antecedents}"
+                                    placeholder="경력을 입력해 주세요.">
+
+                            </textarea>
                         </div>
 
                         <div class="form-group">
                             <label>수상이력</label>
-                            <textarea name="awards" class="short-text1"
-                                      th:text="${resume.awards}"></textarea>
+                            <textarea
+                                    name="awards"
+                                    class="short-text1"
+                                    th:text="${resume.awards}"
+                                    placeholder="수상이력을 입력해 주세요.">
+
+                            </textarea>
                         </div>
                     </td>
                 </tr>
@@ -172,13 +208,19 @@ function validateForm() {
                 <tr th:each="content, iterStat : ${resume.resumeContents}">
                     <th>
                         <div class="question">
-                            <textarea th:name="'resumeContents[' + ${iterStat.index} + '].question'"
-                                      class="question-textarea" th:text="${content.question}"></textarea>
+                            <textarea
+                                    th:name="'resumeContents[' + ${iterStat.index} + '].question'"
+                                    class="question-textarea"
+                                    th:text="${content.question}"
+                                    placeholder="질문을 입력하세요."></textarea>
                         </div>
                     </th>
                     <td>
-        <textarea th:name="'resumeContents[' + ${iterStat.index} + '].context'"
-                  class="answer-textarea" th:text="${content.context}"></textarea>
+        <textarea
+                th:name="'resumeContents[' + ${iterStat.index} + '].context'"
+                class="answer-textarea"
+                th:text="${content.context}"
+                placeholder="답변을 입력하세요."></textarea>
                     </td>
                 </tr>
 
