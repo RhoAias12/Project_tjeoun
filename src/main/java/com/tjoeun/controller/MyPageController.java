@@ -217,11 +217,27 @@ public class MyPageController {
     }
 
     @PostMapping("/react_delete/{id}")
+    @Transactional
     public String deleteResume(@PathVariable Long id,
                                @RequestParam(defaultValue = "1") int page) {
         resumeRepository.deleteById(id);
+
+        long totalCount = resumeRepository.count();
+        int pageSize = 5;
+        int lastPage = (int) Math.ceil((double) totalCount / pageSize);
+
+        if (lastPage < 1) {
+            lastPage = 1;
+        }
+        if (page > lastPage) {
+            page = lastPage;
+        }
+        if (page < 1) {
+            page = 1;
+        }
         return "redirect:/mypage/react_list?page=" + page;
     }
+
 
     @GetMapping("/react_modify/{id}")
     public String reactModify(@PathVariable Long id,
