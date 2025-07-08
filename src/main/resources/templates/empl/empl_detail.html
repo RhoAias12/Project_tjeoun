@@ -7,6 +7,13 @@
 
   <script th:inline="javascript">
     let isLogin = /*[[${#authorization.expression('isAuthenticated()')}]]*/ false;
+
+    function goBackWithRefreshParam() {
+    const prevUrl = /*[[${prevUrl != null ? prevUrl : '/empl/empl_main'}]]*/ '/empl/empl_main';
+    const delimiter = prevUrl.includes('?') ? '&' : '?';
+    const random = Math.random().toString().slice(2);
+    location.href = `${prevUrl}${delimiter}refresh=${random}`;
+  }
   </script>
 
   <!-- CSRF 토큰 -->
@@ -103,9 +110,11 @@
     지원하기
   </button>
 
-  <a th:href="${prevUrl}">
-    <button type="button">목록보기</button>
-  </a>
+  <button type="button"
+          onclick="goBackWithRefreshParam()">
+    목록보기
+  </button>
+
 </div>
 
 <div th:replace="include/footer :: footer"></div>
