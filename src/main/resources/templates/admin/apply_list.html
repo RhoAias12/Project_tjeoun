@@ -27,6 +27,36 @@
         link.href = linkUrl.toString();
       });
     });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const startInput = document.getElementById('startDate');
+      const endInput = document.getElementById('endDate');
+
+      function validateDates(changedField) {
+        const startDateVal = startInput.value;
+        const endDateVal = endInput.value;
+
+        if (!startDateVal || !endDateVal) return;
+
+        const startDate = new Date(startDateVal);
+        const endDate = new Date(endDateVal);
+
+        if (startDate > endDate) {
+          if (changedField === 'start') {
+            alert('시작일은 마감일보다 늦을 수 없습니다.');
+          } else if (changedField === 'end') {
+            alert('마감일은 시작일보다 빠를 수 없습니다.');
+          }
+
+          // 잘못된 값 초기화
+          startInput.value = '';
+          endInput.value = '';
+        }
+      }
+
+      startInput.addEventListener('change', () => validateDates('start'));
+      endInput.addEventListener('change', () => validateDates('end'));
+    });
   </script>
 
 </head>
@@ -42,23 +72,46 @@
     <!-- 검색 및 정렬 영역 -->
     <div class="search">
       <section class="search-bar">
-        <input type="text" placeholder="공고이름" />
-        <input type="text" placeholder="회사명" />
-        <input type="date" />
-        <input type="text" placeholder="지역" />
-        <button type="button">검색</button>
+        <input type="text" placeholder="공고이름" name="title" />
+        <input type="text" placeholder="공고내용" name="content" />
+        <input type="text" placeholder="지역" name="region" />
+        <input type="text" placeholder="회사명" name="company" />
+        <input type="text" placeholder="이메일" name="email" />
+        <input type="text" placeholder="닉네임" name="nickname" />
+
+        <div class="date-range">
+          <div class="date-group">
+            <label for="startDate">시작일</label>
+            <input type="date" name="startDate" id="startDate" />
+          </div>
+          <span class="tilde">-</span>
+          <div class="date-group">
+            <label for="endDate">마감일</label>
+            <input type="date" name="endDate" id="endDate" />
+          </div>
+        </div>
+
+        <button type="submit">검색</button>
       </section>
 
       <!-- 정렬 -->
       <div class="sort-wrapper">
-        <form method="get" th:action="@{/admin/apply_list}" id="sortForm">
-          <select name="sortOption" class="sort-select" onchange="document.getElementById('sortForm').submit()">
+        <form method="get" th:action="@{/admin/apply_list}" id="sortForm" style="display: flex; gap: 10px;">
+          <select name="sortOption" class="sort-select" onchange="this.form.submit()">
             <option value="all" th:selected="${sortOption == 'all'}">전체</option>
             <option value="apply_latest" th:selected="${sortOption == 'apply_latest'}">지원일: 최신순</option>
             <option value="apply_oldest" th:selected="${sortOption == 'apply_oldest'}">지원일: 오래된순</option>
             <option value="deadline_latest" th:selected="${sortOption == 'deadline_latest'}">마감일: 최신순</option>
             <option value="deadline_oldest" th:selected="${sortOption == 'deadline_oldest'}">마감일: 오래된순</option>
           </select>
+
+          <select name="statusFilter" class="sort-select" onchange="this.form.submit()">
+            <option value="">상태 전체</option>
+            <option value="SUBMITTED">진행중</option>
+            <option value="PASS">합격</option>
+            <option value="FAIL">불합격</option>
+          </select>
+
           <input type="hidden" name="page" value="1" />
         </form>
       </div>

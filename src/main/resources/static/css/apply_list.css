@@ -58,6 +58,41 @@
   background-color: #006edc;
 }
 
+/* 날짜 범위 입력 필드 (시작일 - 마감일) */
+.date-range {
+  grid-column: span 2;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+}
+
+.date-group {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.date-group label {
+  font-size: 12px;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.date-group input[type='date'] {
+  padding: 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.tilde {
+  font-size: 18px;
+  color: #333;
+  padding-top: 26px; /* 가운데 정렬용 */
+}
+
+
 /* 정렬 드롭다운 박스 */
 .sort-wrapper {
   display: flex;
