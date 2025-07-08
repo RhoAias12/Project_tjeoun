@@ -18,28 +18,53 @@
 
     <script>
       function deleteScrap(recruitmentIdx, userIdx) {
-        const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
-        const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+  const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+  const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
 
-        fetch(`/mypage/scrap`, {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-            [csrfHeader]: csrfToken
-          },
-          body: JSON.stringify({
-            userIdx: userIdx,
-            recruitmentIdx: recruitmentIdx
-          })
-        })
-        .then(response => {
-          if (response.ok) {
-            document.getElementById('card-' + recruitmentIdx).remove();
+  fetch(`/mypage/scrap`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      [csrfHeader]: csrfToken
+    },
+    body: JSON.stringify({
+      userIdx: userIdx,
+      recruitmentIdx: recruitmentIdx
+    })
+  })
+  .then(response => {
+    if (response.ok) {
+      // 삭제 성공하면 해당 카드 제거
+      const cardElement = document.getElementById('card-' + recruitmentIdx);
+      if (cardElement) cardElement.remove();
+
+      // 삭제 후 페이지에 남은 카드가 없으면 이전 페이지로 이동
+      setTimeout(() => {
+        const cards = document.querySelectorAll('.apply-card'); // 여기 클래스명 변경!
+        console.log("남은 카드 수:", cards.length);
+
+        if (cards.length === 0) {
+          // 현재 페이지 번호 파싱 (URL 쿼리스트링에서 page 파라미터 읽기)
+          const urlParams = new URLSearchParams(window.location.search);
+          let currentPage = parseInt(urlParams.get('page')) || 1;
+
+          if (currentPage > 1) {
+            // 이전 페이지로 이동
+            window.location.href = `/mypage/scrap?page=${currentPage - 1}`;
           } else {
-            alert("삭제 실패");
+            // 1페이지인데도 빈 페이지면 그냥 새로고침
+            location.reload();
           }
-        });
-      }
+        }
+      }, 50);
+
+    } else {
+      alert("삭제 실패");
+    }
+  });
+}
+
+
 
       function checkAndGoApply(recruitmentIdx) {
         fetch(`/mypage/check_applied/${recruitmentIdx}`)
