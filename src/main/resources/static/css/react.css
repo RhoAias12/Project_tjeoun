@@ -169,28 +169,36 @@ textarea:not(.short-text) {
 
 /* 버튼 그룹 */
 .button-group {
-  flex: 1 0 auto;
-  max-width: 1200px;
-  width: 100%;
-  margin: 0 auto;
-  padding: 30px 0;
-  text-align: right;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;  /* 버튼들 세로 가운데 정렬 */
+  margin-top: 20px;
+  gap: 10px;
 }
 
+
+.button-group a,
 .button-group button {
   padding: 10px 20px;
-  font-size: 14px;
-  cursor: pointer;
-  border: 1px solid #0085ff;
-  background-color: white;
-  color: #0085ff;
-  border-radius: 6px;
-  transition: all 0.2s ease-in-out;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s ease-in-out;
+  display: inline-block;
+  white-space: nowrap;   /* 버튼 줄바꿈 방지 */
 }
 
+.button-group form {
+  display: inline-block; /* 폼이 block인 문제 해결 */
+}
+
+.button-group a:hover,
 .button-group button:hover {
   background-color: #0085ff;
-  color: white;
+    color: white;
+    border-color: #0085ff;
 }
 
 /* ✅ 반응형 */
