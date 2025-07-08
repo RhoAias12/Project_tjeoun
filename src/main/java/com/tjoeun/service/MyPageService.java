@@ -258,21 +258,35 @@ public class MyPageService {
     Resume resume = resumeRepository.findById(id)
       .orElseThrow(() -> new IllegalArgumentException("이력서 없음"));
 
-    // Lazy 필드 강제 로딩
-    resume.getUser().getUserName();
+    resume.getUser().getUserName(); // Lazy 로딩 강제
+
+    List<ResumeContentDTO> resumeContentDtos = resume.getResumeContents().stream()
+      .map(rc -> ResumeContentDTO.builder()
+        .question(rc.getQuestion())
+        .context(rc.getContext())
+        .build())
+      .toList();
 
     return ResumeDto.builder()
       .title(resume.getTitle())
       .address(resume.getAddress())
       .phoneNum(resume.getPhoneNum())
-      // 필요한 필드 다 넣기
+      .context(resume.getContext())
+      .education(resume.getEducation())
+      .antecedents(resume.getAntecedents())
+      .ability(resume.getAbility())
+      .awards(resume.getAwards())
+      .img(resume.getImg())
+      .createdAt(resume.getCreatedAt())
+      .updatedAt(resume.getUpdatedAt())
+      .resumeContents(resumeContentDtos)
       .build();
   }
+
 
   @Transactional
   public void saveApplyHistoryWithResumeCopy(Users user, Recruitment recruitment, ResumeDto resumeDto) {
 
-    // 1. ApplyHistory 생성 및 저장
     ApplyHistory applyHistory = ApplyHistory.builder()
       .user(user)
       .recruitment(recruitment)
@@ -282,7 +296,6 @@ public class MyPageService {
 
     applyHistoryRepository.save(applyHistory);
 
-    // 2. ApplyHistoryResume 복사본 생성
     ApplyHistoryResume applyHistoryResume = ApplyHistoryResume.builder()
       .applyHistory(applyHistory)
       .user(user)
@@ -300,27 +313,31 @@ public class MyPageService {
       .updatedAt(resumeDto.getUpdatedAt())
       .build();
 
-// 기존 리스트 초기화 후 add() 방식으로 질답 복사
     applyHistoryResume.setContents(new ArrayList<>());
 
     if (resumeDto.getResumeContents() != null) {
       for (ResumeContentDTO contentDto : resumeDto.getResumeContents()) {
         ApplyHistoryResumeContent content = ApplyHistoryResumeContent.builder()
-          .applyHistoryResume(applyHistoryResume)  // 연관관계 설정
+          .applyHistoryResume(applyHistoryResume)
           .question(contentDto.getQuestion())
           .context(contentDto.getContext())
           .build();
         applyHistoryResume.addContent(content);
+        for (ApplyHistoryResumeContent c : applyHistoryResume.getContents()) {
+          System.out.println("Content question: " + c.getQuestion() + ", applyHistoryResume: " + c.getApplyHistoryResume());
+        }
       }
     }
 
-// 4. 저장
+    // *** 핵심: applyHistoryResumeRepository.save 호출 반드시 필요 ***
     applyHistoryResumeRepository.save(applyHistoryResume);
 
-    // 5. ApplyHistory에 연관관계 설정 후 저장
     applyHistory.setApplyHistoryResume(applyHistoryResume);
+
+    // save applyHistory는 선택사항이지만 안정성을 위해 해도 됨
     applyHistoryRepository.save(applyHistory);
   }
+
 
 
   public ApplyHistoryResumeDTO toDto(ApplyHistoryResume entity) {
