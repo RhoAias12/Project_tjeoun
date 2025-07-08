@@ -69,4 +69,8 @@ public class Users {
   @Builder.Default
   @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
   private List<ApplyHistory> applyHistories = new ArrayList<>();
+
+  @Builder.Default
+  @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
+  private List<ApplyHistoryResume> applyHistoryResumes = new ArrayList<>();
 }

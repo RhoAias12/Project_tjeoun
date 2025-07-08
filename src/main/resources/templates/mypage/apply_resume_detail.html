@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>지원 당시 이력서 상세</title>
+  <link rel="stylesheet" th:href="@{/css/main.css}" />
+  <link rel="stylesheet" th:href="@{/css/header.css}" />
+  <link rel="stylesheet" th:href="@{/css/footer.css}" />
+  <link rel="stylesheet" th:href="@{/css/react.css}" />
+</head>
+<body>
+<div th:replace="include/header :: header"></div>
+
+<div class="page-title">
+  <p>마이페이지 &gt; 지원현황 &gt; 지원 이력서</p>
+</div>
+
+<div class="container">
+  <table class="resume-table">
+    <!-- 제목 -->
+    <tr>
+      <th scope="row">제목</th>
+      <td class="centered-cell">
+        <div class="form-group">
+          <p class="readonly-box1" th:text="${applyResume.title}">제목</p>
+        </div>
+      </td>
+    </tr>
+
+    <!-- 이미지 -->
+    <tr>
+      <th style="text-align: center">
+        <div th:if="${applyResume.img != null}">
+          <img class="img" th:src="@{${applyResume.img}}" alt="이력서 이미지 없음" />
+        </div>
+        <div th:if="${applyResume.img == null}">
+          <p>이미지가 없습니다.</p>
+        </div>
+      </th>
+      <td></td>
+    </tr>
+
+    <!-- 개인정보 -->
+    <tr>
+      <td>
+        <div class="form-group">
+          <label class="thick">이름</label>
+          <p class="readonly-box1" th:text="${applyResume.user.userName}">이름</p>
+        </div>
+
+        <div class="form-group">
+          <label class="thick">이메일</label>
+          <p class="readonly-box1" th:text="${applyResume.user.userEmail}">이메일</p>
+        </div>
+
+        <div class="form-group">
+          <label class="thick">생년월일</label>
+          <p class="readonly-box1" th:text="${#temporals.format(applyResume.user.userBirth, 'yyyy-MM-dd')}">생년월일</p>
+        </div>
+
+        <div class="form-group">
+          <label>주소</label>
+          <p class="readonly-box1" th:text="${applyResume.address}">주소</p>
+        </div>
+
+        <div class="form-group">
+          <label>전화번호</label>
+          <p class="readonly-box1" th:text="${applyResume.phoneNum}">전화번호</p>
+        </div>
+
+        <!-- 학력 -->
+        <div class="form-group" th:if="${applyResume.education != null}">
+          <label>학력</label>
+          <p class="readonly-box1" th:text="${applyResume.education}">학력</p>
+        </div>
+
+        <!-- 자격증 및 스킬 -->
+        <div class="form-group" th:if="${applyResume.ability != null}">
+          <label>자격증 및 스킬</label>
+          <p class="readonly-box1" th:text="${applyResume.ability}">자격증 및 스킬</p>
+        </div>
+
+        <!-- 경력 -->
+        <div class="form-group" th:if="${applyResume.antecedents != null}">
+          <label>경력</label>
+          <p class="readonly-box1" th:text="${applyResume.antecedents}">경력</p>
+        </div>
+
+        <!-- 수상이력 -->
+        <div class="form-group" th:if="${applyResume.awards != null}">
+          <label>수상이력</label>
+          <p class="readonly-box1" th:text="${applyResume.awards}">수상이력</p>
+        </div>
+      </td>
+    </tr>
+
+    <!-- 질문/답변 리스트 -->
+    <tr th:each="content : ${applyResume.resumeContents}"
+        th:if="${content.question != null or content.context != null}">
+      <th>
+        <div class="question">
+          <p th:text="${content.question}">질문</p>
+        </div>
+      </th>
+      <td>
+        <p class="content" th:text="${content.context}">답변</p>
+      </td>
+    </tr>
+
+    <!-- 포트폴리오 링크 -->
+    <tr th:if="${applyResume.context != null}">
+      <th>포트폴리오 링크</th>
+      <td><p class="content" th:text="${applyResume.context}">포트폴리오 링크</p></td>
+    </tr>
+  </table>
+
+  <div class="button-group">
+    <a th:href="@{/mypage/apply_status}" class="button">목록보기</a>
+  </div>
+</div>
+
+<div th:replace="include/footer :: footer"></div>
+</body>
+</html>
