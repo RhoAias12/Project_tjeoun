@@ -1,21 +1,31 @@
 package com.tjoeun.dto;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class ResumeDto {
-
   private String title;
-  private String context;
+  private String img;
   private String address;
   private String phoneNum;
   private String education;
   private String ability;
   private String antecedents;
   private String awards;
-  private String img;
+  private String context;
 
-  // 생성자, getter, setter는 lombok으로 자동 생성
+  private MultipartFile imgFile;
+
+
+
+  // 새로 추가
+  private List<ResumeContentDTO> resumeContents;
 }

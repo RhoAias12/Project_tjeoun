@@ -8,6 +8,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -55,4 +57,16 @@ public class Users {
       .userRole(UserRole.USER)
       .build();
   }
+
+  @Builder.Default
+  @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
+  private List<Favorite> favorites = new ArrayList<>();
+
+  @Builder.Default
+  @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
+  private List<Resume> resumes = new ArrayList<>();
+
+  @Builder.Default
+  @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
+  private List<ApplyHistory> applyHistories = new ArrayList<>();
 }

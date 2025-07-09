@@ -8,12 +8,17 @@ import com.tjoeun.service.RecruitmentService;
 import com.tjoeun.service.UserService;
 import com.tjoeun.util.PaginationUtil;
 import com.tjoeun.util.PaginationUtil2;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,11 +32,18 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.Principal;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/mypage")
@@ -46,7 +58,12 @@ public class MyPageController {
     private final FavoriteRepository favoriteRepository;
     private final RecruitmentRepository recruitmentRepository;
     private final ResumeRepository resumeRepository;
+    private final ResumeContentRepository resumeContentRepository;
+
     private final RecruitmentService recruitmentService;
+
+    @Value("${upload.path}")
+    private String uploadRootPath;
 
     @GetMapping("/member_modify")
     public String showMemberModifyForm(Model model, Principal principal) {
@@ -64,15 +81,49 @@ public class MyPageController {
         String email = principal.getName();
         return myPageService.updateUser(dto, email, bindingResult, model, passwordEncoder, userService);
     }
+    @PostMapping("/member_delete")
+    public String deleteMember(Principal principal, HttpServletRequest request) throws ServletException {
+        String email = principal.getName();
+
+        myPageService.deleteUserByEmail(email);
+        request.logout();
+        return "redirect:/";
+    }
 
     @GetMapping("/react_list")
-    public String reactList() {
+    public String reactList(@RequestParam(defaultValue = "1") int page,
+                            @PageableDefault(size = 5) Pageable pageable,
+                            Model model,
+                            Principal principal) {
+        String email = principal.getName();
+        Users user = userRepository.findByUserEmail(email);
+
+        Pageable correctedPageable = PageRequest.of(
+          page - 1,
+          pageable.getPageSize(),
+          Sort.by(Sort.Direction.DESC, "updatedAt")
+        );
+        Page<Resume> resumePage = myPageService.getPagedResumesByUserId(user.getUserIdx().longValue(), correctedPageable);
+
+        model.addAttribute("resumes", resumePage.getContent());
+        model.addAttribute("jobPage", resumePage);
+
+        PaginationUtil.setPaging(model, resumePage, "/mypage/react_list");
+
         return "mypage/react_list";
     }
 
+
+
+
     // 이력서 저장
-    @PostMapping("/mypage/react_write")
-    public String saveResume(@ModelAttribute("resumeDto") @Valid ResumeDto resumeDto, BindingResult bindingResult, Principal principal) {
+    @PostMapping("/react_write")
+    public String saveResume(
+      @ModelAttribute("resumeDto") @Valid ResumeDto resumeDto,
+      @RequestParam("imgFile") MultipartFile imgFile,
+      BindingResult bindingResult,
+      Principal principal) throws IOException {
+
         if (bindingResult.hasErrors()) {
             return "mypage/react_write"; // 에러가 있으면 작성 페이지로 다시 돌아감
         }
@@ -84,56 +135,113 @@ public class MyPageController {
         if (user == null) {
             throw new IllegalArgumentException("로그인한 사용자를 찾을 수 없습니다.");
         }
+        Timestamp now = new Timestamp(System.currentTimeMillis());
 
-        // ResumeDto에서 Resume 엔티티로 변환하여 저장
+        // ResumeDto에서 Resume 엔티티로 변환
         Resume resume = new Resume();
         resume.setUser(user);
         resume.setTitle(resumeDto.getTitle());
-        resume.setContext(resumeDto.getContext());
         resume.setAddress(resumeDto.getAddress());
         resume.setPhoneNum(resumeDto.getPhoneNum());
         resume.setEducation(resumeDto.getEducation());
         resume.setAbility(resumeDto.getAbility());
         resume.setAntecedents(resumeDto.getAntecedents());
         resume.setAwards(resumeDto.getAwards());
-        resume.setImg(resumeDto.getImg());  // 이미지 처리 추가
+        resume.setContext(resumeDto.getContext());
+        resume.setCreatedAt(now);
+        resume.setUpdatedAt(now);
 
-        // DB에 저장
+        // ✅ 이미지 업로드 처리
+        if (!imgFile.isEmpty()) {
+            String fileName = imgFile.getOriginalFilename();
+
+            // 공통 업로드 루트에 /resume 붙여서 사용
+            String uploadDir = uploadRootPath + "/resume";
+
+            Path uploadPath = Paths.get(uploadDir);
+            if (!Files.exists(uploadPath)) {
+                Files.createDirectories(uploadPath);
+            }
+
+            Path filePath = uploadPath.resolve(fileName);
+            imgFile.transferTo(filePath.toFile());
+
+            // DB에는 URL 경로로 저장해야 함
+            resume.setImg("/uploads/images/resume/" + fileName);
+        }
+
+        // 저장
         resumeRepository.save(resume);
 
-        return "redirect:/mypage/react_list"; // 저장 후 이력서 리스트로 리다이렉트
+        // ResumeContent 저장
+        if (resumeDto.getResumeContents() != null) {
+            for (ResumeContentDTO contentDto : resumeDto.getResumeContents()) {
+                ResumeContent content = ResumeContent.builder()
+                  .resume(resume)
+                  .question(contentDto.getQuestion())
+                  .context(contentDto.getContext())
+                  .build();
+                resumeContentRepository.save(content);
+            }
+        }
+
+        // 저장 성공 시 react_list로 이동
+        return "redirect:/mypage/react_list";
     }
 
 
     @GetMapping("/react_write")
-    public String reactWrite() {
+    public String reactWrite(Model model, Principal principal) {
+        Users user = userRepository.findByUserEmail(principal.getName());
+        model.addAttribute("user", user);
+        model.addAttribute("formDto", new ResumeDto());
         return "mypage/react_write";
     }
 
-
-    @GetMapping("/react_modify")
-    public String reactModify() {
-        return "mypage/react_modify";
-    }
-
-    @GetMapping("/react_detail")
-    public String reactDetail() {
-        return "mypage/react_detail";
-    }
-
     @GetMapping("/react_detail/{id}")
-    public String reactDetail(@PathVariable Long id, Model model) {
-        // id가 null인지 체크
-        if (id == null) {
-            throw new IllegalArgumentException("해당 이력서를 찾을 수 없습니다.");
-        }
+    public String reactDetail(@PathVariable Long id,
+                              @RequestParam(defaultValue = "1") int page,
+                              @RequestParam(defaultValue = "false") boolean readonly,
+                              @RequestParam(required = false) String prevUrl,
+                              Model model) {
+        Resume resume = resumeRepository.findById(id)
+          .orElseThrow(() -> new IllegalArgumentException("해당 이력서를 찾을 수 없습니다."));
 
-        Resume resume = resumeRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("해당 이력서를 찾을 수 없습니다."));
         model.addAttribute("resume", resume);
+        model.addAttribute("page", page);
+        model.addAttribute("readonly", readonly);
+        model.addAttribute("prevUrl", prevUrl); // ← 이거 중요!
         return "mypage/react_detail";
     }
 
+    @PostMapping("/react_delete/{id}")
+    public String deleteResume(@PathVariable Long id,
+                               @RequestParam(defaultValue = "1") int page) {
+        resumeRepository.deleteById(id);
+        return "redirect:/mypage/react_list?page=" + page;
+    }
 
+   @GetMapping("/react_modify/{id}")
+   public String reactModify(@PathVariable Long id,
+                             @RequestParam(defaultValue = "1") int page,
+                             Model model) {
+       Resume resume = resumeRepository.findById(id)
+         .orElseThrow(() -> new IllegalArgumentException("해당 이력서를 찾을 수 없습니다."));
+       model.addAttribute("resume", resume);
+       model.addAttribute("page", page);
+       return "mypage/react_modify";
+   }
+
+    @PostMapping("/react_modify/{id}")
+    public String updateResume(@PathVariable Long id,
+                               @ModelAttribute ResumeDto resumeDto,
+                               @RequestParam("imgFile") MultipartFile imgFile) throws IOException {
+
+        // ✅ 서비스 레이어에 모든 로직 위임
+        myPageService.updateResume(id, resumeDto, imgFile);
+
+        return "redirect:/mypage/react_detail/" + id;
+    }
 
 
     @GetMapping("/apply_status")
@@ -145,7 +253,11 @@ public class MyPageController {
 
         String email = principal.getName();
 
-        Pageable correctedPageable = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
+        Pageable correctedPageable = PageRequest.of(
+          page - 1,
+          pageable.getPageSize(),
+          Sort.by(Sort.Direction.DESC, "apply")
+        );
 
         Page<ApplyHistoryDTO> historyPage = myPageService.getPagedApplyHistories(email, correctedPageable);
 
@@ -165,12 +277,18 @@ public class MyPageController {
                             Principal principal) {
 
         String email = principal.getName();
-        Pageable correctedPageable = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
+
+        Pageable correctedPageable = PageRequest.of(
+          page - 1,
+          pageable.getPageSize(),
+          Sort.by(Sort.Direction.DESC, "apply")
+        );
+
         Page<FavoriteDTO> jobPage = myPageService.getPagedFavorites(email, correctedPageable);
 
-        System.out.println("📌 로그인 유저: " + email);
-        System.out.println("📌 스크랩 개수: " + jobPage.getTotalElements());
-        System.out.println("📌 스크랩 리스트: " + jobPage.getContent());
+//        System.out.println("로그인 유저: " + email);
+//        System.out.println("스크랩 개수: " + jobPage.getTotalElements());
+//        System.out.println("스크랩 리스트: " + jobPage.getContent());
 
 
         model.addAttribute("favorites", jobPage.getContent());
@@ -225,12 +343,14 @@ public class MyPageController {
 
     @PostMapping("/submit")
     public String submitApply(@RequestParam("recruitmentIdx") Long recruitmentId,
+                              @RequestParam("resumeIdx") Long resumeIdx,
                               @AuthenticationPrincipal UserDetails userDetails,
                               RedirectAttributes redirectAttributes) {
 
         String email = userDetails.getUsername();
         Users user = userService.findByUserEmail(email);
         Recruitment recruitment = recruitmentService.getEntityById(recruitmentId);
+        Resume resume = myPageService.getResumeById(resumeIdx);
 
         // 이미 지원한 이력 있는지 확인 (resume 없이)
         boolean alreadyApplied = applyHistoryRepository
@@ -245,6 +365,7 @@ public class MyPageController {
         ApplyHistory history = ApplyHistory.builder()
                 .user(user)
                 .recruitment(recruitment)
+                .resume(resume)
                 .status(ApplyHistory.ApplyStatus.SUBMITTED)
                 .apply(new Timestamp(System.currentTimeMillis()))
                 .build();
@@ -268,7 +389,16 @@ public class MyPageController {
         return ResponseEntity.ok(alreadyApplied);
     }
 
+    @GetMapping("/check_applied/{recruitmentIdx}")
+    @ResponseBody
+    public ResponseEntity<?> checkApplied(@PathVariable Long recruitmentIdx, Principal principal) {
+        String email = principal.getName();
+        Users user = userRepository.findByUserEmail(email);
+        boolean applied = applyHistoryRepository.existsByUserAndRecruitment(user,
+          recruitmentRepository.findById(recruitmentIdx).orElseThrow());
 
+        return ResponseEntity.ok().body(Map.of("applied", applied));
+    }
 
 
 

@@ -7,13 +7,20 @@
 
   <script th:inline="javascript">
     let isLogin = /*[[${#authorization.expression('isAuthenticated()')}]]*/ false;
+
+    function goBackWithRefreshParam() {
+    const prevUrl = /*[[${prevUrl != null ? prevUrl : '/empl/empl_main'}]]*/ '/empl/empl_main';
+    const delimiter = prevUrl.includes('?') ? '&' : '?';
+    const random = Math.random().toString().slice(2);
+    location.href = `${prevUrl}${delimiter}refresh=${random}`;
+  }
   </script>
 
-  <!-- ✅ CSRF 토큰 -->
+  <!-- CSRF 토큰 -->
   <meta name="_csrf" th:content="${_csrf.token}" />
   <meta name="_csrf_header" th:content="${_csrf.headerName}" />
 
-  <!-- ✅ CSS -->
+  <!-- CSS -->
   <link rel="stylesheet" th:href="@{/css/main.css}" />
   <link rel="stylesheet" th:href="@{/css/header.css}" />
   <link rel="stylesheet" th:href="@{/css/footer.css}" />
@@ -53,7 +60,6 @@
   </section>
 
   <section class="job-desc">
-
     <h3>고용형태</h3>
     <p th:text="${job.employmentType}" style="white-space: pre-wrap;"></p>
 
@@ -96,7 +102,6 @@
     <i class="fa-bookmark fa-regular"></i>
   </button>
 
-
   <button type="button"
           class="apply-button"
           th:attr="data-recruitment-id=${job.recruitmentIdx}"
@@ -105,14 +110,16 @@
     지원하기
   </button>
 
+  <button type="button"
+          onclick="goBackWithRefreshParam()">
+    목록보기
+  </button>
 
-
-  <button type="button" onclick="location.href='/empl/empl_main'">목록보기</button>
 </div>
 
 <div th:replace="include/footer :: footer"></div>
 
-<!-- ✅ JS는 body 끝에 넣기 -->
+<!-- JS는 body 끝에 넣기 -->
 <script>
   function toggleBookmark(button) {
     if (!isLogin) {
@@ -175,7 +182,6 @@
       });
   }
 </script>
-
 
 </body>
 </html>

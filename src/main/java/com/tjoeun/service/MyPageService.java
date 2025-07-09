@@ -1,11 +1,10 @@
 package com.tjoeun.service;
 
-import com.tjoeun.dto.ApplyHistoryDTO;
-import com.tjoeun.dto.FavoriteDTO;
-import com.tjoeun.dto.UserFormDto;
+import com.tjoeun.dto.*;
 import com.tjoeun.entity.*;
 import com.tjoeun.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -14,7 +13,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -23,11 +28,15 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class MyPageService {
 
+  @Value("${upload.path}")
+  private String uploadRootPath;
+
   private final FavoriteRepository favoriteRepository;
   private final RecruitmentRepository recruitmentRepository;
   private final UserRepository userRepository;
   private final ApplyHistoryRepository applyHistoryRepository;
   private final ResumeRepository resumeRepository;
+  private final ResumeContentRepository resumeContentRepository;
 
   public List<ApplyHistoryDTO> getApplyHistoryList(String email) {
     Users user = userRepository.findByUserEmail(email);
@@ -42,7 +51,7 @@ public class MyPageService {
                     .statusDisplay(history.getStatus().getDisplay())
                     .recruitmentTitle(history.getRecruitment().getTitle())
                     .recruitmentCompany(history.getRecruitment().getCompany())
-                    .resumeId(history.getOptionalIdx())
+                    .resumeId(history.getResume().getResumeIdx())
                     .build())
             .toList();
   }
@@ -60,7 +69,8 @@ public class MyPageService {
             .statusDisplay(history.getStatus().getDisplay())
             .recruitmentTitle(history.getRecruitment().getTitle())
             .recruitmentCompany(history.getRecruitment().getCompany())
-            .resumeId(history.getOptionalIdx())
+            .recruitmentId(history.getRecruitment().getRecruitmentIdx())
+            .resumeId(history.getResume().getResumeIdx())
             .build());
   }
 
@@ -99,6 +109,69 @@ public class MyPageService {
     return "redirect:/mypage/member_modify?success";
   }
 
+
+
+  @Transactional
+  public void deleteUserByEmail(String email) {
+    Users user = userRepository.findByUserEmail(email);
+    if (user != null) {
+      userRepository.delete(user);
+    } else {
+      throw new IllegalArgumentException("해당 이메일의 사용자가 존재하지 않습니다.");
+    }
+  }
+
+
+
+
+  @Transactional
+  public void updateResume(Long id, ResumeDto dto, MultipartFile imgFile) throws IOException {
+    Resume resume = resumeRepository.findById(id)
+      .orElseThrow(() -> new IllegalArgumentException("이력서를 찾을 수 없습니다."));
+
+    resume.setTitle(dto.getTitle());
+    resume.setAddress(dto.getAddress());
+    resume.setPhoneNum(dto.getPhoneNum());
+    resume.setEducation(dto.getEducation());
+    resume.setAbility(dto.getAbility());
+    resume.setAntecedents(dto.getAntecedents());
+    resume.setAwards(dto.getAwards());
+    resume.setContext(dto.getContext());
+    resume.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
+
+    // ✅ 이미지 업로드 처리
+    if (imgFile != null && !imgFile.isEmpty()) {
+      String fileName = imgFile.getOriginalFilename();
+      String uploadDir = uploadRootPath + "/resume";
+      Path uploadPath = Paths.get(uploadDir);
+      if (!Files.exists(uploadPath)) {
+        Files.createDirectories(uploadPath);
+      }
+      Path filePath = uploadPath.resolve(fileName);
+      imgFile.transferTo(filePath.toFile());
+      resume.setImg("/uploads/images/resume/" + fileName);
+    }
+
+    // ✅ ResumeContents 갱신
+    if (resume.getResumeContents() != null) {
+      resume.getResumeContents().clear();
+    }
+
+    if (dto.getResumeContents() != null) {
+      for (ResumeContentDTO contentDto : dto.getResumeContents()) {
+        ResumeContent content = ResumeContent.builder()
+          .resume(resume)
+          .question(contentDto.getQuestion())
+          .context(contentDto.getContext())
+          .build();
+        resume.getResumeContents().add(content);
+      }
+    }
+
+    resumeRepository.save(resume);
+  }
+
+
   @Transactional
   public void deleteScrap(FavoriteDTO favoriteDTO) {
     Users user = userRepository.findById(favoriteDTO.getUserIdx())
@@ -129,6 +202,7 @@ public class MyPageService {
                       .title(r.getTitle() != null ? r.getTitle() : "제목 없음")
                       .company(r.getCompany() != null ? r.getCompany() : "회사 없음")
                       .deadline(r.getDeadline())
+                      .scrapCount(favoriteRepository.countByRecruitment(r))
                       .build();
             })
             .filter(Objects::nonNull)
@@ -154,6 +228,7 @@ public class MyPageService {
                       .title(r.getTitle())
                       .company(r.getCompany())
                       .deadline(r.getDeadline())
+                      .scrapCount(favoriteRepository.countByRecruitment(r))
                       .build();
             })
             .filter(Objects::nonNull)
@@ -175,6 +250,23 @@ public class MyPageService {
     return resumeRepository.findByUser_UserIdx(userIdx, pageable);
   }
 
+
+
+  @Transactional(readOnly = true)
+  public ResumeDto getResumeDetail(Long id) {
+    Resume resume = resumeRepository.findById(id)
+      .orElseThrow(() -> new IllegalArgumentException("이력서 없음"));
+
+    // Lazy 필드 강제 로딩
+    resume.getUser().getUserName();
+
+    return ResumeDto.builder()
+      .title(resume.getTitle())
+      .address(resume.getAddress())
+      .phoneNum(resume.getPhoneNum())
+      // 필요한 필드 다 넣기
+      .build();
+  }
 
 
 }

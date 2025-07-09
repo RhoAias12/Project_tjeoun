@@ -3,6 +3,8 @@ package com.tjoeun.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.sql.Timestamp;
+
 @Entity
 @Table(name = "favorite")
 @Getter @Setter
@@ -22,4 +24,12 @@ public class Favorite {
   @ManyToOne
   @JoinColumn(name = "recruitment_idx", nullable = false)
   private Recruitment recruitment;
+
+  @Column(nullable = false, updatable = false)
+  private Timestamp apply;
+
+  @PrePersist
+  public void onPrePersist() {
+    this.apply = new Timestamp(System.currentTimeMillis());
+  }
 }

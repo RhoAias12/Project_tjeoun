@@ -11,6 +11,7 @@ public class WebConfig implements WebMvcConfigurer {
   @Value("${upload.path}")
   private String uploadPath;
 
+
   @Override
   public void addResourceHandlers(ResourceHandlerRegistry registry) {
     // 기존 static 폴더 내 이미지 서빙 (내부 리소스)
@@ -24,5 +25,9 @@ public class WebConfig implements WebMvcConfigurer {
     }
     registry.addResourceHandler("/uploads/**")
       .addResourceLocations("file:///" + externalPath);
+
+    String resumeExternalPath = externalPath + "resume/";
+    registry.addResourceHandler("/uploads/images/resume/**")
+      .addResourceLocations("file:///" + resumeExternalPath);
   }
 }

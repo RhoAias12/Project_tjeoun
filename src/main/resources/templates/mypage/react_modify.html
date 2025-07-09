@@ -9,6 +9,75 @@
       <link rel="stylesheet" th:href="@{/css/footer.css}" />
       <link rel="stylesheet" th:href="@{/css/react.css}" />
 <!--    <script defer src="/js/main.js"></script>-->
+
+      <script>
+// 이미지
+    document.addEventListener('DOMContentLoaded', function () {
+    const imgUpload = document.getElementById('imgUpload');
+    const imgPreview = document.getElementById('imgPreview');
+
+    imgUpload.addEventListener('change', function () {
+      const file = imgUpload.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          imgPreview.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  });
+
+function validateForm() {
+  // 필수 필드 검사
+  const titleEl = document.querySelector('textarea[name="title"]');
+  const addressEl = document.querySelector('textarea[name="address"]');
+  const phoneNumEl = document.querySelector('textarea[name="phoneNum"]');
+
+  if (!titleEl.value.trim()) {
+    alert('제목을 작성해 주세요!');
+    titleEl.classList.add('required-field');
+    return false;
+  }
+  if (!addressEl.value.trim()) {
+    alert('주소를 작성해 주세요!');
+    addressEl.classList.add('required-field');
+    return false;
+  }
+  if (!phoneNumEl.value.trim()) {
+    alert('전화번호를 작성해 주세요!');
+    phoneNumEl.classList.add('required-field');
+    return false;
+  }
+
+  // 질문/답변 쌍 검사: 질문1~n
+  const questionEls = document.querySelectorAll('textarea[name^="resumeContents"][name$=".question"]');
+  const contextEls = document.querySelectorAll('textarea[name^="resumeContents"][name$=".context"]');
+
+  for (let i = 0; i < questionEls.length; i++) {
+    const question = questionEls[i].value.trim();
+    const context = contextEls[i].value.trim();
+
+    if (question && !context) {
+      alert(`질문 ${i + 1}에 대한 답변을 작성해 주세요!`);
+      contextEls[i].classList.add('required-field');
+      contextEls[i].focus();
+      return false;
+    }
+    if (!question && context) {
+      alert(`질문 ${i + 1}이 비어있습니다. 질문을 작성해 주세요!`);
+      questionEls[i].classList.add('required-field');
+      questionEls[i].focus();
+      return false;
+    }
+  }
+
+  return true;
+}
+
+  </script>
+
+
   </head>
   <body>
     <div th:replace="include/header :: header"></div>
@@ -16,255 +85,164 @@
         <p>마이페이지 &gt; 이력서</p>
     </div>
     <div class="container">
-        <form>
+        <form th:action="@{/mypage/react_modify/{id}(id=${resume.resumeIdx})}" method="post" enctype="multipart/form-data" onsubmit="return validateForm()">
+        <input type="hidden" name="page" th:value="${page}" />
             <table class="resume-table">
                 <!-- 첫 줄: 이미지 텍스트 -->
                 <tr>
-                    <th class="img">제목</th>
+                    <th scope="row">* 제목</th>
                     <td class="centered-cell">
                         <div class="form-group">
-                <textarea
-                        id="title"
-                        class="short-text"
-                        placeholder="제목를 입력해 주세요."
-                >
-여러분들의 일개미가 되겠습니다! </textarea
-                >
+                            <textarea
+                                    name="title"
+                                    class="short-text"
+                                    th:text="${resume.title}"
+                                    placeholder="제목를 입력해 주세요.">
+
+                            </textarea>
                         </div>
                     </td>
                 </tr>
                 <tr>
-                    <!-- 왼쪽: 이미지 + 파일 선택 -->
-                    <th style="text-align: center">
-                        <img id="preview" src="" alt="미리보기 없음" />
-                        <input type="file" id="imageUpload" accept="image/*" />
-                        <div id="fileName" style="margin-top: 4px"></div>
+                    <th style="text-align: center;">
+                        <label for="imgUpload" class="logo-label"></label>
+                        <input type="file" id="imgUpload" name="imgFile" accept="image/*" />
+                        <div>
+                            <img id="imgPreview"
+                                 class="img"
+                                 th:if="${resume.img != null}"
+                                 th:src="@{${resume.img}}"
+                                 alt="이미지 미리보기" />
+                            <p th:if="${resume.img == null}">이미지가 없습니다.</p>
+                        </div>
                     </th>
 
                     <!-- 오른쪽: 개인정보 입력 -->
                     <td>
                         <div class="form-group">
-                            <label for="name" class="thick">이름</label>
-                            <textarea
-                                    id="name"
-                                    class="short-text"
-                                    placeholder="이름을 입력해 주세요."
-                            >
-홍길동</textarea
-                            >
+                            <label>이름</label>
+                            <textarea name="userName" class="short-text"
+                                      th:text="${resume.user.userName}"></textarea>
                         </div>
 
                         <div class="form-group">
-                            <label for="email" class="thick">이메일</label>
-                            <textarea
-                                    id="email"
-                                    class="short-text"
-                                    placeholder="이메일을 입력해 주세요."
-                            >
-honggildong@example.com</textarea
-                            >
+                            <label>이메일</label>
+                            <textarea name="userEmail" class="short-text"
+                                      th:text="${resume.user.userEmail}"></textarea>
                         </div>
 
                         <div class="form-group">
-                            <label for="birth" class="thick">생년월일</label>
-                            <textarea
-                                    id="birth"
-                                    class="short-text"
-                                    placeholder="생년월일을 입력해 주세요."
-                            >
-1995-07-01</textarea
-                            >
+                            <label>생년월일</label>
+                            <textarea name="userBirth" class="short-text"
+                                      th:text="${#temporals.format(resume.user.userBirth, 'yyyy-MM-dd')}"></textarea>
                         </div>
 
                         <div class="form-group">
-                            <label for="address">주소</label>
+                            <label>* 주소</label>
                             <textarea
-                                    id="address"
+                                    name="address"
                                     class="short-text"
-                                    placeholder="주소를 입력해 주세요."
-                            >
-서울특별시 성동구 성수동</textarea
-                            >
+                                    th:text="${resume.address}"
+                                    placeholder="주소를 입력해 주세요.">
+
+                            </textarea>
                         </div>
 
                         <div class="form-group">
-                            <label for="phone">전화번호</label>
+                            <label>* 전화번호</label>
                             <textarea
-                                    id="phone"
+                                    name="phoneNum"
                                     class="short-text"
-                                    placeholder="전화번호를 입력해 주세요."
-                            >
-010-1234-5678</textarea
-                            >
+                                    th:text="${resume.phoneNum}"
+                                    placeholder="전화번호를 입력해 주세요. ex. 010-0000-0000">
+
+                            </textarea>
                         </div>
 
                         <div class="form-group">
-                            <label for="education">학력</label>
+                            <label>학력</label>
                             <textarea
-                                    id="education"
+                                    name="education"
                                     class="short-text"
-                                    placeholder="학력을 입력해 주세요."
-                            >
-서울대학교 컴퓨터공학과 졸업</textarea
-                            >
+                                    th:text="${resume.education}"
+                                    placeholder="학력을 입력해 주세요.">
+
+                            </textarea>
                         </div>
 
                         <div class="form-group">
-                            <label for="career">자격증 및 스킬</label>
+                            <label>자격증 및 스킬</label>
                             <textarea
-                                    id="skill"
+                                    name="ability"
                                     class="short-text1"
-                                    placeholder="자격증 및 스킬을 입력해 주세요."
-                            >
-python, SQL</textarea
-                            >
+                                    th:text="${resume.ability}"
+                                    placeholder="자격증 및 스킬을 입력해 주세요.">
+
+                            </textarea>
                         </div>
 
                         <div class="form-group">
-                            <label for="career">경력</label>
+                            <label>경력</label>
                             <textarea
-                                    id="career"
+                                    name="antecedents"
                                     class="short-text1"
-                                    placeholder="경력을 입력해 주세요."
-                            >
-2021 ~ 2024 (주)코드랩 백엔드 개발자</textarea
-                            >
+                                    th:text="${resume.antecedents}"
+                                    placeholder="경력을 입력해 주세요.">
+
+                            </textarea>
                         </div>
 
                         <div class="form-group">
-                            <label for="award">수상이력</label>
+                            <label>수상이력</label>
                             <textarea
-                                    id="award"
+                                    name="awards"
                                     class="short-text1"
-                                    placeholder="수상이력을 입력해 주세요."
-                            >
-2023 SW창의력대회 최우수상 수상</textarea
-                            >
+                                    th:text="${resume.awards}"
+                                    placeholder="수상이력을 입력해 주세요.">
+
+                            </textarea>
                         </div>
                     </td>
                 </tr>
 
-                <tr>
+                <tr th:each="content, iterStat : ${resume.resumeContents}">
                     <th>
                         <div class="question">
-                            <p>질문1.</p>
-                            <textarea class="question-textarea">
-본인 소개 부탁드립니다.</textarea
-                            >
+                            <textarea
+                                    th:name="'resumeContents[' + ${iterStat.index} + '].question'"
+                                    class="question-textarea"
+                                    th:text="${content.question}"
+                                    placeholder="질문을 입력하세요."></textarea>
                         </div>
                     </th>
                     <td>
-              <textarea class="answer-textarea">
-안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-    </textarea
-    >
+        <textarea
+                th:name="'resumeContents[' + ${iterStat.index} + '].context'"
+                class="answer-textarea"
+                th:text="${content.context}"
+                placeholder="답변을 입력하세요."></textarea>
                     </td>
                 </tr>
 
-                <tr>
-                    <th>
-                        <div class="question">
-                            <p>질문1.</p>
-                            <textarea class="question-textarea">
-본인 소개 부탁드립니다.</textarea
-                            >
-                        </div>
-                    </th>
-                    <td>
-              <textarea class="answer-textarea">
-안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-    </textarea
-    >
-                    </td>
-                </tr>
 
                 <tr>
-                    <th>
-                        <div class="question">
-                            <p>질문1.</p>
-                            <textarea class="question-textarea">
-본인 소개 부탁드립니다.</textarea
-                            >
-                        </div>
-                    </th>
+                    <th class="link">포트폴리오 링크</th>
                     <td>
-              <textarea class="answer-textarea">
-안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-    </textarea
-    >
-                    </td>
-                </tr>
-
-                <tr>
-                    <th>
-                        <div class="question">
-                            <p>질문1.</p>
-                            <textarea class="question-textarea">
-본인 소개 부탁드립니다.</textarea
-                            >
-                        </div>
-                    </th>
-                    <td>
-              <textarea class="answer-textarea">
-안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-안녕하십니까 저는 누워있는 걸 잘하고 평생 놀고 먹고싶습니다.
-    </textarea
-    >
-                    </td>
-                </tr>
-
-                <tr>
-                    <th class="link">
-                        포트폴리오 링크를<br />
-                        넣어주세요.
-                    </th>
-                    <td>
-              <textarea
-                      placeholder="예: https://github.com/yourname/portfolio"
-              ></textarea>
+            <textarea name="context" placeholder="예: https://github.com/yourname/portfolio"
+                      th:text="${resume.context}"></textarea>
                     </td>
                 </tr>
             </table>
+
+                <div class="button-group">
+                    <button type="button"
+                            th:onclick="|location.href='@{/mypage/react_detail/{id}(id=${resume.resumeIdx})}?page=${page}'|">
+                        취소
+                    </button>
+                    <button type="submit">수정 완료</button>
+                </div>
+
         </form>
-    </div>
-    <div class="button-group">
-        <button type="button">취소</button>
-        <button type="submit">수정</button>
     </div>
     <div th:replace="include/footer :: footer"></div>
   </body>
