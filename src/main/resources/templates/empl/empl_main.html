@@ -80,18 +80,12 @@
         <!-- 정렬 영역 -->
         <div class="search-sort">
           <div class="search-wrapper">
-            <!-- 마감일 정렬 -->
-            <select class="sort-select" name="deadlineSort" onchange="document.getElementById('filterForm').submit()">
-              <option value="" th:selected="${deadlineSort == null or deadlineSort == ''}">전체</option>
-              <option value="deadline-asc" th:selected="${deadlineSort == 'deadline-asc'}">마감일 빠른 순</option>
-              <option value="deadline-desc" th:selected="${deadlineSort == 'deadline-desc'}">마감일 늦는 순</option>
-            </select>
-
-            <!-- 스크랩 정렬 -->
-            <select class="sort-select" name="scrapSort" onchange="document.getElementById('filterForm').submit()">
-              <option value="" th:selected="${scrapSort == null or scrapSort == ''}">전체</option>
-              <option value="scrap-desc" th:selected="${scrapSort == 'scrap-desc'}">스크랩 많은 순</option>
-              <option value="scrap-asc" th:selected="${scrapSort == 'scrap-asc'}">스크랩 적은 순</option>
+            <select class="sort-select" name="sortOrder" onchange="this.form.submit()">
+              <option value="all" th:selected="${sortOrder == 'all'}">전체</option>
+              <option value="deadline_asc" th:selected="${sortOrder == 'deadline_asc'}">마감일: 최신순</option>
+              <option value="deadline_desc" th:selected="${sortOrder == 'deadline_desc'}">마감일: 오래된순</option>
+              <option value="scrap_desc" th:selected="${sortOrder == 'scrap_desc'}">스크랩: 많은순</option>
+              <option value="scrap_asc" th:selected="${sortOrder == 'scrap_asc'}">스크랩: 적은순</option>
             </select>
           </div>
         </div>
