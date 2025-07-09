@@ -54,6 +54,10 @@ dependencies {
     implementation 'org.jsoup:jsoup:1.15.3'
     implementation 'org.seleniumhq.selenium:selenium-java:4.11.0'
 
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+    implementation 'co.elastic.clients:elasticsearch-java:8.13.4'
+
+
 }
 
 def querydslDir = "$buildDir/generated/querydsl"

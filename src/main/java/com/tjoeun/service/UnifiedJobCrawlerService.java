@@ -38,6 +38,9 @@ public class UnifiedJobCrawlerService {
   @Autowired
   private RecruitmentRepository repository;
 
+  @Autowired
+  private RecruitmentSyncService recruitmentSyncService;
+
   private final String logoSaveDir = "src/main/resources/static/images/logos/";
   @Scheduled(cron = "0 0 4 * * *", zone = "Asia/Seoul")
 //  @Scheduled(fixedDelay = 10000) // 10초마다 실행
@@ -78,6 +81,8 @@ public class UnifiedJobCrawlerService {
     }
 
     System.out.println("크롤링 및 저장 완료: 총 " + savedCount + "건 저장됨");
+
+    recruitmentSyncService.syncAllToElasticsearch();
   }
 
   private List<Recruitment> crawlJobKorea() {
