@@ -16,14 +16,14 @@ import java.util.stream.Collectors;
 public class RecruitmentSearchService {
 
   private final ElasticsearchClient esClient;
-  private static final String INDEX_NAME = "recruitment_index";
+  private static final String INDEX_NAME = "recruitments";
 
   public List<RecruitmentDocument> search(String keyword) throws IOException {
     SearchResponse<RecruitmentDocument> response = esClient.search(s -> s
       .index(INDEX_NAME)
       .query(q -> q
         .multiMatch(t -> t
-          .fields("title", "company", "responsibilities", "preferred")
+          .fields("title", "company", "combinedContent")
           .query(keyword)
         )
       ), RecruitmentDocument.class);

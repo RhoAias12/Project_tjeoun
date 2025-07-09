@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class RecruitmentSyncService {
@@ -47,6 +49,15 @@ public class RecruitmentSyncService {
       .location(recruitment.getLocation())
       .salary(recruitment.getSalary())
       .employmentType(recruitment.getEmploymentType())
+      .combinedContent(String.join(" ",
+        Optional.ofNullable(recruitment.getQualifications()).orElse(""),
+        Optional.ofNullable(recruitment.getResponsibilities()).orElse(""),
+        Optional.ofNullable(recruitment.getPreferred()).orElse(""),
+        Optional.ofNullable(recruitment.getBenefits()).orElse(""),
+        Optional.ofNullable(recruitment.getSalary()).orElse(""),
+        Optional.ofNullable(recruitment.getEmploymentType()).orElse(""))
+      )
       .build();
   }
+
 }

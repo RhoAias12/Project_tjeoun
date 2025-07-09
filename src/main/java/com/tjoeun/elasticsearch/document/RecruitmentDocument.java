@@ -3,6 +3,8 @@ package com.tjoeun.elasticsearch.document;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
+import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -30,14 +32,6 @@ public class RecruitmentDocument {
   private String salary;
   private String employmentType;
 
-  public String getCombinedContent() {
-    return String.join(" ",
-      Optional.ofNullable(qualifications).orElse(""),
-      Optional.ofNullable(responsibilities).orElse(""),
-      Optional.ofNullable(preferred).orElse(""),
-      Optional.ofNullable(benefits).orElse(""),
-      Optional.ofNullable(salary).orElse(""),
-      Optional.ofNullable(employmentType).orElse("")
-    );
-  }
+  @Field(type = FieldType.Text)
+  private String combinedContent;
 }
