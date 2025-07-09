@@ -58,7 +58,15 @@ public class EmplService {
         predicates.add(cb.like(root.get("title"), "%" + title + "%"));
       }
       if (content != null && !content.isBlank()) {
-        predicates.add(cb.like(root.get("responsibilities"), "%" + content + "%"));
+        Predicate contentPredicate = cb.or(
+          cb.like(cb.lower(root.get("qualifications")), "%" + content.toLowerCase() + "%"),
+          cb.like(cb.lower(root.get("responsibilities")), "%" + content.toLowerCase() + "%"),
+          cb.like(cb.lower(root.get("preferred")), "%" + content.toLowerCase() + "%"),
+          cb.like(cb.lower(root.get("benefits")), "%" + content.toLowerCase() + "%"),
+          cb.like(cb.lower(root.get("salary")), "%" + content.toLowerCase() + "%"),
+          cb.like(cb.lower(root.get("employmentType")), "%" + content.toLowerCase() + "%")
+        );
+        predicates.add(contentPredicate);
       }
       if (region != null && !region.isBlank()) {
         predicates.add(cb.like(root.get("location"), "%" + region + "%"));

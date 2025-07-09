@@ -33,7 +33,7 @@ public class Recruitment {
   private LocalDate deadline;
 
   @Column(columnDefinition = "TEXT")
-  private String qualifications; //자격요건
+  private String qualifications; //요구사항
 
   @Column(columnDefinition = "TEXT")
   private String logoUrl;
@@ -45,16 +45,16 @@ public class Recruitment {
   private String preferred; //우대사항
 
   @Column(columnDefinition = "TEXT")
-  private String benefits;
+  private String benefits; //복지 및 혜택
 
   @Column(columnDefinition = "TEXT")
   private String location;
 
   @Column(columnDefinition = "TEXT")
-  private String salary;
+  private String salary; //연봉
 
   @Column(columnDefinition = "TEXT")
-  private String employmentType;
+  private String employmentType; //고용형태
 
   @Transient
   private Integer scrapCount;

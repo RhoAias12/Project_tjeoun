@@ -5,6 +5,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 @Getter
 @Setter
@@ -28,4 +29,15 @@ public class RecruitmentDocument {
   private String location;
   private String salary;
   private String employmentType;
+
+  public String getCombinedContent() {
+    return String.join(" ",
+      Optional.ofNullable(qualifications).orElse(""),
+      Optional.ofNullable(responsibilities).orElse(""),
+      Optional.ofNullable(preferred).orElse(""),
+      Optional.ofNullable(benefits).orElse(""),
+      Optional.ofNullable(salary).orElse(""),
+      Optional.ofNullable(employmentType).orElse("")
+    );
+  }
 }
