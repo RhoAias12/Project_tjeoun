@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -26,6 +27,9 @@ public class RecruitmentService {
 
     @Autowired
     private FavoriteRepository favoriteRepository;
+
+    @Autowired
+    private RecruitmentSyncService recruitmentSyncService;
 
     public List<RecruitmentDTO> getAllPosts() {
         List<Recruitment> list = recruitmentRepository.findAll();
@@ -184,5 +188,14 @@ public class RecruitmentService {
                 .orElseThrow(() -> new IllegalArgumentException("채용공고 없음"));
     }
 
+    public Recruitment saveOrUpdate(Recruitment recruitment) {
+        Recruitment saved = recruitmentRepository.save(recruitment);
+        recruitmentSyncService.save(saved);
+        return saved;
+    }
+
+    public void deleteById(Long id) {
+        recruitmentSyncService.delete(id);
+    }
 
 }

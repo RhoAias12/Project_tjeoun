@@ -19,9 +19,12 @@ public class ApplyHistory {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Integer optionalIdx;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "resume_idx")
-  private Resume resume;
+//  @ManyToOne(fetch = FetchType.LAZY)
+//  @JoinColumn(name = "resume_idx")
+//  private Resume resume;
+
+  @OneToOne(mappedBy = "applyHistory", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+  private ApplyHistoryResume applyHistoryResume;
 
   @ManyToOne
   @JoinColumn(name = "user_idx", nullable = false)

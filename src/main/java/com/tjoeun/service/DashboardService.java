@@ -1,8 +1,10 @@
 package com.tjoeun.service;
 
+import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import com.tjoeun.dto.DashboardDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.ui.Model;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -11,39 +13,66 @@ import java.util.*;
 @RequiredArgsConstructor
 public class DashboardService {
 
-    public DashboardDTO getDashboardData() {
-        DashboardDTO dto = new DashboardDTO();
+    private final ElasticsearchClient elasticsearchClient;
+    private final ElasticsearchService elasticsearchService;
+
+    public void populateUserDashboard(Model model) {
 
         // 총 공고 수
-        dto.setTotalJobCount(35214);
+        long totalJobCount = elasticsearchService.countRecruitments();
+        model.addAttribute("totalJobCount", totalJobCount);
 
-        // 인기 직무 TOP 5
-        dto.setPopularJobs(Arrays.asList("백엔드", "프론트엔드", "데이터 분석", "AI 엔지니어", "DevOps"));
+        // 마감 임박 공고 수 (예: 7일 이내 마감)
+        long closingSoon = elasticsearchService.countClosedRecruitments();
+        model.addAttribute("closingSoonCount", closingSoon);
 
-        // 인기 기술 스택
-        dto.setPopularStacks(Arrays.asList("Java", "Spring Boot", "React", "Python", "Docker"));
+        // 마감률 계산
+        long closedCount = elasticsearchService.countClosedRecruitments();
+        double closeRate = totalJobCount == 0 ? 0 : Math.round(((double) closedCount / totalJobCount) * 1000.0) / 10.0;
+        model.addAttribute("closeRate", closeRate);
 
-        // 지역별 공고 수
-        Map<String, Integer> regionStats = new LinkedHashMap<>();
-        regionStats.put("서울", 18000);
-        regionStats.put("경기", 10000);
-        regionStats.put("부산", 4200);
-        regionStats.put("대전", 1500);
-        regionStats.put("기타", 1514);
-        dto.setRegionDistribution(regionStats);
+        // 인기 직무
+        Map<String, Long> topRoles = elasticsearchService.getTopRoles(5);
+        model.addAttribute("popularRoles", new ArrayList<>(topRoles.keySet()));
+        model.addAttribute("popularRoleCounts", new ArrayList<>(topRoles.values()));
 
-        // 최근 한 달간 공고 수 (날짜별)
-        Map<String, Integer> monthlyTrend = new LinkedHashMap<>();
-        LocalDate now = LocalDate.now();
-        for (int i = 29; i >= 0; i--) {
-            String date = now.minusDays(i).toString();
-            monthlyTrend.put(date, new Random().nextInt(200) + 100); // 100~299 랜덤
-        }
-        dto.setRegionDistribution(monthlyTrend);
+        // 키워드
+        Map<String, Long> topKeywords = elasticsearchService.getTopKeywords(5);
+        model.addAttribute("topKeywordLabels", new ArrayList<>(topKeywords.keySet()));
+        model.addAttribute("topKeywordCounts", new ArrayList<>(topKeywords.values()));
 
-        // 마감 임박 공고 수 (오늘 포함 3일 이내)
-        dto.setClosingSoonCount(874);
-
-        return dto;
+        // 직무 비율
+        model.addAttribute("jobTypeLabels", new ArrayList<>(topRoles.keySet()));
+        model.addAttribute("jobTypeCounts", new ArrayList<>(topRoles.values()));
     }
+
+    public void populateAdminDashboard(Model model) {
+        long total = elasticsearchService.countRecruitments();
+        long closed = elasticsearchService.countClosedRecruitments();
+        long active = total - closed;
+
+        model.addAttribute("totalJobs", total);
+        model.addAttribute("activeJobs", active);
+        model.addAttribute("closedJobs", closed);
+        model.addAttribute("userCount", fetchUserCount());
+        model.addAttribute("resumeRate", fetchResumeCompletionRate());
+        model.addAttribute("crawlStatus", 98.3); // TODO: 필요시 시스템 상태 기준으로 연결
+
+        // ✅ 관리자용 검색 키워드
+        Map<String, Long> topKeywords = elasticsearchService.getTopKeywords(5);
+        model.addAttribute("topSearchKeywords", new ArrayList<>(topKeywords.keySet()));
+        model.addAttribute("topSearchCounts", new ArrayList<>(topKeywords.values()));
+    }
+
+    private long fetchUserCount() {
+        // TODO: 실제 회원 수 DB 연동 필요
+        return 1023;
+    }
+
+    private double fetchResumeCompletionRate() {
+        // TODO: 이력서 작성률 DB 연동 필요
+        return 72.5;
+    }
+
+
 }

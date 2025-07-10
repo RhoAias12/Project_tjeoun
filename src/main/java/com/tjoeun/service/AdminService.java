@@ -1,10 +1,7 @@
 package com.tjoeun.service;
 
 import com.tjoeun.dto.*;
-import com.tjoeun.entity.ApplyHistory;
-import com.tjoeun.entity.Recruitment;
-import com.tjoeun.entity.Resume;
-import com.tjoeun.entity.Users;
+import com.tjoeun.entity.*;
 import com.tjoeun.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
@@ -61,7 +58,9 @@ public class AdminService {
     Page<Users> userPage = userRepository.findAll(pageable);
     return userPage.map(user -> new UserListDto(
       user.getUserIdx(),
+      user.getUserName(),
       user.getUserEmail(),
+      user.getUserBirth(),
       user.getUserNickname()
     ));
   }
@@ -73,6 +72,9 @@ public class AdminService {
     Users user = userRepository.findById(userIdx)
       .orElseThrow(() -> new IllegalArgumentException("사용자 없음"));
     userRepository.delete(user);
+  }
+  public int getTotalUserCount() {
+    return (int) userRepository.count();
   }
 
   // 회원 상세 조회
@@ -167,10 +169,10 @@ public class AdminService {
       .orElseThrow(() -> new IllegalArgumentException("해당 지원 기록을 찾을 수 없습니다. id=" + applyHistoryId));
 
     Recruitment recruitment = applyHistory.getRecruitment();
-    Resume resume = applyHistory.getResume();
+    ApplyHistoryResume resume = applyHistory.getApplyHistoryResume();
     Users user = applyHistory.getUser();
 
-    List<ResumeContentDTO> resumeContentList = resume.getResumeContents().stream()
+    List<ResumeContentDTO> resumeContentList = resume.getContents().stream()
       .map(content -> ResumeContentDTO.builder()
         .question(content.getQuestion())
         .context(content.getContext())
@@ -202,6 +204,7 @@ public class AdminService {
       .statusDisplay(applyHistory.getStatus().getDisplay())
       .build();
   }
+
 
 
   @Transactional

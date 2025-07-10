@@ -17,31 +17,85 @@
     <title>스크랩</title>
 
     <script>
-      function deleteScrap(recruitmentIdx, userIdx) {
-        const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
-        const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+  function deleteScrapFromDetail(recruitmentIdx, userIdx) {
+    const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
 
-        fetch(`/mypage/scrap`, {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-            [csrfHeader]: csrfToken
-          },
-          body: JSON.stringify({
-            userIdx: userIdx,
-            recruitmentIdx: recruitmentIdx
-          })
-        })
-        .then(response => {
-          if (response.ok) {
-            document.getElementById('card-' + recruitmentIdx).remove();
-          } else {
-            alert("삭제 실패");
-          }
-        });
+    // 현재 상세 페이지의 URL에서 prevUrl 추출 → page 번호 가져오기
+    const urlParams = new URLSearchParams(window.location.search);
+    const prevUrl = urlParams.get("prevUrl"); // ex: /mypage/scrap?page=2
+    let currentPage = 1;
+
+    if (prevUrl) {
+      const pageMatch = prevUrl.match(/page=(\d+)/);
+      if (pageMatch) {
+        currentPage = parseInt(pageMatch[1]);
       }
+    }
 
-      function checkAndGoApply(recruitmentIdx) {
+    const pageSize = 8; // 너희 페이징 사이즈에 맞게 설정 (한 페이지당 스크랩 개수)
+
+    fetch(`/mypage/scrap?page=${currentPage}&size=${pageSize}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        [csrfHeader]: csrfToken
+      },
+      body: JSON.stringify({
+        userIdx: userIdx,
+        recruitmentIdx: recruitmentIdx
+      })
+    })
+    .then(response => {
+      if (!response.ok) throw new Error("삭제 실패");
+      return response.json();
+    })
+    .then(data => {
+      const newPage = data.newPage || 1;
+      window.location.href = `/mypage/scrap?page=${newPage}`;
+    })
+    .catch(err => {
+      console.error("스크랩 삭제 중 오류:", err);
+      alert("스크랩 삭제에 실패했습니다. 다시 시도해주세요.");
+    });
+  }
+function deleteScrap(recruitmentIdx, userIdx) {
+  const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+  const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
+  // 현재 페이지 번호 추출
+  const urlParams = new URLSearchParams(window.location.search);
+  let currentPage = parseInt(urlParams.get("page")) || 1;
+  const pageSize = 8;
+
+  fetch(`/mypage/scrap?page=${currentPage}&size=${pageSize}`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      [csrfHeader]: csrfToken
+    },
+    body: JSON.stringify({
+      userIdx: userIdx,
+      recruitmentIdx: recruitmentIdx
+    })
+  })
+    .then(response => {
+      if (!response.ok) throw new Error("삭제 실패");
+      return response.json();
+    })
+    .then(data => {
+      const newPage = data.newPage || 1;
+      // 새로운 페이지로 이동
+      window.location.href = `/mypage/scrap?page=${newPage}`;
+    })
+    .catch(err => {
+      console.error("스크랩 삭제 중 오류:", err);
+      alert("스크랩 삭제에 실패했습니다. 다시 시도해주세요.");
+    });
+}
+
+
+    function checkAndGoApply(recruitmentIdx) {
         fetch(`/mypage/check_applied/${recruitmentIdx}`)
           .then(response => response.json())
           .then(data => {

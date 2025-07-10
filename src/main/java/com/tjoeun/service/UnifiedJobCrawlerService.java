@@ -7,6 +7,8 @@ import org.jsoup.Connection;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.openkoreantext.processor.OpenKoreanTextProcessorJava;
+import org.openkoreantext.processor.tokenizer.KoreanTokenizer;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
@@ -18,6 +20,9 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import scala.collection.JavaConverters;
+import scala.collection.Seq;
+
 
 import java.io.File;
 import java.io.InputStream;
@@ -37,6 +42,9 @@ public class UnifiedJobCrawlerService {
 
   @Autowired
   private RecruitmentRepository repository;
+
+  @Autowired
+  private RecruitmentSyncService recruitmentSyncService;
 
   private final String logoSaveDir = "src/main/resources/static/images/logos/";
   @Scheduled(cron = "0 0 4 * * *", zone = "Asia/Seoul")
@@ -70,7 +78,8 @@ public class UnifiedJobCrawlerService {
     int savedCount = 0;
     for (Recruitment job : cleanedJobs) {
       try {
-        repository.save(job);
+        Recruitment saved = repository.save(job);
+        recruitmentSyncService.save(saved); // Elasticsearch에 색인
         savedCount++;
       } catch (Exception e) {
         System.out.println("[저장 실패] 중복 또는 오류: " + job.getTitle());
@@ -78,12 +87,14 @@ public class UnifiedJobCrawlerService {
     }
 
     System.out.println("크롤링 및 저장 완료: 총 " + savedCount + "건 저장됨");
+
+//    recruitmentSyncService.syncAllToElasticsearch();
   }
 
   private List<Recruitment> crawlJobKorea() {
     List<Recruitment> result = new ArrayList<>();
 //    int totalPages = 5;
-    int totalPages = 1;
+    int totalPages = 2;
 
     try {
       for (int page = totalPages; page >= 1; page--) {
@@ -228,7 +239,8 @@ public class UnifiedJobCrawlerService {
       driver.get("https://www.jobplanet.co.kr/job");
       Thread.sleep(3000);
 
-      for (int i = 0; i < 3; i++) {
+      for (int i = 0; i < 20; i++) {
+//      for (int i = 0; i < 3; i++) {
         ((JavascriptExecutor) driver).executeScript("window.scrollTo(0, document.body.scrollHeight);");
         Thread.sleep(1000);
       }
@@ -240,7 +252,9 @@ public class UnifiedJobCrawlerService {
         if (href != null && !href.isEmpty()) links.add(href);
       }
 
-      for (int idx = 0; idx < Math.min(links.size(), 10); idx++) {
+//      for (int idx = 0; idx < Math.min(links.size(), 200); idx++) {
+        for (int idx = 0; idx < Math.min(links.size(), 50); idx++) {
+//      for (int idx = 0; idx < Math.min(links.size(), 10); idx++) {
         String link = links.get(idx);
         driver.get(link);
         Thread.sleep(2000);
@@ -300,8 +314,8 @@ public class UnifiedJobCrawlerService {
     try {
       driver.get("https://www.wanted.co.kr/wdlist?country=kr&job_sort=job.latest_order&years=-1&locations=all");
       Thread.sleep(3000);
-//      for (int i = 0; i < 20; i++) {
-      for (int i = 0; i < 5; i++) {
+      for (int i = 0; i < 20; i++) {
+//      for (int i = 0; i < 5; i++) {
         ((JavascriptExecutor) driver).executeScript("window.scrollTo(0, document.body.scrollHeight);");
         Thread.sleep(1000);
       }
@@ -311,8 +325,8 @@ public class UnifiedJobCrawlerService {
         String href = el.getAttribute("href");
         if (href != null && href.contains("/wd/")) {
           urls.add(href);
-//          if (urls.size() >= 200) break;
-          if (urls.size() >= 20) break;
+          if (urls.size() >= 50) break;
+//          if (urls.size() >= 20) break;
         }
       }
       System.out.println("원티드 상세 링크 수: " + urls.size());
@@ -472,6 +486,25 @@ public class UnifiedJobCrawlerService {
           job.setSalary("회사내규에 따름");
         if (job.getEmploymentType() == null || job.getEmploymentType().isBlank())
           job.setEmploymentType("면접 후 결정");
+
+        try {
+          String combinedText = (job.getTitle() + " " + job.getResponsibilities()).trim();
+          CharSequence normalized = OpenKoreanTextProcessorJava.normalize(combinedText);
+          Seq<KoreanTokenizer.KoreanToken> tokens = OpenKoreanTextProcessorJava.tokenize(normalized);
+
+          List<String> nouns = OpenKoreanTextProcessorJava.tokensToJavaKoreanTokenList(tokens)
+                  .stream()
+                  .filter(token -> token.getPos().toString().equals("Noun"))
+                  .map(token -> token.toString())
+                  .distinct()
+                  .collect(Collectors.toList());
+
+          job.setJobKeywords(String.join(", ", nouns));
+        } catch (Exception e) {
+          System.out.println("[명사 추출 실패] " + job.getTitle() + ": " + e.getMessage());
+          job.setJobKeywords("");
+        }
+
       })
       .collect(Collectors.toList());
   }

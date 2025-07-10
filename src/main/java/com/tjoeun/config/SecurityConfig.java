@@ -34,7 +34,8 @@ public class SecurityConfig {
         .requestMatchers("/css/**", "/js/**", "/images/**", "/static/**").permitAll()
         .requestMatchers("/", "/user/signup", "/user/login", "/api/user/**", "/user/login/error").permitAll()
         .requestMatchers("/empl/empl_main", "/empl/empl_detail/**").permitAll()
-        .requestMatchers("/admin/**").hasRole("ADMIN")
+        .requestMatchers("/dashboard/ad_dashboard").hasRole("ADMIN")
+        .requestMatchers("/dashboard/admin").hasRole("ADMIN")
         .requestMatchers("/mypage/**").authenticated()  // 마이페이지는 로그인 사용자만
         .anyRequest().authenticated()
       )
