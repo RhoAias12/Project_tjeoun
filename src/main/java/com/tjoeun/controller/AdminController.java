@@ -10,6 +10,7 @@ import com.tjoeun.util.PaginationUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -20,11 +21,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import org.springframework.security.web.csrf.CsrfToken;
-import jakarta.servlet.http.HttpServletRequest;
-
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 
 @Controller
@@ -119,21 +118,52 @@ public class AdminController {
     @GetMapping("/recruit_list")
     public String recruitList(@RequestParam(defaultValue = "1") int page,
                               @RequestParam(defaultValue = "deadline_all") String deadlineSort,
+                              @RequestParam(required = false) String title,
+                              @RequestParam(required = false) String content,
+                              @RequestParam(required = false) String region,
+                              @RequestParam(required = false) String company,
+                              @RequestParam(required = false) String startDate,
+                              @RequestParam(required = false) String endDate,
                               @PageableDefault(size = 10) Pageable pageable,
-                              Model model) {
+                              Model model) throws IOException {
 
-        Pageable correctedPageable = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
+        // 검색 조건을 기반으로 필터링
+        List<RecruitmentDTO> filteredList = adminService.searchAndSortWithFilter(
+          title, content, region, company, startDate, endDate, deadlineSort, page
+        );
 
-        Page<RecruitmentDTO> recruitmentPage =
-          recruitmentService.getSortedPagedPosts(correctedPageable, deadlineSort);
+        // 페이지네이션 처리
+        int pageSize = pageable.getPageSize();
+        int start = (page - 1) * pageSize;
+        int end = Math.min(start + pageSize, filteredList.size());
+        List<RecruitmentDTO> pageContent = (start > filteredList.size()) ? List.of() : filteredList.subList(start, end);
+        Page<RecruitmentDTO> recruitmentPage = new PageImpl<>(pageContent, PageRequest.of(page - 1, pageSize), filteredList.size());
 
-        String urlWithParams = "/admin/recruit_list?deadlineSort=" + deadlineSort;
-        PaginationUtil.setPaging(model, recruitmentPage, urlWithParams);
+        // URL 파라미터 보존
+        StringBuilder urlWithParams = new StringBuilder("/admin/recruit_list?deadlineSort=" + deadlineSort);
+        if (title != null && !title.isBlank()) urlWithParams.append("&title=").append(title);
+        if (content != null && !content.isBlank()) urlWithParams.append("&content=").append(content);
+        if (region != null && !region.isBlank()) urlWithParams.append("&region=").append(region);
+        if (company != null && !company.isBlank()) urlWithParams.append("&company=").append(company);
+        if (startDate != null && !startDate.isBlank()) urlWithParams.append("&startDate=").append(startDate);
+        if (endDate != null && !endDate.isBlank()) urlWithParams.append("&endDate=").append(endDate);
 
+        // 페이징 세팅
+        PaginationUtil.setPaging(model, recruitmentPage, urlWithParams.toString());
+
+        // 화면에 필요한 값 세팅
         model.addAttribute("recruitmentList", recruitmentPage.getContent());
         model.addAttribute("recruitmentPage", recruitmentPage);
         model.addAttribute("deadlineSort", deadlineSort);
         model.addAttribute("page", page);
+
+        // 검색 조건 다시 뷰에 넘기기 (화면에 유지되도록)
+        model.addAttribute("title", title);
+        model.addAttribute("content", content);
+        model.addAttribute("region", region);
+        model.addAttribute("company", company);
+        model.addAttribute("startDate", startDate);
+        model.addAttribute("endDate", endDate);
 
         return "admin/recruit_list";
     }

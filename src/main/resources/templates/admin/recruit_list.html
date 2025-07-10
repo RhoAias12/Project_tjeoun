@@ -63,27 +63,28 @@
 
         <!-- 검색 및 정렬 영역  -->
         <div class="search">
-          <section class="search-bar">
-            <input type="text" placeholder="공고이름" name="title" />
-            <input type="text" placeholder="공고내용" name="content" />
-            <input type="text" placeholder="지역" name="region" />
-            <input type="text" placeholder="회사명" name="company" />
+          <form method="get" th:action="@{/admin/recruit_list}">
+            <section class="search-bar">
+              <input type="text" placeholder="공고이름" name="title" th:value="${title}" />
+              <input type="text" placeholder="공고내용" name="content" th:value="${content}" />
+              <input type="text" placeholder="지역" name="region" th:value="${region}" />
+              <input type="text" placeholder="회사명" name="company" th:value="${company}" />
 
-            <div class="date-range">
-              <div class="date-group">
-                <label for="startDate">시작일</label>
-                <input type="date" name="startDate" id="startDate" />
+              <div class="date-range">
+                <div class="date-group">
+                  <label for="startDate">시작일</label>
+                  <input type="date" name="startDate" id="startDate" th:value="${startDate}" />
+                </div>
+                <span class="tilde">-</span>
+                <div class="date-group">
+                  <label for="endDate">마감일</label>
+                  <input type="date" name="endDate" id="endDate" th:value="${endDate}" />
+                </div>
               </div>
-              <span class="tilde">-</span>
-              <div class="date-group">
-                <label for="endDate">마감일</label>
-                <input type="date" name="endDate" id="endDate" />
-              </div>
-            </div>
 
-            <button type="submit">검색</button>
-          </section>
-
+              <button type="submit">검색</button>
+            </section>
+          </form>
 
           <div class="sort-wrapper" style="display: flex; gap: 10px;">
             <form method="get" th:action="@{/admin/recruit_list}" style="display: flex; gap: 10px;">
