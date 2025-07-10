@@ -1,20 +1,10 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>공고 상세페이지</title>
-
-  <script th:inline="javascript">
-    let isLogin = /*[[${#authorization.expression('isAuthenticated()')}]]*/ false;
-
-    function goBackWithRefreshParam() {
-    const prevUrl = /*[[${prevUrl != null ? prevUrl : '/empl/empl_main'}]]*/ '/empl/empl_main';
-    const delimiter = prevUrl.includes('?') ? '&' : '?';
-    const random = Math.random().toString().slice(2);
-    location.href = `${prevUrl}${delimiter}refresh=${random}`;
-  }
-  </script>
 
   <!-- CSRF 토큰 -->
   <meta name="_csrf" th:content="${_csrf.token}" />
@@ -32,25 +22,24 @@
 <div th:replace="include/header :: header"></div>
 
 <div class="search">
-  <section class="search-bar">
-    <input type="text" placeholder="공고이름" name="title" />
-    <input type="text" placeholder="공고내용" name="content" />
-    <input type="text" placeholder="지역" name="region" />
-    <input type="text" placeholder="회사명" name="company" />
-
+  <form action="/empl/empl_main" method="get" class="search-bar">
+    <input type="text" placeholder="공고이름" name="title" th:value="${title}" />
+    <input type="text" placeholder="공고내용" name="content" th:value="${content}" />
+    <input type="text" placeholder="지역" name="region" th:value="${region}" />
+    <input type="text" placeholder="회사명" name="company" th:value="${company}" />
     <div class="date-range">
       <div class="date-group">
         <label for="startDate">시작일</label>
-        <input type="date" name="startDate" id="startDate" />
+        <input type="date" name="startDate" id="startDate" th:value="${startDate}" />
       </div>
       <span class="tilde">-</span>
       <div class="date-group">
         <label for="endDate">마감일</label>
-        <input type="date" name="endDate" id="endDate" />
+        <input type="date" name="endDate" id="endDate" th:value="${endDate}" />
       </div>
     </div>
     <button type="submit">검색</button>
-  </section>
+  </form>
 </div>
 
 <div class="container">
@@ -131,7 +120,42 @@
 
 <div th:replace="include/footer :: footer"></div>
 
-<!-- JS는 body 끝에 넣기 -->
+<script th:inline="javascript">
+  let isLogin = /*[[${#authorization.expression('isAuthenticated()')}]]*/ false;
+
+  /*<![CDATA[*/
+  let prevUrl = /*[[${prevUrl != null ? prevUrl : '/empl/empl_main'}]]*/ '/empl/empl_main';
+  let page = /*[[${page}]]*/ 1;
+  let sortOrder = /*[[${sortOrder != null ? sortOrder : ''}]]*/ '';
+  let title = /*[[${title != null ? title : ''}]]*/ '';
+  let content = /*[[${content != null ? content : ''}]]*/ '';
+  let region = /*[[${region != null ? region : ''}]]*/ '';
+  let company = /*[[${company != null ? company : ''}]]*/ '';
+  let startDate = /*[[${startDate != null ? startDate : ''}]]*/ '';
+  let endDate = /*[[${endDate != null ? endDate : ''}]]*/ '';
+
+  function goBackWithRefreshParam() {
+    const params = new URLSearchParams();
+
+    params.append('page', page);
+    if (sortOrder) params.append('sortOrder', sortOrder);
+    if (title) params.append('title', title);
+    if (content) params.append('content', content);
+    if (region) params.append('region', region);
+    if (company) params.append('company', company);
+    if (startDate) params.append('startDate', startDate);
+    if (endDate) params.append('endDate', endDate);
+
+    // 새로고침용 랜덤 파라미터 추가
+    params.append('refresh', Math.random().toString().slice(2));
+
+    // URL 조합
+    const delimiter = prevUrl.includes('?') ? '&' : '?';
+    location.href = prevUrl + delimiter + params.toString();
+  }
+  /*]]>*/
+</script>
+
 <script>
   function toggleBookmark(button) {
     if (!isLogin) {

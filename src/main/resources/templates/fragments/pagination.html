@@ -4,27 +4,26 @@
 <head></head>
 <body>
 
-<!-- 🔽 페이징 프래그먼트 -->
 <div th:fragment="fragment (jobPage, startPage, endPage, url)" th:if="${jobPage != null and jobPage.totalPages > 1}" class="pagination">
   <ul class="pagination-list">
 
-    <!-- « 이전 -->
+    <!-- 이전 -->
     <li th:if="${jobPage.number + 1 > 1}">
-      <a class="page-btn" th:href="@{${url}(page=${jobPage.number})}">〈</a>
+      <a class="page-btn" th:href="${url + '?page=' + (jobPage.number) + (queryParams != null ? queryParams : '')}">〈</a>
     </li>
 
     <!-- 페이지 번호 (1-based) -->
     <li th:each="i : ${#numbers.sequence(startPage + 1, endPage + 1)}">
       <a class="page-btn"
          th:classappend="${i} == ${jobPage.number + 1} ? ' active'"
-         th:href="@{${url}(page=${i})}"
+         th:href="${url + '?page=' + i + (queryParams != null ? queryParams : '')}"
          th:text="${i}">
       </a>
     </li>
 
-    <!-- » 다음 -->
+    <!-- 다음 -->
     <li th:if="${jobPage.number + 1 < jobPage.totalPages}">
-      <a class="page-btn" th:href="@{${url}(page=${jobPage.number + 2})}">〉</a>
+      <a class="page-btn" th:href="${url + '?page=' + (jobPage.number + 2) + (queryParams != null ? queryParams : '')}">〉</a>
     </li>
 
   </ul>

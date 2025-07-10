@@ -86,8 +86,8 @@ public class UnifiedJobCrawlerService {
 
   private List<Recruitment> crawlJobKorea() {
     List<Recruitment> result = new ArrayList<>();
-//    int totalPages = 5;
-    int totalPages = 1;
+    int totalPages = 5;
+//    int totalPages = 1;
 
     try {
       for (int page = totalPages; page >= 1; page--) {
@@ -232,7 +232,8 @@ public class UnifiedJobCrawlerService {
       driver.get("https://www.jobplanet.co.kr/job");
       Thread.sleep(3000);
 
-      for (int i = 0; i < 3; i++) {
+      for (int i = 0; i < 20; i++) {
+//      for (int i = 0; i < 3; i++) {
         ((JavascriptExecutor) driver).executeScript("window.scrollTo(0, document.body.scrollHeight);");
         Thread.sleep(1000);
       }
@@ -244,7 +245,8 @@ public class UnifiedJobCrawlerService {
         if (href != null && !href.isEmpty()) links.add(href);
       }
 
-      for (int idx = 0; idx < Math.min(links.size(), 10); idx++) {
+      for (int idx = 0; idx < Math.min(links.size(), 200); idx++) {
+//      for (int idx = 0; idx < Math.min(links.size(), 10); idx++) {
         String link = links.get(idx);
         driver.get(link);
         Thread.sleep(2000);
@@ -304,8 +306,8 @@ public class UnifiedJobCrawlerService {
     try {
       driver.get("https://www.wanted.co.kr/wdlist?country=kr&job_sort=job.latest_order&years=-1&locations=all");
       Thread.sleep(3000);
-//      for (int i = 0; i < 20; i++) {
-      for (int i = 0; i < 5; i++) {
+      for (int i = 0; i < 20; i++) {
+//      for (int i = 0; i < 5; i++) {
         ((JavascriptExecutor) driver).executeScript("window.scrollTo(0, document.body.scrollHeight);");
         Thread.sleep(1000);
       }
@@ -315,8 +317,8 @@ public class UnifiedJobCrawlerService {
         String href = el.getAttribute("href");
         if (href != null && href.contains("/wd/")) {
           urls.add(href);
-//          if (urls.size() >= 200) break;
-          if (urls.size() >= 20) break;
+          if (urls.size() >= 200) break;
+//          if (urls.size() >= 20) break;
         }
       }
       System.out.println("원티드 상세 링크 수: " + urls.size());
