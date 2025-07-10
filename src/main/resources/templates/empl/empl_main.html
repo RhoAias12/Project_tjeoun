@@ -41,6 +41,59 @@
       startInput.addEventListener('change', () => validateDates('start'));
       endInput.addEventListener('change', () => validateDates('end'));
     });
+
+
+     //chat 챗봇
+  function toggleChat() {
+    const popup = document.getElementById("chatPopup");
+    popup.style.display = (popup.style.display === "block") ? "none" : "block";
+  }
+
+  async function sendMessage() {
+    const inputEl = document.getElementById("userInput");
+    const message = inputEl.value.trim();
+    if (!message) return;
+
+    const chatBox = document.getElementById("chatBox");
+
+    // 유저 메시지
+    const userMsg = document.createElement("div");
+    userMsg.className = "message user-message";
+    userMsg.textContent = message;
+    chatBox.appendChild(userMsg);
+
+    inputEl.value = "";
+
+    // 서버로 전송
+    const response = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ input: message }),
+    });
+
+    const data = await response.json();
+
+    // 챗봇 메시지
+    const botMsg = document.createElement("div");
+    botMsg.className = "message bot-message";
+    botMsg.textContent = data.reply;
+    chatBox.appendChild(botMsg);
+
+    // 스크롤 맨 아래로
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
+
+  // 엔터 키로 전송
+  document.addEventListener("DOMContentLoaded", () => {
+  const inputEl = document.getElementById("userInput");
+  inputEl.addEventListener("keydown", function(event) {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      sendMessage();
+    }
+  });
+});
+
   </script>
 
 
@@ -110,6 +163,29 @@
       </div>
 
     </div>
+
+      <!-- chat.html -->
+      <!-- 채팅 토글 버튼 -->
+      <div class="chat-toggle-button" onclick="toggleChat()">💬</div>
+
+      <!-- 채팅 팝업 -->
+      <div class="chat-popup" id="chatPopup">
+        <div class="chat-header">
+          <span class="chat-title">AI Chat</span>
+          <button class="close-btn" onclick="toggleChat()">✖️</button>
+        </div>
+
+        <!-- 메시지 영역 -->
+        <div class="chat-box" id="chatBox">
+          <!-- 여기에 메시지들이 들어감 -->
+        </div>
+
+        <!-- 입력창은 형제로 따로! -->
+        <div class="input-box">
+          <input type="text" id="userInput" placeholder="메시지를 입력하세요..." />
+          <button onclick="sendMessage()">전송</button>
+        </div>
+      </div>
 
     <!-- 페이징 -->
       <div th:replace="~{fragments/pagination :: fragment(${jobPage}, ${startPage}, ${endPage}, '/empl/empl_main')}"></div>
