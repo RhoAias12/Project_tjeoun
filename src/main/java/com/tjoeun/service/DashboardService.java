@@ -23,7 +23,7 @@ public class DashboardService {
         model.addAttribute("totalJobCount", totalJobCount);
 
         // 마감 임박 공고 수 (예: 7일 이내 마감)
-        long closingSoon = elasticsearchService.countClosingSoonRecruitments();
+        long closingSoon = elasticsearchService.countClosedRecruitments();
         model.addAttribute("closingSoonCount", closingSoon);
 
         // 마감률 계산

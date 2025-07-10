@@ -8,6 +8,8 @@ import com.tjoeun.repository.RecruitmentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.tjoeun.elasticsearch.KoreanNounExtractor;
+
 
 import java.util.List;
 import java.util.Optional;
@@ -39,34 +41,35 @@ public class RecruitmentSyncService {
   }
 
   private RecruitmentDocument mapToDocument(Recruitment recruitment) {
-
-    String jobKeywords = Optional.ofNullable(recruitment.getTitle()).orElse("") + " " +
+    String combined = Optional.ofNullable(recruitment.getTitle()).orElse("") + " " +
             Optional.ofNullable(recruitment.getResponsibilities()).orElse("");
 
-    return RecruitmentDocument.builder()
-      .recruitmentIdx(recruitment.getRecruitmentIdx())
-      .title(recruitment.getTitle())
-      .company(recruitment.getCompany())
-      .deadline(recruitment.getDeadline())
-      .qualifications(recruitment.getQualifications())
-      .logoUrl(recruitment.getLogoUrl())
-      .responsibilities(recruitment.getResponsibilities())
-      .preferred(recruitment.getPreferred())
-      .benefits(recruitment.getBenefits())
-      .location(recruitment.getLocation())
-      .salary(recruitment.getSalary())
-      .employmentType(recruitment.getEmploymentType())
-      .combinedContent(String.join(" ",
-        Optional.ofNullable(recruitment.getQualifications()).orElse(""),
-        Optional.ofNullable(recruitment.getResponsibilities()).orElse(""),
-        Optional.ofNullable(recruitment.getPreferred()).orElse(""),
-        Optional.ofNullable(recruitment.getBenefits()).orElse(""),
-        Optional.ofNullable(recruitment.getSalary()).orElse(""),
-        Optional.ofNullable(recruitment.getEmploymentType()).orElse(""))
-      )
-      .jobKeywords(jobKeywords)
-      .build();
+    String jobKeywords = String.join(" ", KoreanNounExtractor.extractNouns(combined));
 
+
+    return RecruitmentDocument.builder()
+            .recruitmentIdx(recruitment.getRecruitmentIdx())
+            .title(recruitment.getTitle())
+            .company(recruitment.getCompany())
+            .deadline(recruitment.getDeadline())
+            .qualifications(recruitment.getQualifications())
+            .logoUrl(recruitment.getLogoUrl())
+            .responsibilities(recruitment.getResponsibilities())
+            .preferred(recruitment.getPreferred())
+            .benefits(recruitment.getBenefits())
+            .location(recruitment.getLocation())
+            .salary(recruitment.getSalary())
+            .employmentType(recruitment.getEmploymentType())
+            .combinedContent(String.join(" ",
+                    Optional.ofNullable(recruitment.getQualifications()).orElse(""),
+                    Optional.ofNullable(recruitment.getResponsibilities()).orElse(""),
+                    Optional.ofNullable(recruitment.getPreferred()).orElse(""),
+                    Optional.ofNullable(recruitment.getBenefits()).orElse(""),
+                    Optional.ofNullable(recruitment.getSalary()).orElse(""),
+                    Optional.ofNullable(recruitment.getEmploymentType()).orElse("")
+            ))
+            .jobKeywords(jobKeywords)
+            .build();
   }
 
     // 전체 DB 데이터를 ES에 동기화

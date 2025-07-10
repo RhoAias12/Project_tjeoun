@@ -3,6 +3,7 @@ package com.tjoeun.service;
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch._types.aggregations.ExtendedBounds;
+import co.elastic.clients.elasticsearch._types.analysis.TokenFilterDefinition;
 import co.elastic.clients.elasticsearch.core.CountRequest;
 import co.elastic.clients.elasticsearch.core.CountResponse;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
@@ -13,8 +14,13 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import co.elastic.clients.json.JsonData;
+import co.elastic.clients.elasticsearch._types.analysis.StopTokenFilter;
+import co.elastic.clients.elasticsearch._types.analysis.TokenFilterDefinition;
+import co.elastic.clients.elasticsearch._types.analysis.StopTokenFilter;
+
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -31,54 +37,82 @@ public class ElasticsearchService {
         String indexName = "recruitments";
 
         try {
+            // 🔥 기존 인덱스 삭제
             boolean exists = elasticsearchClient.indices()
-                    .exists(b -> b.index(indexName))
-                    .value();
+                    .exists(e -> e.index(indexName)).value();
 
             if (exists) {
-                System.out.println("[Elasticsearch] recruitments 인덱스 이미 존재");
-                return;
+                elasticsearchClient.indices().delete(d -> d.index(indexName));
+                System.out.println("[Elasticsearch] 기존 인덱스 삭제 완료");
             }
 
-            // 인덱스 생성
+            // ✅ 새 인덱스 생성 (커스텀 분석기 포함)
             elasticsearchClient.indices().create(c -> c
-                    .index(indexName)
-                    .settings(s -> s
-                            .analysis(a -> a
-                                    .analyzer("my_nori", an -> an
-                                            .custom(ca -> ca.tokenizer("nori_tokenizer"))
-                                    )
-                            )
-                    )
+                    .index("recruitments")
+                    .settings(s -> s.withJson(new StringReader("""
+            {
+              "analysis": {
+                "analyzer": {
+                  "korean_custom": {
+                    "type": "custom",
+                    "tokenizer": "nori_tokenizer",
+                    "filter": ["lowercase", "nori_readingform", "my_stop"]
+                  }
+                },
+                "filter": {
+                  "my_stop": {
+                    "type": "stop",
+                    "stopwords": ["이", "자", "직", "주요", "사"]
+                  }
+                }
+              }
+            }
+            """)))
                     .mappings(mb -> mb
-                            .properties("combinedContent", p -> p.text(t -> t))
-                            .properties("jobKeywords", p -> p.text(t -> t
-                                    .analyzer("my_nori")
-                                    .fielddata(true)
-                            ))
-                            .properties("_class", p -> p.keyword(k -> k.index(false).docValues(false)))
+                            .properties("jobKeywords", p -> p.text(t -> t.analyzer("korean_custom").fielddata(true)))
+                            .properties("title", p -> p.text(t -> t.analyzer("korean_custom")))
+                            .properties("combinedContent", p -> p.text(t -> t.analyzer("korean_custom")))
+                            .properties("company", p -> p.keyword(k -> k))
                             .properties("deadline", p -> p.date(d -> d.format("yyyy-MM-dd")))
                             .properties("createdAt", p -> p.date(d -> d.format("yyyy-MM-dd")))
                             .properties("location", p -> p.keyword(k -> k))
-                            .properties("title", p -> p.keyword(k -> k))
+                            .properties("_class", p -> p.keyword(k -> k.index(false).docValues(false)))
                     )
             );
 
-            System.out.println("[Elasticsearch] recruitments 인덱스 생성 완료");
+            System.out.println("[Elasticsearch] recruitments 인덱스 새로 생성 완료");
 
         } catch (IOException e) {
-            System.err.println("[Elasticsearch] recruitments 인덱스 생성 중 오류 발생");
+            System.err.println("[Elasticsearch] recruitments 인덱스 생성 실패");
             e.printStackTrace();
         }
     }
 
-    // 총 공고 수
+    public void resetRecruitmentIndex(RecruitmentSyncService recruitmentSyncService) {
+        try {
+            // 1. 기존 인덱스 삭제
+            elasticsearchClient.indices().delete(d -> d.index("recruitments"));
+            System.out.println("🧹 기존 인덱스 삭제 완료");
+
+            // 2. 인덱스 재생성
+            createIndexIfNotExists();
+
+            // 3. 전체 데이터 재동기화 (DB → Elasticsearch)
+            recruitmentSyncService.syncAllToElasticsearch();
+
+            System.out.println("✅ 인덱스 재설정 및 전체 동기화 완료");
+
+        } catch (IOException e) {
+            System.err.println("❌ 인덱스 재설정 실패");
+            e.printStackTrace();
+        }
+    }
+
+
+    // 전체 채용 공고 수
     public long countRecruitments() {
         try {
-            CountRequest request = CountRequest.of(c ->
-                    c.index("recruitments")
-                            .query(q -> q.matchAll(m -> m))
-            );
+            CountRequest request = CountRequest.of(c -> c.index("recruitments"));
             CountResponse response = elasticsearchClient.count(request);
             return response.count();
         } catch (IOException e) {
@@ -87,27 +121,6 @@ public class ElasticsearchService {
         }
     }
 
-
-    // 마감 임박 공고 수 (7일 내)
-    public long countClosingSoonRecruitments() {
-        try {
-            String today = LocalDate.now().toString();
-            String soon = LocalDate.now().plusDays(7).toString();
-            CountRequest request = CountRequest.of(c ->
-                    c.index("recruitments")
-                            .query(q -> q.range(r -> r
-                                    .field("deadline")
-                                    .gte(JsonData.of(today))
-                                    .lte(JsonData.of(soon))
-                            ))
-            );
-            CountResponse response = elasticsearchClient.count(request);
-            return response.count();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return 0;
-        }
-    }
 
     // 인기 직무 TOP N
     public Map<String, Long> getTopRoles(int size) {
@@ -133,6 +146,34 @@ public class ElasticsearchService {
             return Map.of();
         }
     }
+
+    public long countClosingSoonRecruitments() {
+        try {
+            String today = LocalDate.now().toString();
+            String soon = LocalDate.now().plusDays(10).toString();  // 3일 이내 마감
+
+            System.out.println(" 오늘 날짜: " + today);
+            System.out.println(" 마감 기준 날짜: " + soon);
+
+            CountRequest request = CountRequest.of(c ->
+                    c.index("recruitments")
+                            .query(q -> q.range(r -> r
+                                    .field("deadline")
+                                    .gte(JsonData.of(today))
+                                    .lte(JsonData.of(soon))
+                            ))
+            );
+
+            long count = elasticsearchClient.count(request).count();
+            System.out.println(" 마감 임박 공고 수: " + count);
+
+            return count;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
 
     // 지역 분포
     public Map<String, Long> getRegionDistribution() {

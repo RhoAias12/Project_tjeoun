@@ -62,6 +62,9 @@ public class Recruitment {
   @Column
   private LocalDateTime createdAt;
 
+  private String jobKeywords;
+
+
   @PrePersist
   protected void onCreate() {
     this.createdAt = LocalDateTime.now();
