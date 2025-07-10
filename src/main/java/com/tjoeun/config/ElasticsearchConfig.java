@@ -2,6 +2,7 @@ package com.tjoeun.config;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.json.jackson.JacksonJsonpMapper;
+import co.elastic.clients.transport.ElasticsearchTransport;
 import co.elastic.clients.transport.rest_client.RestClientTransport;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -13,18 +14,29 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ElasticsearchConfig {
 
-    @Bean
-    public ElasticsearchClient elasticsearchClient() {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(new JavaTimeModule());
+  @Bean
+  public ElasticsearchClient elasticsearchClient() {
+    RestClient restClient = RestClient.builder(
+      new HttpHost("localhost", 9200)).build();
 
-        JacksonJsonpMapper jsonpMapper = new JacksonJsonpMapper(mapper);
+    ElasticsearchTransport transport = new RestClientTransport(
+      restClient, new JacksonJsonpMapper());
 
-        RestClient restClient = RestClient.builder(
-                new HttpHost("localhost", 9200)).build();
+    return new ElasticsearchClient(transport);
+  }
 
-        RestClientTransport transport = new RestClientTransport(restClient, jsonpMapper);
-
-        return new ElasticsearchClient(transport);
-    }
+//    @Bean
+//    public ElasticsearchClient elasticsearchClient() {
+//        ObjectMapper mapper = new ObjectMapper();
+//        mapper.registerModule(new JavaTimeModule());
+//
+//        JacksonJsonpMapper jsonpMapper = new JacksonJsonpMapper(mapper);
+//
+//        RestClient restClient = RestClient.builder(
+//                new HttpHost("localhost", 9200)).build();
+//
+//        RestClientTransport transport = new RestClientTransport(restClient, jsonpMapper);
+//
+//        return new ElasticsearchClient(transport);
+//    }
 }

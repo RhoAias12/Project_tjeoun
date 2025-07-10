@@ -5,13 +5,14 @@ import com.tjoeun.entity.Recruitment;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 
 @Repository
-public interface RecruitmentRepository extends JpaRepository<Recruitment, Long> {
+public interface RecruitmentRepository extends JpaRepository<Recruitment, Long> , JpaSpecificationExecutor<Recruitment> {
   // 기본 CRUD 메서드 자동 제공
   int deleteByDeadlineBefore(LocalDate date);
 

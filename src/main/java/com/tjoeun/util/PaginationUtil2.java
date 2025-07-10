@@ -20,7 +20,9 @@ public class PaginationUtil2 {
     }
 
     public static void setPaging(Model model, Page<?> page, String url,
-                                 String scrapSort, String deadlineSort, int visiblePageCount) {
+                                 String sortOrder, int visiblePageCount,
+                                 String title, String content, String region, String company,
+                                 String startDate, String endDate) {
         int currentPage = page.getNumber();         // 0-based 현재 페이지
         int totalPages = page.getTotalPages();      // 전체 페이지 수
 
@@ -31,9 +33,17 @@ public class PaginationUtil2 {
         model.addAttribute("startPage", startPage);
         model.addAttribute("endPage", endPage);
         model.addAttribute("url", url);
-        model.addAttribute("scrapSort", scrapSort);
-        model.addAttribute("deadlineSort", deadlineSort);
+        model.addAttribute("sortOrder", sortOrder);
+
+        // 검색조건도 추가로 넘김 (페이징 링크에 유지용)
+        model.addAttribute("title", title);
+        model.addAttribute("content", content);
+        model.addAttribute("region", region);
+        model.addAttribute("company", company);
+        model.addAttribute("startDate", startDate);
+        model.addAttribute("endDate", endDate);
     }
+
 
 
 }

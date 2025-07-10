@@ -54,59 +54,46 @@
 <div class="tab-box">
   <div class="tab-inner">
     <div class="search">
-      <section class="search-bar">
-        <input type="text" placeholder="공고이름" name="title" />
-        <input type="text" placeholder="공고내용" name="content" />
-        <input type="text" placeholder="지역" name="region" />
-        <input type="text" placeholder="회사명" name="company" />
+      <!-- 검색 + 정렬 통합 Form 시작 -->
+      <form method="get" action="/empl/empl_main" id="filterForm">
+        <section class="search-bar">
+          <input type="text" placeholder="공고이름" name="title" th:value="${title}" />
+          <input type="text" placeholder="공고내용" name="content" th:value="${content}" />
+          <input type="text" placeholder="지역" name="region" th:value="${region}" />
+          <input type="text" placeholder="회사명" name="company" th:value="${company}" />
 
-        <div class="date-range">
-          <div class="date-group">
-            <label for="startDate">시작일</label>
-            <input type="date" name="startDate" id="startDate" />
+          <div class="date-range">
+            <div class="date-group">
+              <label for="startDate">시작일</label>
+              <input type="date" name="startDate" id="startDate" th:value="${startDate}" />
+            </div>
+            <span class="tilde">-</span>
+            <div class="date-group">
+              <label for="endDate">마감일</label>
+              <input type="date" name="endDate" id="endDate" th:value="${endDate}" />
+            </div>
           </div>
-          <span class="tilde">-</span>
-          <div class="date-group">
-            <label for="endDate">마감일</label>
-            <input type="date" name="endDate" id="endDate" />
+
+          <button type="submit">검색</button>
+        </section>
+
+        <!-- 정렬 영역 -->
+        <div class="search-sort">
+          <div class="search-wrapper">
+            <select class="sort-select" name="sortOrder" onchange="this.form.submit()">
+              <option value="all" th:selected="${sortOrder == 'all'}">전체</option>
+              <option value="deadline_asc" th:selected="${sortOrder == 'deadline_asc'}">마감일: 최신순</option>
+              <option value="deadline_desc" th:selected="${sortOrder == 'deadline_desc'}">마감일: 오래된순</option>
+              <option value="scrap_desc" th:selected="${sortOrder == 'scrap_desc'}">스크랩: 많은순</option>
+              <option value="scrap_asc" th:selected="${sortOrder == 'scrap_asc'}">스크랩: 적은순</option>
+            </select>
           </div>
         </div>
+      </form>
+      <!-- 통합 Form 끝 -->
 
 
-        <button type="submit">검색</button>
-      </section>
-
-
-    </div>
-
-    <div class="title">
-      <p>채용 공고</p>
-    </div>
-
-    <!-- 정렬 영역 -->
-    <form method="get" action="/empl/empl_main" id="sortForm">
-      <div class="search-sort">
-        <div class="search-wrapper">
-
-          <!-- 마감일 정렬 -->
-          <select class="sort-select" name="deadlineSort" onchange="document.getElementById('sortForm').submit()">
-            <option value="" th:selected="${deadlineSort == null or deadlineSort == ''}">전체</option>
-            <option value="deadline-asc" th:selected="${deadlineSort == 'deadline-asc'}">마감일 빠른 순</option>
-            <option value="deadline-desc" th:selected="${deadlineSort == 'deadline-desc'}">마감일 늦는 순</option>
-          </select>
-
-          <!-- 스크랩 정렬 -->
-          <select class="sort-select" name="scrapSort" onchange="document.getElementById('sortForm').submit()">
-            <option value="" th:selected="${scrapSort == null or scrapSort == ''}">전체</option>
-            <option value="scrap-desc" th:selected="${scrapSort == 'scrap-desc'}">스크랩 많은 순</option>
-            <option value="scrap-asc" th:selected="${scrapSort == 'scrap-asc'}">스크랩 적은 순</option>
-          </select>
-
-        </div>
-      </div>
-    </form>
-
-    <!-- 채용 카드 리스트 -->
+      <!-- 채용 카드 리스트 -->
     <div class="card-grid">
       <div class="job-card"
            th:each="job : ${jobPage.content}">
