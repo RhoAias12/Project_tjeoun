@@ -7,7 +7,6 @@ import com.tjoeun.service.MyPageService;
 import com.tjoeun.service.RecruitmentService;
 import com.tjoeun.service.UserService;
 import com.tjoeun.util.PaginationUtil;
-import com.tjoeun.util.PaginationUtil2;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -18,7 +17,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -42,7 +40,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.Principal;
 import java.sql.Timestamp;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -328,7 +325,7 @@ public class MyPageController {
         model.addAttribute("favorites", jobPage.getContent());
         model.addAttribute("jobPage", jobPage);
         model.addAttribute("customSort", customSort);
-        PaginationUtil2.setPaging(model, jobPage, "/mypage/scrap", customSort, 5);
+        PaginationUtil.setPaging(model, jobPage, "/mypage/scrap");
 
         return "mypage/scrap";
     }

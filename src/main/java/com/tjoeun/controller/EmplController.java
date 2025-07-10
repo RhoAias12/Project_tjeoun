@@ -3,7 +3,7 @@ package com.tjoeun.controller;
 import com.tjoeun.dto.RecruitmentDTO;
 import com.tjoeun.service.EmplService;
 import com.tjoeun.service.FavoriteService;
-import com.tjoeun.util.PaginationUtil2;
+import com.tjoeun.util.PaginationUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
@@ -35,24 +35,22 @@ public class EmplController {
       @RequestParam(required = false) String endDate,
       Model model) {
 
-        // 서비스 호출하여 페이징 처리된 공고 목록 조회
         Page<RecruitmentDTO> jobPage = emplService.getJobPage(
           page, pageSize, sortOrder,
           title, content, region, company, startDate, endDate);
 
-        // 이전 URL 생성 (검색 조건과 페이징 상태 유지)
-        String prevUrl = emplService.buildPrevUrl(page, pageSize, sortOrder,
+        String prevUrl = emplService.buildPrevUrl(
+          page, pageSize, sortOrder,
           title, content, region, company, startDate, endDate);
+
         String encodedPrevUrl = URLEncoder.encode(prevUrl, StandardCharsets.UTF_8);
 
-        // 뷰에 모델 속성 추가
-        model.addAttribute("prevUrl", prevUrl);
-        model.addAttribute("encodedPrevUrl", encodedPrevUrl);
         model.addAttribute("jobList", jobPage.getContent());
         model.addAttribute("jobPage", jobPage);
         model.addAttribute("sortOrder", sortOrder);
+        model.addAttribute("prevUrl", prevUrl);
+        model.addAttribute("encodedPrevUrl", encodedPrevUrl);
 
-        // 검색조건도 뷰에 유지
         model.addAttribute("title", title);
         model.addAttribute("content", content);
         model.addAttribute("region", region);
@@ -60,8 +58,7 @@ public class EmplController {
         model.addAttribute("startDate", startDate);
         model.addAttribute("endDate", endDate);
 
-        // 페이지네이션 유틸 호출
-        PaginationUtil2.setPaging(model, jobPage, "/empl/empl_main",
+        PaginationUtil.setPaging(model, jobPage, "/empl/empl_main",
           sortOrder, 10,
           title, content, region, company, startDate, endDate);
 
@@ -69,11 +66,20 @@ public class EmplController {
     }
 
     @GetMapping("/empl_detail/{id}")
-    public String emplDetailPage(@PathVariable("id") Long id,
-                                 @RequestParam(defaultValue = "1") int page,
-                                 @RequestParam(required = false) String prevUrl,
-                                 Model model,
-                                 Principal principal) {
+    public String emplDetailPage(
+      @PathVariable("id") Long id,
+      @RequestParam(defaultValue = "1") int page,
+      @RequestParam(required = false) String prevUrl,
+      @RequestParam(required = false) String sortOrder,
+      @RequestParam(required = false) String title,
+      @RequestParam(required = false) String content,
+      @RequestParam(required = false) String region,
+      @RequestParam(required = false) String company,
+      @RequestParam(required = false) String startDate,
+      @RequestParam(required = false) String endDate,
+      Model model,
+      Principal principal) {
+
         RecruitmentDTO dto = emplService.getRecruitmentDetail(id);
         if (dto == null) {
             return "error/404";
@@ -89,7 +95,15 @@ public class EmplController {
         model.addAttribute("job", dto);
         model.addAttribute("prevUrl", prevUrl != null ? prevUrl : "/empl/empl_main");
         model.addAttribute("isFavorited", isFavorited);
+        model.addAttribute("sortOrder", sortOrder);
+        model.addAttribute("title", title);
+        model.addAttribute("content", content);
+        model.addAttribute("region", region);
+        model.addAttribute("company", company);
+        model.addAttribute("startDate", startDate);
+        model.addAttribute("endDate", endDate);
 
         return "empl/empl_detail";
     }
 }
+

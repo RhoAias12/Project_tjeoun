@@ -112,8 +112,8 @@
     </div>
 
     <!-- 페이징 -->
-    <div th:replace="~{fragments/pagination2 :: fragment(${jobPage}, ${startPage}, ${endPage}, '/empl/empl_main', ${scrapSort}, ${deadlineSort})}"></div>
-
+      <div th:replace="~{fragments/pagination :: fragment(${jobPage}, ${startPage}, ${endPage}, '/empl/empl_main')}"></div>
+    </div>
   </div>
 </div>
 
