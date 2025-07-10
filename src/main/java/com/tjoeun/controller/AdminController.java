@@ -116,30 +116,22 @@ public class AdminController {
 
 
     @GetMapping("/recruit_list")
-    public String recruitList(@RequestParam(defaultValue = "1") int page,
-                              @RequestParam(defaultValue = "deadline_all") String deadlineSort,
-                              @RequestParam(required = false) String title,
-                              @RequestParam(required = false) String content,
-                              @RequestParam(required = false) String region,
-                              @RequestParam(required = false) String company,
-                              @RequestParam(required = false) String startDate,
-                              @RequestParam(required = false) String endDate,
-                              @PageableDefault(size = 10) Pageable pageable,
-                              Model model) throws IOException {
+    public String recruitList(
+      @RequestParam(defaultValue = "1") int page,
+      @RequestParam(defaultValue = "deadline_all") String deadlineSort,
+      @RequestParam(required = false) String title,
+      @RequestParam(required = false) String content,
+      @RequestParam(required = false) String region,
+      @RequestParam(required = false) String company,
+      @RequestParam(required = false) String startDate,
+      @RequestParam(required = false) String endDate,
+      @PageableDefault(size = 10) Pageable pageable,
+      Model model) throws IOException {
 
-        // 검색 조건을 기반으로 필터링
-        List<RecruitmentDTO> filteredList = adminService.searchAndSortWithFilter(
-          title, content, region, company, startDate, endDate, deadlineSort, page
+        Page<RecruitmentDTO> recruitmentPage = adminService.getFilteredRecruitments(
+          title, content, region, company, startDate, endDate, deadlineSort, page, pageable.getPageSize()
         );
 
-        // 페이지네이션 처리
-        int pageSize = pageable.getPageSize();
-        int start = (page - 1) * pageSize;
-        int end = Math.min(start + pageSize, filteredList.size());
-        List<RecruitmentDTO> pageContent = (start > filteredList.size()) ? List.of() : filteredList.subList(start, end);
-        Page<RecruitmentDTO> recruitmentPage = new PageImpl<>(pageContent, PageRequest.of(page - 1, pageSize), filteredList.size());
-
-        // URL 파라미터 보존
         StringBuilder urlWithParams = new StringBuilder("/admin/recruit_list?deadlineSort=" + deadlineSort);
         if (title != null && !title.isBlank()) urlWithParams.append("&title=").append(title);
         if (content != null && !content.isBlank()) urlWithParams.append("&content=").append(content);
@@ -148,16 +140,13 @@ public class AdminController {
         if (startDate != null && !startDate.isBlank()) urlWithParams.append("&startDate=").append(startDate);
         if (endDate != null && !endDate.isBlank()) urlWithParams.append("&endDate=").append(endDate);
 
-        // 페이징 세팅
         PaginationUtil.setPaging(model, recruitmentPage, urlWithParams.toString());
 
-        // 화면에 필요한 값 세팅
         model.addAttribute("recruitmentList", recruitmentPage.getContent());
         model.addAttribute("recruitmentPage", recruitmentPage);
         model.addAttribute("deadlineSort", deadlineSort);
         model.addAttribute("page", page);
 
-        // 검색 조건 다시 뷰에 넘기기 (화면에 유지되도록)
         model.addAttribute("title", title);
         model.addAttribute("content", content);
         model.addAttribute("region", region);

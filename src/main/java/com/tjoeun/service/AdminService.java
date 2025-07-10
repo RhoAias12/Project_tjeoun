@@ -310,7 +310,8 @@ public class AdminService {
     String startDate,
     String endDate,
     String deadlineSort,
-    int page
+    int page,
+    int size
   ) {
     Specification<Recruitment> spec = RecruitmentSpecification.searchWithFilter(title, content, region, company, startDate, endDate);
 
@@ -320,10 +321,10 @@ public class AdminService {
     } else if ("deadline_asc".equals(deadlineSort)) {
       sort = Sort.by(Sort.Direction.ASC, "deadline");
     } else {
-      sort = Sort.unsorted();  // 기본값
+      sort = Sort.unsorted();
     }
 
-    Pageable pageable = PageRequest.of(page - 1, Integer.MAX_VALUE, sort);  // 페이지는 1부터 시작하므로 -1 처리
+    Pageable pageable = PageRequest.of(page - 1, size, sort);
 
     Page<Recruitment> recruitmentPage = recruitmentRepository.findAll(spec, pageable);
 
@@ -331,6 +332,49 @@ public class AdminService {
       .map(RecruitmentDTO::new)
       .collect(Collectors.toList());
   }
+
+  public Page<RecruitmentDTO> getFilteredRecruitments(
+    String title,
+    String content,
+    String region,
+    String company,
+    String startDate,
+    String endDate,
+    String deadlineSort,
+    int page,
+    int size) {
+
+    Specification<Recruitment> spec = RecruitmentSpecification.searchWithFilter(title, content, region, company, startDate, endDate);
+
+    Sort sort;
+    if ("deadline_desc".equals(deadlineSort)) {
+      sort = Sort.by(Sort.Direction.DESC, "deadline");
+    } else if ("deadline_asc".equals(deadlineSort)) {
+      sort = Sort.by(Sort.Direction.ASC, "deadline");
+    } else {
+      sort = Sort.unsorted();
+    }
+
+    int currentPage = Math.max(page - 1, 0);
+    Pageable pageable = PageRequest.of(currentPage, size, sort);
+
+    Page<Recruitment> recruitmentPage = recruitmentRepository.findAll(spec, pageable);
+
+    return recruitmentPage.map(RecruitmentDTO::new);
+  }
+
+
+
+  private Sort getSortByDeadline(String deadlineSort) {
+    return switch (deadlineSort) {
+      case "deadline_desc" -> Sort.by(Sort.Direction.DESC, "deadline");
+      case "deadline_asc" -> Sort.by(Sort.Direction.ASC, "deadline");
+      default -> Sort.unsorted();
+    };
+  }
+
+
+
 
 
 
