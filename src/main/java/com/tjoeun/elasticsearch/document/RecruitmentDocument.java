@@ -34,4 +34,8 @@ public class RecruitmentDocument {
 
   @Field(type = FieldType.Text)
   private String combinedContent;
+
+  @Field(type = FieldType.Text, analyzer = "nori")
+  private String jobKeywords;
+
 }

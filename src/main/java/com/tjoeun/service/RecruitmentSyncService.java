@@ -18,6 +18,7 @@ public class RecruitmentSyncService {
 
   private final RecruitmentRepository recruitmentRepository;
   private final RecruitmentSearchRepository recruitmentSearchRepository;
+  private final ElasticsearchService elasticsearchService;
 
   // MariaDB 저장 후 Elasticsearch 색인 생성/갱신
   @Transactional
@@ -38,6 +39,10 @@ public class RecruitmentSyncService {
   }
 
   private RecruitmentDocument mapToDocument(Recruitment recruitment) {
+
+    String jobKeywords = Optional.ofNullable(recruitment.getTitle()).orElse("") + " " +
+            Optional.ofNullable(recruitment.getResponsibilities()).orElse("");
+
     return RecruitmentDocument.builder()
       .recruitmentIdx(recruitment.getRecruitmentIdx())
       .title(recruitment.getTitle())
@@ -59,29 +64,20 @@ public class RecruitmentSyncService {
         Optional.ofNullable(recruitment.getSalary()).orElse(""),
         Optional.ofNullable(recruitment.getEmploymentType()).orElse(""))
       )
+      .jobKeywords(jobKeywords)
       .build();
+
   }
 
-//    // 전체 DB 데이터를 ES에 동기화
-//    public void syncAllToElasticsearch() {
-//        List<Recruitment> recruitments = recruitmentRepository.findAll();
-//
-//        for (Recruitment r : recruitments) {
-//            RecruitmentSearchDocument doc = RecruitmentSearchDocument.builder()
-//                    .title(r.getTitle())
-//                    .company(r.getCompany())
-//                    .location(r.getLocation())
-//                    .deadline(r.getDeadline())
-//                    .qualifications(r.getQualifications())
-//                    .responsibilities(r.getResponsibilities())
-//                    .preferred(r.getPreferred())
-//                    .benefits(r.getBenefits())
-//                    .employmentType(r.getEmploymentType())
-//                    .build();
-//
-//            elasticsearchService.saveToES(doc);
-//        }
-//
-//        System.out.println("✅ 전체 ES 동기화 완료: " + recruitments.size() + "건");
-//    }
+    // 전체 DB 데이터를 ES에 동기화
+    public void syncAllToElasticsearch() {
+      List<Recruitment> recruitments = recruitmentRepository.findAll();
+
+      for (Recruitment r : recruitments) {
+        recruitmentSearchRepository.save(mapToDocument(r));
+      }
+
+      System.out.println(" 전체 ES 동기화 완료: " + recruitments.size() + "건");
+    }
+
 }

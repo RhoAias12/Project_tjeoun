@@ -83,7 +83,7 @@ public class UnifiedJobCrawlerService {
 
     System.out.println("크롤링 및 저장 완료: 총 " + savedCount + "건 저장됨");
 
-    recruitmentSyncService.syncAllToElasticsearch();
+//    recruitmentSyncService.syncAllToElasticsearch();
   }
 
   private List<Recruitment> crawlJobKorea() {

@@ -9,6 +9,7 @@ import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch._types.aggregations.CalendarInterval;
 import co.elastic.clients.util.NamedValue;
 import com.tjoeun.document.RecruitmentSearchDocument;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import co.elastic.clients.json.JsonData;
@@ -25,6 +26,51 @@ import java.util.LinkedHashMap;
 public class ElasticsearchService {
 
     private final ElasticsearchClient elasticsearchClient;
+
+    public void createIndexIfNotExists() {
+        String indexName = "recruitments";
+
+        try {
+            boolean exists = elasticsearchClient.indices()
+                    .exists(b -> b.index(indexName))
+                    .value();
+
+            if (exists) {
+                System.out.println("[Elasticsearch] recruitments 인덱스 이미 존재");
+                return;
+            }
+
+            // 인덱스 생성
+            elasticsearchClient.indices().create(c -> c
+                    .index(indexName)
+                    .settings(s -> s
+                            .analysis(a -> a
+                                    .analyzer("my_nori", an -> an
+                                            .custom(ca -> ca.tokenizer("nori_tokenizer"))
+                                    )
+                            )
+                    )
+                    .mappings(mb -> mb
+                            .properties("combinedContent", p -> p.text(t -> t))
+                            .properties("jobKeywords", p -> p.text(t -> t
+                                    .analyzer("my_nori")
+                                    .fielddata(true)
+                            ))
+                            .properties("_class", p -> p.keyword(k -> k.index(false).docValues(false)))
+                            .properties("deadline", p -> p.date(d -> d.format("yyyy-MM-dd")))
+                            .properties("createdAt", p -> p.date(d -> d.format("yyyy-MM-dd")))
+                            .properties("location", p -> p.keyword(k -> k))
+                            .properties("title", p -> p.keyword(k -> k))
+                    )
+            );
+
+            System.out.println("[Elasticsearch] recruitments 인덱스 생성 완료");
+
+        } catch (IOException e) {
+            System.err.println("[Elasticsearch] recruitments 인덱스 생성 중 오류 발생");
+            e.printStackTrace();
+        }
+    }
 
     // 총 공고 수
     public long countRecruitments() {
@@ -70,7 +116,11 @@ public class ElasticsearchService {
                     .index("recruitments")
                     .size(0)
                     .aggregations("top_roles", a -> a
-                            .terms(t -> t.field("job.keyword").size(size))
+                            .terms(t -> t
+                                    .field("jobKeywords")
+                                    .size(size)
+                            )
+
                     ), Void.class);
 
             return response.aggregations().get("top_roles").sterms().buckets().array().stream()
