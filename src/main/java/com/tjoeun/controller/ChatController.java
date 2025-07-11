@@ -18,8 +18,7 @@ public class ChatController {
 
   @PostMapping("/chat")
   public ChatResponse handleChat(@RequestBody ChatRequest request) {
-    String userInput = request.getInput();
-    String reply = chatService.generateReply(userInput);
+    String reply = chatService.generateReply(request.getInput());
     return new ChatResponse(reply);
   }
 }

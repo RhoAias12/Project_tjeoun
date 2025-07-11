@@ -1,13 +1,10 @@
 package com.tjoeun.dto;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public class ChatRequest {
   private String input;
-
-  public String getInput() {
-    return input;
-  }
-
-  public void setInput(String input) {
-    this.input = input;
-  }
 }
