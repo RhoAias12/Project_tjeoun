@@ -47,16 +47,16 @@ public class RecruitmentSearchService {
     builder.query(q -> q.bool(b -> {
       // title, content, region, company 필터
       if (title != null && !title.isBlank()) {
-        b.must(m -> m.match(mm -> mm.field("title").query(title)));
+        b.must(m -> m.wildcard(wc -> wc.field("title").value("*" + title + "*")));
       }
       if (content != null && !content.isBlank()) {
-        b.must(m -> m.match(mm -> mm.field("combinedContent").query(content)));
+        b.must(m -> m.wildcard(mm -> mm.field("combinedContent").value("*" + content + "*")));
       }
       if (region != null && !region.isBlank()) {
-        b.must(m -> m.match(mm -> mm.field("location").query(region)));
+        b.must(m -> m.wildcard(mm -> mm.field("location").value("*" + region + "*")));
       }
       if (company != null && !company.isBlank()) {
-        b.must(m -> m.match(mm -> mm.field("company").query(company)));
+        b.must(m -> m.wildcard(wc -> wc.field("combinedContent").value("*" + content + "*")));
       }
 
       // 날짜 필터 조건 (deadline or 9999-12-31T00:00:00)
