@@ -10,6 +10,7 @@ import com.tjoeun.util.PaginationUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -20,11 +21,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import org.springframework.security.web.csrf.CsrfToken;
-import jakarta.servlet.http.HttpServletRequest;
-
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 
 @Controller
@@ -117,23 +116,43 @@ public class AdminController {
 
 
     @GetMapping("/recruit_list")
-    public String recruitList(@RequestParam(defaultValue = "1") int page,
-                              @RequestParam(defaultValue = "deadline_all") String deadlineSort,
-                              @PageableDefault(size = 10) Pageable pageable,
-                              Model model) {
+    public String recruitList(
+      @RequestParam(defaultValue = "1") int page,
+      @RequestParam(defaultValue = "deadline_all") String deadlineSort,
+      @RequestParam(required = false) String title,
+      @RequestParam(required = false) String content,
+      @RequestParam(required = false) String region,
+      @RequestParam(required = false) String company,
+      @RequestParam(required = false) String startDate,
+      @RequestParam(required = false) String endDate,
+      @PageableDefault(size = 10) Pageable pageable,
+      Model model) throws IOException {
 
-        Pageable correctedPageable = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
+        Page<RecruitmentDTO> recruitmentPage = adminService.getFilteredRecruitments(
+          title, content, region, company, startDate, endDate, deadlineSort, page, pageable.getPageSize()
+        );
 
-        Page<RecruitmentDTO> recruitmentPage =
-          recruitmentService.getSortedPagedPosts(correctedPageable, deadlineSort);
+        StringBuilder urlWithParams = new StringBuilder("/admin/recruit_list?deadlineSort=" + deadlineSort);
+        if (title != null && !title.isBlank()) urlWithParams.append("&title=").append(title);
+        if (content != null && !content.isBlank()) urlWithParams.append("&content=").append(content);
+        if (region != null && !region.isBlank()) urlWithParams.append("&region=").append(region);
+        if (company != null && !company.isBlank()) urlWithParams.append("&company=").append(company);
+        if (startDate != null && !startDate.isBlank()) urlWithParams.append("&startDate=").append(startDate);
+        if (endDate != null && !endDate.isBlank()) urlWithParams.append("&endDate=").append(endDate);
 
-        String urlWithParams = "/admin/recruit_list?deadlineSort=" + deadlineSort;
-        PaginationUtil.setPaging(model, recruitmentPage, urlWithParams);
+        PaginationUtil.setPaging(model, recruitmentPage, urlWithParams.toString());
 
         model.addAttribute("recruitmentList", recruitmentPage.getContent());
         model.addAttribute("recruitmentPage", recruitmentPage);
         model.addAttribute("deadlineSort", deadlineSort);
         model.addAttribute("page", page);
+
+        model.addAttribute("title", title);
+        model.addAttribute("content", content);
+        model.addAttribute("region", region);
+        model.addAttribute("company", company);
+        model.addAttribute("startDate", startDate);
+        model.addAttribute("endDate", endDate);
 
         return "admin/recruit_list";
     }
