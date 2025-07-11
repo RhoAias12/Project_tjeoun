@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface RecruitmentSearchRepository extends ElasticsearchRepository<RecruitmentDocument, Long> {
+public interface RecruitmentSearchRepository  extends ElasticsearchRepository<RecruitmentDocument, Long> {
 
   List<RecruitmentDocument> findByTitleContainingOrCompanyContaining(String title, String company);
 }
