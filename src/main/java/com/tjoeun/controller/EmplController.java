@@ -2,7 +2,7 @@ package com.tjoeun.controller;
 
 import com.tjoeun.dto.RecruitmentDTO;
 import com.tjoeun.service.EmplService;
-import com.tjoeun.service.FavoriteService;
+import com.tjoeun.service.MyPageService;
 import com.tjoeun.util.PaginationUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -21,7 +21,7 @@ import java.security.Principal;
 public class EmplController {
 
   private final EmplService emplService;
-  private final FavoriteService favoriteService;
+  private final MyPageService myPageService;
 
   @GetMapping("/empl_main")
   public String emplMainPage(
@@ -93,7 +93,7 @@ public class EmplController {
       boolean isFavorited = false;
       if (principal != null) {
         String userEmail = principal.getName();
-        isFavorited = favoriteService.isFavorited(userEmail, id);
+        isFavorited = myPageService.isFavorited(userEmail, id);
       }
 
       model.addAttribute("page", page);

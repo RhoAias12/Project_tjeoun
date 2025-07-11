@@ -56,7 +56,7 @@ public class RecruitmentSearchService {
         b.must(m -> m.wildcard(mm -> mm.field("location").value("*" + region + "*")));
       }
       if (company != null && !company.isBlank()) {
-        b.must(m -> m.wildcard(wc -> wc.field("combinedContent").value("*" + content + "*")));
+        b.must(m -> m.wildcard(wc -> wc.field("combinedContent").value("*" + company + "*")));
       }
 
       // 날짜 필터 조건 (deadline or 9999-12-31T00:00:00)

@@ -116,8 +116,8 @@
             </div>
             <div class="apply-buttons">
               <div class="situation"
-                   th:text="${recruit.deadline.isBefore(T(java.time.LocalDate).now()) ? '지원마감' : '지원모집'}"
-                   th:classappend="${recruit.deadline.isBefore(T(java.time.LocalDate).now()) ? 'closed' : 'open'}">
+                   th:text="${recruit.deadline.toLocalDate().isBefore(T(java.time.LocalDate).now()) ? '지원마감' : '지원모집'}"
+                   th:classappend="${recruit.deadline.toLocalDate().isBefore(T(java.time.LocalDate).now()) ? 'closed' : 'open'}">
                 공고상태
               </div>
               <form th:action="@{/admin/recruit_delete}" method="post"

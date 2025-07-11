@@ -23,6 +23,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -38,24 +39,6 @@ public class MyPageService {
   private final ApplyHistoryRepository applyHistoryRepository;
   private final ResumeRepository resumeRepository;
   private final ApplyHistoryResumeRepository applyHistoryResumeRepository;
-
-  public List<ApplyHistoryDTO> getApplyHistoryList(String email) {
-    Users user = userRepository.findByUserEmail(email);
-    if (user == null) {
-      throw new IllegalArgumentException("로그인한 사용자를 찾을 수 없습니다.");
-    }
-
-    List<ApplyHistory> historyList = applyHistoryRepository.findByUser_UserIdx(user.getUserIdx());
-
-    return historyList.stream().map(history -> ApplyHistoryDTO.builder()
-                    .applyHistoryId(history.getOptionalIdx())
-                    .statusDisplay(history.getStatus().getDisplay())
-                    .recruitmentTitle(history.getRecruitment().getTitle())
-                    .recruitmentCompany(history.getRecruitment().getCompany())
-                    .applyHistoryResumeId(history.getApplyHistoryResume().getApplyHistoryResumeId())
-                    .build())
-            .toList();
-  }
 
   public Page<ApplyHistoryDTO> getPagedApplyHistories(String email, Pageable pageable) {
     Users user = userRepository.findByUserEmail(email);
@@ -183,6 +166,14 @@ public class MyPageService {
 
     favoriteRepository.deleteByUserAndRecruitment(user, recruitment);
   }
+
+//  public List<Favorite> getFavorites(String userEmail) {
+//    Users user = userRepository.findByUserEmail(userEmail);
+//    if (user == null) {
+//      throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
+//    }
+//    return favoriteRepository.findByUser(user);
+//  }
 
   public List<FavoriteDTO> getFavorites(String userEmail) {
     Users user = userRepository.findByUserEmail(userEmail);
@@ -329,7 +320,6 @@ public class MyPageService {
       }
     }
 
-    // *** 핵심: applyHistoryResumeRepository.save 호출 반드시 필요 ***
     applyHistoryResumeRepository.save(applyHistoryResume);
 
     applyHistory.setApplyHistoryResume(applyHistoryResume);
@@ -383,5 +373,42 @@ public class MyPageService {
   }
 
 
+  // 즐겨찾기 등록 or 해제 (토글 방식)
+  @Transactional
+  public boolean toggleFavorite(String userEmail, Long recruitmentIdx) {
+    Users user = userRepository.findByUserEmail(userEmail);
+    if (user == null) {
+      throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
+    }
+
+    Recruitment recruitment = recruitmentRepository.findById(recruitmentIdx)
+      .orElseThrow(() -> new IllegalArgumentException("공고를 찾을 수 없습니다."));
+
+    Optional<Favorite> existing = favoriteRepository.findByUserAndRecruitment(user, recruitment);
+
+    if (existing.isPresent()) {
+      favoriteRepository.delete(existing.get());
+      return false; // 해제됨
+    } else {
+      Favorite favorite = new Favorite();
+      favorite.setUser(user);
+      favorite.setRecruitment(recruitment);
+      favoriteRepository.save(favorite);
+      return true; // 등록됨
+    }
+  }
+
+  // 해당 공고가 스크랩되었는지 여부
+  public boolean isFavorited(String userEmail, Long recruitmentIdx) {
+    Users user = userRepository.findByUserEmail(userEmail);
+    if (user == null) {
+      throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
+    }
+
+    Recruitment recruitment = recruitmentRepository.findById(recruitmentIdx)
+      .orElseThrow(() -> new IllegalArgumentException("공고를 찾을 수 없습니다."));
+
+    return favoriteRepository.existsByUserAndRecruitment(user, recruitment);
+  }
 
 }

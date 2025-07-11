@@ -251,69 +251,6 @@ public class AdminService {
     };
   }
 
-  @Transactional(readOnly = true)
-  public List<RecruitmentDTO> getSortedRecruitments(String deadlineSort) {
-    List<Recruitment> recruitments = recruitmentRepository.findAll();
-
-    List<RecruitmentDTO> dtoList = recruitments.stream()
-      .map(r -> RecruitmentDTO.builder()
-        .recruitmentIdx(r.getRecruitmentIdx())
-        .title(r.getTitle())
-        .company(r.getCompany())
-        .deadline(r.getDeadline())
-        .location(r.getLocation())
-        .logoUrl(r.getLogoUrl())
-        .build())
-      .collect(Collectors.toList());
-
-    return sortRecruitmentDTOList(dtoList, deadlineSort);
-  }
-
-  private List<RecruitmentDTO> sortRecruitmentDTOList(List<RecruitmentDTO> list, String deadlineSort) {
-    return switch (deadlineSort) {
-      case "deadline_latest" -> list.stream()
-        .sorted((a, b) -> b.getDeadline().compareTo(a.getDeadline()))
-        .collect(Collectors.toList());
-
-      case "deadline_oldest" -> list.stream()
-        .sorted((a, b) -> a.getDeadline().compareTo(b.getDeadline()))
-        .collect(Collectors.toList());
-
-      default -> list;
-    };
-  }
-
-  public List<RecruitmentDTO> searchAndSortWithFilter(
-    String title,
-    String content,
-    String region,
-    String company,
-    String startDate,
-    String endDate,
-    String deadlineSort,
-    int page,
-    int size
-  ) {
-    Specification<Recruitment> spec = RecruitmentSpecification.searchWithFilter(title, content, region, company, startDate, endDate);
-
-    Sort sort;
-    if ("deadline_desc".equals(deadlineSort)) {
-      sort = Sort.by(Sort.Direction.DESC, "deadline");
-    } else if ("deadline_asc".equals(deadlineSort)) {
-      sort = Sort.by(Sort.Direction.ASC, "deadline");
-    } else {
-      sort = Sort.unsorted();
-    }
-
-    Pageable pageable = PageRequest.of(page - 1, size, sort);
-
-    Page<Recruitment> recruitmentPage = recruitmentRepository.findAll(spec, pageable);
-
-    return recruitmentPage.stream()
-      .map(RecruitmentDTO::new)
-      .collect(Collectors.toList());
-  }
-
   public Page<RecruitmentDTO> getFilteredRecruitments(
     String title,
     String content,
@@ -343,19 +280,6 @@ public class AdminService {
 
     return recruitmentPage.map(RecruitmentDTO::new);
   }
-
-
-
-  private Sort getSortByDeadline(String deadlineSort) {
-    return switch (deadlineSort) {
-      case "deadline_desc" -> Sort.by(Sort.Direction.DESC, "deadline");
-      case "deadline_asc" -> Sort.by(Sort.Direction.ASC, "deadline");
-      default -> Sort.unsorted();
-    };
-  }
-
-
-
 
 
 
