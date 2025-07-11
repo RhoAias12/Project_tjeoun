@@ -107,15 +107,7 @@ public class EmplController {
         return "empl/empl_detail";
     }
 
-    @GetMapping("/{id}")
-    public RecruitmentDTO getRecruitment(@PathVariable Long id) {
-        return emplService.getRecruitmentDetail(id);
-    }
-
-    @GetMapping("/list")
-    public List<RecruitmentDTO> getRecruitments(@RequestParam(defaultValue = "1") int page) {
-        // 서비스에서 Page 객체 가져오고 필요한 내용만 DTO로
-        return emplService.getJobPage(page, 25, "all", null, null, null, null, null, null).getContent();
-    }
+    // 아래는 삭제! 서버 렌더링이면 불필요!
+    // @GetMapping("/{id}") ...
+    // @GetMapping("/list") ...
 }
-
