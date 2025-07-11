@@ -1,19 +1,25 @@
 package com.tjoeun.service;
 
 import com.tjoeun.dto.*;
+import com.tjoeun.elasticsearch.document.RecruitmentDocument;
 import com.tjoeun.entity.*;
 import com.tjoeun.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import org.springframework.data.domain.Sort;
+import com.tjoeun.specification.RecruitmentSpecification;
 
 @Service
 @Transactional
@@ -21,12 +27,10 @@ import java.util.stream.Collectors;
 public class AdminService {
 
   private final UserRepository userRepository;
-  private final FavoriteRepository favoriteRepository;
-  private final ResumeContentRepository resumeContentRepository;
   private final PasswordEncoder passwordEncoder;
   private final ApplyHistoryRepository applyHistoryRepository;
   private final RecruitmentRepository recruitmentRepository;
-  private final ResumeRepository resumeRepository;
+  private final RecruitmentSearchService recruitmentSearchService;
 
   // 모든 회원 리스트 조회
   public Page<UserListDto> getPagedUsers(int page, int size, String sortBy) {
@@ -245,5 +249,133 @@ public class AdminService {
       default -> "알 수 없음";
     };
   }
+
+  @Transactional(readOnly = true)
+  public List<RecruitmentDTO> searchAndSort(String keyword, String deadlineSort) throws IOException {
+    List<RecruitmentDocument> documents = recruitmentSearchService.search(keyword);
+
+    // RecruitmentDocument → RecruitmentDTO 변환
+    List<RecruitmentDTO> dtoList = documents.stream()
+      .map(doc -> RecruitmentDTO.builder()
+        .recruitmentIdx(doc.getRecruitmentIdx())
+        .title(doc.getTitle())
+        .company(doc.getCompany())
+        .deadline(doc.getDeadline())
+        .location(doc.getLocation())
+        .logoUrl(doc.getLogoUrl())
+        .build())
+      .collect(Collectors.toList());
+
+    // 정렬 로직
+    return sortRecruitmentDTOList(dtoList, deadlineSort);
+  }
+
+  @Transactional(readOnly = true)
+  public List<RecruitmentDTO> getSortedRecruitments(String deadlineSort) {
+    List<Recruitment> recruitments = recruitmentRepository.findAll();
+
+    List<RecruitmentDTO> dtoList = recruitments.stream()
+      .map(r -> RecruitmentDTO.builder()
+        .recruitmentIdx(r.getRecruitmentIdx())
+        .title(r.getTitle())
+        .company(r.getCompany())
+        .deadline(r.getDeadline())
+        .location(r.getLocation())
+        .logoUrl(r.getLogoUrl())
+        .build())
+      .collect(Collectors.toList());
+
+    return sortRecruitmentDTOList(dtoList, deadlineSort);
+  }
+
+  private List<RecruitmentDTO> sortRecruitmentDTOList(List<RecruitmentDTO> list, String deadlineSort) {
+    return switch (deadlineSort) {
+      case "deadline_latest" -> list.stream()
+        .sorted((a, b) -> b.getDeadline().compareTo(a.getDeadline()))
+        .collect(Collectors.toList());
+
+      case "deadline_oldest" -> list.stream()
+        .sorted((a, b) -> a.getDeadline().compareTo(b.getDeadline()))
+        .collect(Collectors.toList());
+
+      default -> list;
+    };
+  }
+
+  public List<RecruitmentDTO> searchAndSortWithFilter(
+    String title,
+    String content,
+    String region,
+    String company,
+    String startDate,
+    String endDate,
+    String deadlineSort,
+    int page,
+    int size
+  ) {
+    Specification<Recruitment> spec = RecruitmentSpecification.searchWithFilter(title, content, region, company, startDate, endDate);
+
+    Sort sort;
+    if ("deadline_desc".equals(deadlineSort)) {
+      sort = Sort.by(Sort.Direction.DESC, "deadline");
+    } else if ("deadline_asc".equals(deadlineSort)) {
+      sort = Sort.by(Sort.Direction.ASC, "deadline");
+    } else {
+      sort = Sort.unsorted();
+    }
+
+    Pageable pageable = PageRequest.of(page - 1, size, sort);
+
+    Page<Recruitment> recruitmentPage = recruitmentRepository.findAll(spec, pageable);
+
+    return recruitmentPage.stream()
+      .map(RecruitmentDTO::new)
+      .collect(Collectors.toList());
+  }
+
+  public Page<RecruitmentDTO> getFilteredRecruitments(
+    String title,
+    String content,
+    String region,
+    String company,
+    String startDate,
+    String endDate,
+    String deadlineSort,
+    int page,
+    int size) {
+
+    Specification<Recruitment> spec = RecruitmentSpecification.searchWithFilter(title, content, region, company, startDate, endDate);
+
+    Sort sort;
+    if ("deadline_desc".equals(deadlineSort)) {
+      sort = Sort.by(Sort.Direction.DESC, "deadline");
+    } else if ("deadline_asc".equals(deadlineSort)) {
+      sort = Sort.by(Sort.Direction.ASC, "deadline");
+    } else {
+      sort = Sort.unsorted();
+    }
+
+    int currentPage = Math.max(page - 1, 0);
+    Pageable pageable = PageRequest.of(currentPage, size, sort);
+
+    Page<Recruitment> recruitmentPage = recruitmentRepository.findAll(spec, pageable);
+
+    return recruitmentPage.map(RecruitmentDTO::new);
+  }
+
+
+
+  private Sort getSortByDeadline(String deadlineSort) {
+    return switch (deadlineSort) {
+      case "deadline_desc" -> Sort.by(Sort.Direction.DESC, "deadline");
+      case "deadline_asc" -> Sort.by(Sort.Direction.ASC, "deadline");
+      default -> Sort.unsorted();
+    };
+  }
+
+
+
+
+
 
 }

@@ -3,6 +3,7 @@ package com.tjoeun.service;
 import com.tjoeun.dto.RecruitmentDTO;
 import com.tjoeun.entity.Recruitment;
 import com.tjoeun.repository.RecruitmentRepository;
+import com.tjoeun.specification.RecruitmentSpecification;
 import jakarta.persistence.criteria.JoinType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
@@ -17,6 +18,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -37,43 +39,18 @@ public class EmplService {
 
     Pageable pageable = PageRequest.of(Math.max(page - 1, 0), pageSize);
 
-    Specification<Recruitment> spec = (root, query, cb) -> {
-      List<Predicate> predicates = new ArrayList<>();
+    Specification<Recruitment> spec = Specification.where(RecruitmentSpecification.titleContains(title))
+      .and(RecruitmentSpecification.contentContains(content))
+      .and(RecruitmentSpecification.regionContains(region))
+      .and(RecruitmentSpecification.companyContains(company))
+      .and(RecruitmentSpecification.deadlineBetween(startDateStr, endDateStr));
 
-      // 필터 조건
-      if (title != null && !title.isBlank()) {
-        predicates.add(cb.like(root.get("title"), "%" + title + "%"));
-      }
-      if (content != null && !content.isBlank()) {
-        Predicate contentPredicate = cb.or(
-          cb.like(cb.lower(root.get("qualifications")), "%" + content.toLowerCase() + "%"),
-          cb.like(cb.lower(root.get("responsibilities")), "%" + content.toLowerCase() + "%"),
-          cb.like(cb.lower(root.get("preferred")), "%" + content.toLowerCase() + "%"),
-          cb.like(cb.lower(root.get("benefits")), "%" + content.toLowerCase() + "%"),
-          cb.like(cb.lower(root.get("salary")), "%" + content.toLowerCase() + "%"),
-          cb.like(cb.lower(root.get("employmentType")), "%" + content.toLowerCase() + "%")
-        );
-        predicates.add(contentPredicate);
-      }
-      if (region != null && !region.isBlank()) {
-        predicates.add(cb.like(root.get("location"), "%" + region + "%"));
-      }
-      if (company != null && !company.isBlank()) {
-        predicates.add(cb.like(root.get("company"), "%" + company + "%"));
-      }
-      if (startDateStr != null && !startDateStr.isBlank() &&
-        endDateStr != null && !endDateStr.isBlank()) {
-        try {
-          LocalDate startDate = LocalDate.parse(startDateStr);
-          LocalDate endDate = LocalDate.parse(endDateStr);
-          predicates.add(cb.between(root.get("deadline"), startDate, endDate));
-        } catch (Exception ignored) {}
-      }
+    Specification<Recruitment> finalSpec = (root, query, cb) -> {
+      Predicate basePredicate = spec.toPredicate(root, query, cb);
 
-      // 정렬 조건에 따른 join, groupBy, orderBy 처리
       if (sortOrder != null && sortOrder.toLowerCase().startsWith("scrap")) {
         var favoriteJoin = root.join("favorites", JoinType.LEFT);
-        query.groupBy(root.get("id"));
+        query.groupBy(root.get("recruitmentIdx"));
 
         if ("scrap_desc".equalsIgnoreCase(sortOrder)) {
           query.orderBy(cb.desc(cb.countDistinct(favoriteJoin.get("id"))));
@@ -81,7 +58,6 @@ public class EmplService {
           query.orderBy(cb.asc(cb.countDistinct(favoriteJoin.get("id"))));
         }
       } else {
-        // 스크랩 정렬이 아닌 경우
         switch (sortOrder != null ? sortOrder.toLowerCase() : "") {
           case "deadline_asc" -> query.orderBy(cb.asc(root.get("deadline")));
           case "deadline_desc" -> query.orderBy(cb.desc(root.get("deadline")));
@@ -89,10 +65,10 @@ public class EmplService {
         }
       }
 
-      return cb.and(predicates.toArray(new Predicate[0]));
+      return basePredicate;
     };
 
-    Page<Recruitment> recruitmentPage = recruitmentRepository.findAll(spec, pageable);
+    Page<Recruitment> recruitmentPage = recruitmentRepository.findAll(finalSpec, pageable);
 
     List<RecruitmentDTO> dtoList = recruitmentPage.stream()
       .map(entity -> RecruitmentDTO.builder()
@@ -110,7 +86,7 @@ public class EmplService {
         .salary(entity.getSalary())
         .employmentType(entity.getEmploymentType())
         .build())
-      .toList();
+      .collect(Collectors.toList());
 
     return new PageImpl<>(dtoList, pageable, recruitmentPage.getTotalElements());
   }
