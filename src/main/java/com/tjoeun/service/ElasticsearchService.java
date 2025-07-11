@@ -62,7 +62,7 @@ public class ElasticsearchService {
                 "filter": {
                   "my_stop": {
                     "type": "stop",
-                    "stopwords": ["이", "자", "직", "주요", "사"]
+                    "stopwords": ["이", "자", "직", "주요", "사", "관리", "동"]
                   }
                 }
               }
@@ -197,26 +197,80 @@ public class ElasticsearchService {
     }
 
 
-    // 지역 분포
+    // 지역별 채용 분포
     public Map<String, Long> getRegionDistribution() {
         try {
-            SearchResponse<Void> response = elasticsearchClient.search(s -> s
-                    .index("recruitments")
-                    .size(0)
-                    .aggregations("region_dist", a -> a
-                            .terms(t -> t.field("location.keyword").size(10))
-                    ), Void.class);
+            SearchResponse<Map> response = elasticsearchClient.search(s -> s
+                            .index("recruitments")
+                            .size(1000)
+                            .query(q -> q.exists(e -> e.field("location")))
+                            .source(src -> src.filter(f -> f.includes("location"))),
+                    Map.class
+            );
 
-            return response.aggregations().get("region_dist").sterms().buckets().array().stream()
-                    .collect(Collectors.toMap(
-                            b -> b.key().stringValue(),
-                            b -> b.docCount()
+            Map<String, Long> grouped = response.hits().hits().stream()
+                    .map(hit -> {
+                        Map<String, Object> source = hit.source();
+                        String raw = (String) source.get("location");
+                        if (raw == null) return "기타";
+
+                        if (raw.startsWith("서울")) return "서울";
+                        if (raw.startsWith("경기")) return "경기";
+                        if (raw.startsWith("대전")) return "대전";
+                        if (raw.startsWith("부산")) return "부산";
+                        if (raw.startsWith("인천")) return "인천";
+                        if (raw.startsWith("광주")) return "광주";
+                        if (raw.startsWith("대구")) return "대구";
+                        if (raw.startsWith("울산")) return "울산";
+                        if (raw.startsWith("세종")) return "세종";
+                        if (raw.startsWith("전북") || raw.startsWith("전라북도")) return "전북";
+                        if (raw.startsWith("전남") || raw.startsWith("전라남도")) return "전남";
+                        if (raw.startsWith("충북") || raw.startsWith("충청북도")) return "충북";
+                        if (raw.startsWith("충남") || raw.startsWith("충청남도")) return "충남";
+                        if (raw.startsWith("경북") || raw.startsWith("경상북도")) return "경북";
+                        if (raw.startsWith("경남") || raw.startsWith("경상남도")) return "경남";
+                        if (raw.startsWith("강원")) return "강원";
+                        if (raw.startsWith("제주")) return "제주";
+                        return "기타";
+                    })
+                    .collect(Collectors.groupingBy(r -> r, Collectors.counting()));
+
+            // 상위 5개 + 기타로 정리
+            Map<String, Long> sorted = grouped.entrySet().stream()
+                    .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
+                    .collect(Collectors.toList())
+                    .stream()
+                    .collect(Collectors.collectingAndThen(
+                            Collectors.toList(),
+                            list -> {
+                                Map<String, Long> top5 = new LinkedHashMap<>();
+                                long etcSum = 0;
+                                for (int i = 0; i < list.size(); i++) {
+                                    Map.Entry<String, Long> entry = list.get(i);
+                                    if (i < 5) {
+                                        top5.put(entry.getKey(), entry.getValue());
+                                    } else {
+                                        etcSum += entry.getValue();
+                                    }
+                                }
+                                if (etcSum > 0) {
+                                    top5.put("기타", etcSum);
+                                }
+                                return top5;
+                            }
                     ));
+
+            System.out.println("✅ [지역 분포] 결과: " + sorted);
+            return sorted;
+
         } catch (IOException e) {
             e.printStackTrace();
             return Map.of();
         }
     }
+
+
+
 
     // 일별 등록 추이(최근 7일 이내)
     public Map<String, Long> getDailyTrends() {

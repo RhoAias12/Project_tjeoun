@@ -17,9 +17,17 @@
 
   <!-- 주요 지표 요약 -->
   <div class="metric-boxes">
-    <div class="metric">총 채용 공고 수: <strong th:text="${dashboard.totalJobCount}">0</strong>건</div>
-    <div class="metric">마감 임박 공고 수: <strong th:text="${dashboard.closingSoonCount}">0</strong>건</div>
-    <div class="metric">채용 마감률: <strong th:text="${dashboard.closeRate + '%'}">0%</strong></div>
+    <div class="metric">
+      <div>총 채용 공고 수: <strong>71</strong>건</div>
+    </div>
+    <div class="metric">
+      <div>마감 임박 공고 수: <strong>7</strong>건</div>
+    </div>
+    <div class="metric">
+      <div>내 지원 수: <strong>2</strong>건</div>
+      <div>평균 지원 수: <strong>2.5</strong>건</div>
+    </div>
+
   </div>
 
   <!-- 차트 영역 -->
@@ -33,23 +41,10 @@
     <canvas id="keywordChart"></canvas>
   </div>
 
-
-  <div class="chart-container">
-    <h3>기업 규모별 공고 비율</h3>
-    <canvas id="companySizeChart"></canvas>
-  </div>
-
   <div class="chart-container">
     <h3>지역별 채용 분포</h3>
     <canvas id="regionChart"></canvas>
   </div>
-
-  <div class="chart-container">
-    <h3>직무별 공고 비율</h3>
-    <canvas id="jobTypeChart"></canvas>
-  </div>
-
-
 
 
   <div class="chart-container">
@@ -67,6 +62,11 @@
   const popularRoleLabels = /*[[${dashboard.popularRoles}]]*/ [];
   const popularRoleCounts = /*[[${dashboard.popularRoleCounts}]]*/ [];
 
+  const regionLabels = /*[[${dashboard.regionLabels}]]*/ [];
+  const regionCounts = /*[[${dashboard.regionCounts}]]*/ [];
+
+  const ctx = document.getElementById('regionChart').getContext('2d');
+
   new Chart(document.getElementById('jobTypeChart'), {
     type: 'pie',
     data: {
@@ -77,36 +77,20 @@
     }
   });
 
+  console.log("📍 지역 라벨:", regionLabels);
+  console.log("📊 지역별 채용 수:", regionCounts);
 
-  new Chart(document.getElementById('companySizeChart'), {
+  new Chart(ctx, {
     type: 'doughnut',
     data: {
-      labels: ['대기업', '중견기업', '스타트업'],
-      datasets: [{
-        data: [40, 35, 25]
-      }]
+        labels: regionLabels,
+        datasets: [{
+            data: regionCounts,
+            borderWidth: 1
+        }]
     }
-  });
+});
 
-  new Chart(document.getElementById('regionChart'), {
-    type: 'doughnut',
-    data: {
-      labels: ['서울', '경기', '부산', '대전', '기타'],
-      datasets: [{
-        data: [400, 300, 150, 100, 80]
-      }]
-    }
-  });
-
-  new Chart(document.getElementById('stackChart'), {
-    type: 'pie',
-    data: {
-      labels: ['Java', 'Spring', 'React', 'AWS', 'Python'],
-      datasets: [{
-        data: [180, 160, 140, 120, 100]
-      }]
-    }
-  });
 
   new Chart(document.getElementById('trendChart'), {
     type: 'line',

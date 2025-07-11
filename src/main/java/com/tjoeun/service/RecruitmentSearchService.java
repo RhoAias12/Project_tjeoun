@@ -11,9 +11,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -24,38 +26,47 @@ public class RecruitmentSearchService {
   private static final String INDEX_NAME = "recruitments";
 
   @Transactional
-  public List<RecruitmentDocument> search(String keyword) throws IOException {
-
-    // 1. 검색 로그 저장
-    System.out.println("🔍 검색 로그 저장 시도 전");
-
-    try {
+  public List<RecruitmentDocument> search(String keyword, Long userIdx) throws IOException {
+    if (keyword != null && !keyword.isBlank()) {
       searchLogRepository.save(SearchLog.builder()
-              .keyword("테스트키워드")
+              .keyword(keyword)
               .searchedAt(LocalDateTime.now())
-              .ip("127.0.0.1")
-              .userId(1L)
+              .userId(userIdx) // null도 허용 가능
               .build());
-      System.out.println("✅ 검색 로그 저장 성공");
-    } catch (Exception e) {
-      System.out.println("❌ 검색 로그 저장 실패: " + e.getMessage());
-      e.printStackTrace();
     }
 
-
-    // 2. Elasticsearch 검색
     SearchResponse<RecruitmentDocument> response = esClient.search(s -> s
-      .index(INDEX_NAME)
-      .query(q -> q
-        .multiMatch(t -> t
-          .fields("title", "company", "combinedContent")
-          .query(keyword)
-        )
-      ), RecruitmentDocument.class);
+            .index(INDEX_NAME)
+            .query(q -> q
+                    .multiMatch(t -> t
+                            .fields("title", "content")
+                            .query(keyword)
+                    )
+            ), RecruitmentDocument.class);
 
     return response.hits().hits().stream()
-      .map(Hit::source)
-      .collect(Collectors.toList());
+            .map(Hit::source)
+            .collect(Collectors.toList());
   }
+
+  // ✅ 오버로딩: 비로그인 사용자용
+  public List<RecruitmentDocument> search(String keyword) throws IOException {
+    return search(keyword, null);  // userId 없이 저장됨
+  }
+
+
+
+  public List<RecruitmentDocument> findAll() throws IOException {
+    SearchResponse<RecruitmentDocument> response = esClient.search(s -> s
+                    .index(INDEX_NAME)
+                    .query(q -> q.matchAll(m -> m)), // 모든 문서 조회
+            RecruitmentDocument.class
+    );
+
+    return response.hits().hits().stream()
+            .map(Hit::source)
+            .collect(Collectors.toList());
+  }
+
 }
 

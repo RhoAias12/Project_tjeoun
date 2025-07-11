@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -20,4 +21,11 @@ public interface ApplyHistoryRepository extends JpaRepository<ApplyHistory, Inte
   boolean existsByUser_UserIdxAndRecruitment_RecruitmentIdx(Integer userIdx, Long recruitmentIdx);
 
   boolean existsByUserAndRecruitment(Users user, Recruitment recruitment);
+
+  @Query("SELECT COUNT(a) FROM ApplyHistory a WHERE a.user.userIdx = :userIdx")
+  int countByUserIdx(@Param("userIdx") Long userIdx);
+
+  @Query("SELECT AVG(a.count) FROM (SELECT COUNT(h) AS count FROM ApplyHistory h GROUP BY h.user.userIdx) a")
+  Double findAvgApplyCountPerUser();
+
 }

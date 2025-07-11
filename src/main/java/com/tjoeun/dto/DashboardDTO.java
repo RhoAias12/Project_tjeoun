@@ -24,6 +24,13 @@ public class DashboardDTO {
     private List<String> jobTypeLabels;
     private List<Long> jobTypeCounts;
 
+    private List<String> regionLabels;
+    private List<Long> regionCounts;
+
+    private int myApplyCount;
+    private double avgApplyCount;
+
+
     // 관리자용 전용 필드
     private long userCount;
     private double resumeRate;

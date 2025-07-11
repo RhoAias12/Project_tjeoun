@@ -251,8 +251,8 @@ public class AdminService {
   }
 
   @Transactional(readOnly = true)
-  public List<RecruitmentDTO> searchAndSort(String keyword, String deadlineSort) throws IOException {
-    List<RecruitmentDocument> documents = recruitmentSearchService.search(keyword);
+  public List<RecruitmentDTO> searchAndSort(String keyword, String deadlineSort, Long userIdx) throws IOException {
+    List<RecruitmentDocument> documents = recruitmentSearchService.search(keyword, userIdx);
 
     // RecruitmentDocument → RecruitmentDTO 변환
     List<RecruitmentDTO> dtoList = documents.stream()

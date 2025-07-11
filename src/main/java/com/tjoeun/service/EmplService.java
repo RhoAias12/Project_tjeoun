@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import jakarta.persistence.criteria.Predicate;
 
+import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
@@ -19,12 +20,14 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
 public class EmplService {
 
   private final RecruitmentRepository recruitmentRepository;
+  private final RecruitmentSearchService recruitmentSearchService;
 
   public Page<RecruitmentDTO> getJobPage(
     int page,
@@ -35,8 +38,29 @@ public class EmplService {
     String region,
     String company,
     String startDateStr,
-    String endDateStr) {
+    String endDateStr,
+    Integer userIdx) {
 
+    // [1] 검색 키워드 존재 시, 로그만 저장 (ES 검색 결과는 안 씀)
+    String combinedKeyword = Stream.of(title, content)
+            .filter(s -> s != null && !s.isBlank())
+            .collect(Collectors.joining(" "));
+
+    if (!combinedKeyword.isBlank()) {
+      try {
+        // ✅ userIdx가 null이 아닐 때만 사용자 기반 검색 로그 저장
+        if (userIdx != null) {
+          recruitmentSearchService.search(combinedKeyword, Long.valueOf(userIdx));
+        } else {
+          recruitmentSearchService.search(combinedKeyword); // 기존 방식 유지 (비로그인 사용자)
+        }
+      } catch (IOException e) {
+        System.out.println("❌ Elasticsearch 검색 로그 저장 실패: " + e.getMessage());
+      }
+    }
+
+
+    // [2] 기존 JPA 조건 검색 로직 유지
     Pageable pageable = PageRequest.of(Math.max(page - 1, 0), pageSize);
 
     Specification<Recruitment> spec = Specification.where(RecruitmentSpecification.titleContains(title))

@@ -26,8 +26,6 @@ public class SearchLog {
 
     private LocalDateTime searchedAt;
 
-    private String ip;  // 선택: 사용자 구분용
-
     private Long userId; // 선택: 로그인 사용자 구분
 }
 
