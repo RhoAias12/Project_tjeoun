@@ -58,6 +58,7 @@ public class RecruitmentSyncService {
         Optional.ofNullable(recruitment.getSalary()).orElse(""),
         Optional.ofNullable(recruitment.getEmploymentType()).orElse(""))
       )
+      .scrapCount(recruitment.getFavorites() != null ? recruitment.getFavorites().size() : 0)
       .build();
   }
 

@@ -44,4 +44,7 @@ public class RecruitmentDocument {
 
   @Field(type = FieldType.Text)
   private String combinedContent;
+
+  @Field(type = FieldType.Integer)
+  private Integer scrapCount;
 }

@@ -87,7 +87,7 @@ public class EmplController {
 
       RecruitmentDTO dto = emplService.getRecruitmentDetail(id);
       if (dto == null) {
-        return "error/404";
+        return "/main";
       }
 
       boolean isFavorited = false;

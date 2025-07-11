@@ -31,45 +31,34 @@ public class EmplService {
   private final RecruitmentSearchService recruitmentSearchService;
 
   public Page<RecruitmentDTO> getJobPage(
-    int page,
-    int pageSize,
+    int page, int pageSize,
     String sortOrder,
     String title,
     String content,
     String region,
     String company,
     String startDate,
-    String endDate) throws IOException {
+    String endDate
+  ) throws IOException {
 
-    // 검색 키워드를 통합하거나 여러 필드를 조건에 맞게 다룰 수 있음
-    String combinedKeyword = Stream.of(title, content, region, company)
-      .filter(s -> s != null && !s.isEmpty())
-      .collect(Collectors.joining(" "));
+    // Elasticsearch에서 검색
+    Page<RecruitmentDocument> esPage = recruitmentSearchService.searchJobs(
+      title, content, region, company, startDate, endDate, sortOrder, page, pageSize
+    );
 
-    // Elasticsearch 검색 결과 받기
-    Page<RecruitmentDocument> searchResultPage = recruitmentSearchService.searchJobs(
-      combinedKeyword, sortOrder, page, pageSize);
-
-    // DTO 변환
-    List<RecruitmentDTO> dtoList = searchResultPage.getContent().stream()
+    // 문서를 DTO로 변환
+    List<RecruitmentDTO> dtoList = esPage.getContent().stream()
       .map(doc -> RecruitmentDTO.builder()
         .recruitmentIdx(doc.getRecruitmentIdx())
         .title(doc.getTitle())
         .company(doc.getCompany())
         .deadline(doc.getDeadline())
-        .scrapCount(0)
-        .qualifications(doc.getQualifications())
+        .scrapCount(doc.getScrapCount() != null ? doc.getScrapCount() : 0)
         .logoUrl(doc.getLogoUrl())
-        .responsibilities(doc.getResponsibilities())
-        .preferred(doc.getPreferred())
-        .benefits(doc.getBenefits())
-        .location(doc.getLocation())
-        .salary(doc.getSalary())
-        .employmentType(doc.getEmploymentType())
-        .build())
-      .collect(Collectors.toList());
+        .build()
+      ).toList();
 
-    return new PageImpl<>(dtoList, PageRequest.of(page - 1, pageSize), searchResultPage.getTotalElements());
+    return new PageImpl<>(dtoList, esPage.getPageable(), esPage.getTotalElements());
   }
 
 
