@@ -49,6 +49,7 @@ public class RecruitmentSyncService {
       .location(recruitment.getLocation())
       .salary(recruitment.getSalary())
       .employmentType(recruitment.getEmploymentType())
+      .createdAt(recruitment.getCreatedAt())
       .combinedContent(String.join(" ",
         Optional.ofNullable(recruitment.getQualifications()).orElse(""),
         Optional.ofNullable(recruitment.getResponsibilities()).orElse(""),

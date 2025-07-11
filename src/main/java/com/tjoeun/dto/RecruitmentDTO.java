@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
@@ -15,7 +16,7 @@ public class RecruitmentDTO {
     private Long recruitmentIdx;
     private String title;
     private String company;
-    private LocalDate deadline;
+    private LocalDateTime deadline;
     private String qualifications;
     private String logoUrl;
     private String responsibilities;
@@ -26,7 +27,7 @@ public class RecruitmentDTO {
     private String employmentType;
     private Integer scrapCount;
 
-    public RecruitmentDTO(Long recruitmentIdx, String title, String company, LocalDate deadline, Long scrapCount) {
+    public RecruitmentDTO(Long recruitmentIdx, String title, String company, LocalDateTime deadline, Long scrapCount) {
         this.recruitmentIdx = recruitmentIdx;
         this.title = title;
         this.company = company;

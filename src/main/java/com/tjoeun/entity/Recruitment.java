@@ -30,7 +30,7 @@ public class Recruitment {
   private String company;
 
   @Column
-  private LocalDate deadline;
+  private LocalDateTime deadline;
 
   @Column(columnDefinition = "TEXT")
   private String qualifications; //요구사항

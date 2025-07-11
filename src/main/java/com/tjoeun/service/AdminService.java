@@ -14,6 +14,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -186,7 +187,7 @@ public class AdminService {
     return ApplyDetailDTO.builder()
       .recruitmentTitle(recruitment.getTitle())
       .recruitmentCompany(recruitment.getCompany())
-      .recruitmentDeadline(recruitment.getDeadline())
+      .recruitmentDeadline(LocalDate.from(recruitment.getDeadline()))
       .recruitmentLocation(recruitment.getLocation())
       .recruitmentLogoUrl(recruitment.getLogoUrl())
 
@@ -248,26 +249,6 @@ public class AdminService {
       case "REJECTED"  -> "불합격";
       default -> "알 수 없음";
     };
-  }
-
-  @Transactional(readOnly = true)
-  public List<RecruitmentDTO> searchAndSort(String keyword, String deadlineSort) throws IOException {
-    List<RecruitmentDocument> documents = recruitmentSearchService.search(keyword);
-
-    // RecruitmentDocument → RecruitmentDTO 변환
-    List<RecruitmentDTO> dtoList = documents.stream()
-      .map(doc -> RecruitmentDTO.builder()
-        .recruitmentIdx(doc.getRecruitmentIdx())
-        .title(doc.getTitle())
-        .company(doc.getCompany())
-        .deadline(doc.getDeadline())
-        .location(doc.getLocation())
-        .logoUrl(doc.getLogoUrl())
-        .build())
-      .collect(Collectors.toList());
-
-    // 정렬 로직
-    return sortRecruitmentDTOList(dtoList, deadlineSort);
   }
 
   @Transactional(readOnly = true)

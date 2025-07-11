@@ -27,6 +27,7 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
@@ -86,8 +87,8 @@ public class UnifiedJobCrawlerService {
 
   private List<Recruitment> crawlJobKorea() {
     List<Recruitment> result = new ArrayList<>();
-    int totalPages = 5;
-//    int totalPages = 1;
+//    int totalPages = 5;
+    int totalPages = 1;
 
     try {
       for (int page = totalPages; page >= 1; page--) {
@@ -232,8 +233,8 @@ public class UnifiedJobCrawlerService {
       driver.get("https://www.jobplanet.co.kr/job");
       Thread.sleep(3000);
 
-      for (int i = 0; i < 20; i++) {
-//      for (int i = 0; i < 3; i++) {
+//      for (int i = 0; i < 20; i++) {
+      for (int i = 0; i < 3; i++) {
         ((JavascriptExecutor) driver).executeScript("window.scrollTo(0, document.body.scrollHeight);");
         Thread.sleep(1000);
       }
@@ -245,8 +246,8 @@ public class UnifiedJobCrawlerService {
         if (href != null && !href.isEmpty()) links.add(href);
       }
 
-      for (int idx = 0; idx < Math.min(links.size(), 200); idx++) {
-//      for (int idx = 0; idx < Math.min(links.size(), 10); idx++) {
+//      for (int idx = 0; idx < Math.min(links.size(), 200); idx++) {
+      for (int idx = 0; idx < Math.min(links.size(), 10); idx++) {
         String link = links.get(idx);
         driver.get(link);
         Thread.sleep(2000);
@@ -306,8 +307,8 @@ public class UnifiedJobCrawlerService {
     try {
       driver.get("https://www.wanted.co.kr/wdlist?country=kr&job_sort=job.latest_order&years=-1&locations=all");
       Thread.sleep(3000);
-      for (int i = 0; i < 20; i++) {
-//      for (int i = 0; i < 5; i++) {
+//      for (int i = 0; i < 20; i++) {
+      for (int i = 0; i < 5; i++) {
         ((JavascriptExecutor) driver).executeScript("window.scrollTo(0, document.body.scrollHeight);");
         Thread.sleep(1000);
       }
@@ -317,8 +318,8 @@ public class UnifiedJobCrawlerService {
         String href = el.getAttribute("href");
         if (href != null && href.contains("/wd/")) {
           urls.add(href);
-          if (urls.size() >= 200) break;
-//          if (urls.size() >= 20) break;
+//          if (urls.size() >= 200) break;
+          if (urls.size() >= 20) break;
         }
       }
       System.out.println("원티드 상세 링크 수: " + urls.size());
@@ -438,32 +439,35 @@ public class UnifiedJobCrawlerService {
     }
   }
 
-  private LocalDate parseDeadline(String raw) {
-    if (raw == null || raw.trim().isEmpty()) return LocalDate.of(9999, 12, 31);
+  private LocalDateTime parseDeadline(String raw) {
+    if (raw == null || raw.trim().isEmpty())
+      return LocalDateTime.of(9999, 12, 31, 0, 0);
 
     raw = raw.trim();
 
     if (raw.contains("상시") || raw.equalsIgnoreCase("채용시 마감")) {
-      return LocalDate.of(9999, 12, 31);
+      return LocalDateTime.of(9999, 12, 31, 0, 0);
     }
 
     raw = raw.replaceAll("D-\\d+", "").trim();
     raw = raw.split(" ")[0].trim();
 
     try {
-      return LocalDate.parse(raw, DateTimeFormatter.ofPattern("yyyy.MM.dd"));
+      LocalDate date = LocalDate.parse(raw, DateTimeFormatter.ofPattern("yyyy.MM.dd"));
+      return date.atStartOfDay();
     } catch (DateTimeParseException e) {
       System.out.println("마감일 파싱 실패: " + raw);
-      return LocalDate.of(9999, 12, 31);
+      return LocalDateTime.of(9999, 12, 31, 0, 0);
     }
   }
+
 
   private List<Recruitment> preprocessJobs(List<Recruitment> jobs) {
     String defaultLogo = "/images/tjoeun.jpg";
     return jobs.stream()
       // 그 외는 기존처럼 기본값 세팅
       .peek(job -> {
-        if (job.getDeadline() == null) job.setDeadline(LocalDate.of(9999, 12, 31));
+        if (job.getDeadline() == null) job.setDeadline(LocalDateTime.of(9999, 12, 31, 0, 0));
         if (job.getQualifications() == null || job.getQualifications().isBlank())
           job.setQualifications("경력무관");
         if (job.getLogoUrl() == null || job.getLogoUrl().isBlank())
