@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
+import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
@@ -104,6 +105,17 @@ public class EmplController {
         model.addAttribute("endDate", endDate);
 
         return "empl/empl_detail";
+    }
+
+    @GetMapping("/{id}")
+    public RecruitmentDTO getRecruitment(@PathVariable Long id) {
+        return emplService.getRecruitmentDetail(id);
+    }
+
+    @GetMapping("/list")
+    public List<RecruitmentDTO> getRecruitments(@RequestParam(defaultValue = "1") int page) {
+        // 서비스에서 Page 객체 가져오고 필요한 내용만 DTO로
+        return emplService.getJobPage(page, 25, "all", null, null, null, null, null, null).getContent();
     }
 }
 
