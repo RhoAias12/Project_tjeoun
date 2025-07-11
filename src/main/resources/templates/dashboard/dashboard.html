@@ -17,9 +17,9 @@
 
   <!-- 주요 지표 요약 -->
   <div class="metric-boxes">
-    <div class="metric">총 채용 공고 수: <strong th:text="${totalJobCount}">0</strong>건</div>
-    <div class="metric">마감 임박 공고 수: <strong th:text="${closingSoon}">0</strong>건</div>
-    <div class="metric">채용 마감률: <strong th:text="${closeRate}">0.0</strong>%</div>
+    <div class="metric">총 채용 공고 수: <strong th:text="${dashboard.totalJobCount}">0</strong>건</div>
+    <div class="metric">마감 임박 공고 수: <strong th:text="${dashboard.closingSoonCount}">0</strong>건</div>
+    <div class="metric">채용 마감률: <strong th:text="${dashboard.closeRate + '%'}">0%</strong></div>
   </div>
 
   <!-- 차트 영역 -->
@@ -61,11 +61,11 @@
 <div th:replace="include/footer :: footer"></div>
 
 <script th:inline="javascript">
-  const jobTypeLabels = [[${jobTypeLabels}]];
-  const jobTypeCounts = [[${jobTypeCounts}]];
+  const jobTypeLabels = /*[[${dashboard.jobTypeLabels}]]*/ [];
+  const jobTypeCounts = /*[[${dashboard.jobTypeCounts}]]*/ [];
 
-  const popularRoleLabels = [[${popularRoles}]];
-  const popularRoleCounts = [[${popularRoleCounts}]];
+  const popularRoleLabels = /*[[${dashboard.popularRoles}]]*/ [];
+  const popularRoleCounts = /*[[${dashboard.popularRoleCounts}]]*/ [];
 
   new Chart(document.getElementById('jobTypeChart'), {
     type: 'pie',
@@ -121,8 +121,15 @@
     }
   });
 
-  const topKeywordLabels = [[${topKeywordLabels}]];
-  const topKeywordCounts = [[${topKeywordCounts}]];
+  const topKeywordLabels = /*[[${dashboard.topKeywordLabels}]]*/ [];
+  const topKeywordCounts = /*[[${dashboard.topKeywordCounts}]]*/ [];
+
+   console.log("🎯 직무 라벨:", jobTypeLabels);
+  console.log("🎯 직무 수치:", jobTypeCounts);
+  console.log("🔥 인기 직무 라벨:", popularRoleLabels);
+  console.log("📊 마감률:", /*[[${dashboard.closeRate}]]*/);
+  console.log("🔑 키워드 라벨:", topKeywordLabels);
+console.log("🔑 키워드 수치:", topKeywordCounts);
 
   new Chart(document.getElementById('keywordChart'), {
     type: 'bar',
@@ -133,8 +140,17 @@
         data: topKeywordCounts,
         backgroundColor: 'skyblue'
       }]
+    },
+    options: {
+      plugins: {
+        title: {
+          display: true,
+          text: '인기 키워드'
+        }
+      }
     }
-  });
+});
+
 
   new Chart(document.getElementById('popularRoleChart'), {
     type: 'bar',

@@ -2,21 +2,30 @@ package com.tjoeun.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
 
 import java.util.List;
-import java.util.Map;
 
-@Data
+@Getter
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class DashboardDTO {
-    private int totalJobCount;
-    private List<String> popularJobs;
-    private List<String> popularStacks;
-    private Map<String, Integer> regionDistribution;
-    private Map<String, Integer> jobTrendsByDate;
-    private int closingSoonCount;
+    private long totalJobCount;
+    private long closingSoonCount;
+    private long closedCount;
+    private double closeRate;
+
+    private List<String> popularRoles;
+    private List<Long> popularRoleCounts;
+
+    private List<String> topKeywordLabels;
+    private List<Long> topKeywordCounts;
+
+    private List<String> jobTypeLabels;
+    private List<Long> jobTypeCounts;
+
+    // 관리자용 전용 필드
+    private long userCount;
+    private double resumeRate;
+    private double crawlStatus;
 }

@@ -147,10 +147,11 @@ public class ElasticsearchService {
         }
     }
 
+    // 마감 임박 공고 수
     public long countClosingSoonRecruitments() {
         try {
             String today = LocalDate.now().toString();
-            String soon = LocalDate.now().plusDays(10).toString();  // 3일 이내 마감
+            String soon = LocalDate.now().plusDays(7).toString();  // 3일 이내 마감
 
             System.out.println(" 오늘 날짜: " + today);
             System.out.println(" 마감 기준 날짜: " + soon);
@@ -171,6 +172,27 @@ public class ElasticsearchService {
         } catch (IOException e) {
             e.printStackTrace();
             return 0;
+        }
+    }
+
+    // top keyword
+    public Map<String, Long> getTopKeywords(int size) {
+        try {
+            SearchResponse<Void> response = elasticsearchClient.search(s -> s
+                    .index("recruitments")
+                    .size(0)
+                    .aggregations("top_keywords", a -> a
+                            .terms(t -> t.field("jobKeywords").size(size))
+                    ), Void.class);
+
+            return response.aggregations().get("top_keywords").sterms().buckets().array().stream()
+                    .collect(Collectors.toMap(
+                            b -> b.key().stringValue(),
+                            b -> b.docCount()
+                    ));
+        } catch (IOException e) {
+            e.printStackTrace();
+            return Map.of();
         }
     }
 
@@ -260,25 +282,7 @@ public class ElasticsearchService {
         }
     }
 
-    public Map<String, Long> getTopKeywords(int size) {
-        try {
-            SearchResponse<Void> response = elasticsearchClient.search(s -> s
-                    .index("recruitments")
-                    .size(0)
-                    .aggregations("top_keywords", a -> a
-                            .terms(t -> t.field("title.keyword").size(size))
-                    ), Void.class);
 
-            return response.aggregations().get("top_keywords").sterms().buckets().array().stream()
-                    .collect(Collectors.toMap(
-                            b -> b.key().stringValue(),
-                            b -> b.docCount()
-                    ));
-        } catch (IOException e) {
-            e.printStackTrace();
-            return Map.of();
-        }
-    }
 
     public Map<String, Long> getTopTitles(int size) {
         try {

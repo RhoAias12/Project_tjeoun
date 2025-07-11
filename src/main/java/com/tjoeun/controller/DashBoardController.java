@@ -1,7 +1,9 @@
 package com.tjoeun.controller;
 
+import com.tjoeun.dto.DashboardDTO;
 import com.tjoeun.service.DashboardService;
 import com.tjoeun.service.ElasticsearchService;
+import com.tjoeun.service.RecruitmentSearchService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,23 +20,22 @@ public class DashBoardController {
 
     private final DashboardService dashboardService;
     private final ElasticsearchService elasticsearchService;
+    private final RecruitmentSearchService recruitmentSearchService;
+
 
     @GetMapping("/user")
     public String userDashboard(Model model) {
-        dashboardService.populateUserDashboard(model);
-        long closingSoon = elasticsearchService.countClosingSoonRecruitments();
-        model.addAttribute("closingSoon", closingSoon);
-
-
-
+        DashboardDTO dto = dashboardService.getUserDashboardData();
+        model.addAttribute("dashboard", dto);
         return "dashboard/dashboard";
+
     }
 
-    @GetMapping("/admin")
+    @GetMapping("/admin/dashboard")
     public String adminDashboard(Model model) {
-        dashboardService.populateAdminDashboard(model);
-        return "dashboard/ad_dashboard";
+        DashboardDTO dto = dashboardService.getAdminDashboardData();
+        model.addAttribute("dashboard", dto);
+        return "dashboard/admin_dashboard";
     }
-
 
 }
