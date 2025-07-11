@@ -33,4 +33,20 @@ public class RecruitmentDTO {
         this.deadline = deadline;
         this.scrapCount = scrapCount != null ? scrapCount.intValue() : 0;
     }
+
+    public RecruitmentDTO(com.tjoeun.entity.Recruitment entity) {
+        this.recruitmentIdx = entity.getRecruitmentIdx();
+        this.title = entity.getTitle();
+        this.company = entity.getCompany();
+        this.deadline = entity.getDeadline();
+        this.qualifications = entity.getQualifications();
+        this.logoUrl = entity.getLogoUrl();
+        this.responsibilities = entity.getResponsibilities();
+        this.preferred = entity.getPreferred();
+        this.benefits = entity.getBenefits();
+        this.location = entity.getLocation();
+        this.salary = entity.getSalary();
+        this.employmentType = entity.getEmploymentType();
+        this.scrapCount = entity.getFavorites() != null ? entity.getFavorites().size() : 0;
+    }
 }
