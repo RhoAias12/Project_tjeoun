@@ -301,6 +301,190 @@ body {
   color: rgb(255, 220, 20);
 }
 
+
+
+
+/* 챗봇 css */
+/* 채팅 토글 버튼 */
+.chat-toggle-button {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 55px;
+  height: 55px;
+  background: #5dc1e7;
+  color: white;
+  font-size: 24px;
+  border-radius: 50%;
+  text-align: center;
+  line-height: 55px;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.chat-toggle-button:hover {
+  background: #44aad2;
+}
+
+/* 팝업창 */
+.chat-popup {
+  position: fixed;
+  bottom: 100px;
+  right: 30px;
+  width: 350px;
+  max-width: 90%;
+  height: 500px;
+  display: flex;
+  flex-direction: column; /* 위-아래 배치! */
+  background: #fff;
+  border-radius: 15px;
+  border: 1px solid #ddd;
+  overflow: hidden;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+  display: none;
+  z-index: 999;
+}
+
+/* 헤더는 상단 고정 */
+.chat-header {
+  background: #5dc1e7;
+  color: #fff;
+  padding: 12px 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+
+/* 메시지 영역은 flex: 1로 나머지 영역 채움, 스크롤 가능 */
+.chat-box {
+  flex: 1; /* 나머지 영역 채움 */
+  padding: 15px;
+  overflow-y: auto;
+  background: #f5f5f5;
+}
+
+/* 입력창은 팝업의 column 맨 아래에 고정됨 */
+.input-box {
+  display: flex;
+  border-top: 1px solid #ddd;
+  height: 44px;
+}
+
+.input-box input {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  outline: none;
+}
+
+.input-box button {
+  background: #5dc1e7;
+  border: none;
+  padding: 0 20px;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+.chat-popup {
+  position: fixed;
+  bottom: 100px;
+  right: 30px;
+  width: 350px;
+  max-width: 90%;
+  height: 500px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 15px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+  display: none; /* 기본은 숨김 */
+  z-index: 999;
+  overflow: hidden;
+}
+
+/* 헤더 */
+.chat-header {
+  background: #5dc1e7;
+  color: white;
+  padding: 12px 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chat-header .chat-title {
+  font-weight: bold;
+}
+
+.chat-header .close-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+/* 채팅 영역 */
+.chat-box {
+  flex: 1;
+  padding: 15px;
+  overflow-y: auto;
+  background: #f5f5f5;
+  height: 82%;
+}
+
+/* 메시지 공통 */
+.message {
+  max-width: 75%;
+  padding: 10px 15px;
+  margin: 8px 0;
+  border-radius: 20px;
+  clear: both;
+  line-height: 1.4;
+  word-wrap: break-word;
+}
+
+/* 챗봇 메시지 - 왼쪽 */
+.bot-message {
+  background: #e2e2e2;
+  float: left;
+  border-top-left-radius: 0;
+}
+
+/* 유저 메시지 - 오른쪽 */
+.user-message {
+  background: #5dc1e7;
+  color: white;
+  float: right;
+  border-top-right-radius: 0;
+}
+
+/* 입력 영역 */
+.input-box {
+  display: flex;
+  border-top: 1px solid #ddd;
+}
+
+.input-box input {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  outline: none;
+}
+
+.input-box button {
+  background: #5dc1e7;
+  border: none;
+  padding: 0 20px;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+
+
 @media (max-width: 768px) {
   .container,
   .search,
