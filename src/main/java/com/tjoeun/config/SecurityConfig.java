@@ -25,6 +25,7 @@ public class SecurityConfig {
     return http
       .csrf(csrf -> csrf
         .csrfTokenRepository(new CookieCsrfTokenRepository())
+        .ignoringRequestMatchers("/api/**")
       )
 //      .csrf(csrf -> csrf
 //        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
@@ -34,6 +35,7 @@ public class SecurityConfig {
         .requestMatchers("/css/**", "/js/**", "/images/**", "/static/**").permitAll()
         .requestMatchers("/", "/user/signup", "/user/login", "/api/user/**", "/user/login/error").permitAll()
         .requestMatchers("/empl/empl_main", "/empl/empl_detail/**").permitAll()
+        .requestMatchers("/api/**").permitAll()
         .requestMatchers("/admin/**").hasRole("ADMIN")
         .requestMatchers("/mypage/**").authenticated()  // 마이페이지는 로그인 사용자만
         .anyRequest().authenticated()

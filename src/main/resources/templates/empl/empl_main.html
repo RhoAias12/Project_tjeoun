@@ -95,29 +95,6 @@
 });
 
 
-    async function loadJobList() {
-    const response = await fetch('/api/empl/list');
-    const data = await response.json();
-    console.log(data); // 👉 JSON 확인
-
-    // 예시: data 반복 돌려서 카드 생성 가능
-    const grid = document.querySelector('.card-grid');
-    grid.innerHTML = ''; // 기존 카드 비우기
-
-    data.forEach(job => {
-      const card = document.createElement('div');
-      card.className = 'job-card';
-      card.innerHTML = `
-        <h3>${job.title}</h3>
-        <p>${job.company}</p>
-        <p>${job.deadline}</p>
-      `;
-      grid.appendChild(card);
-    });
-  }
-
-  window.addEventListener('DOMContentLoaded', loadJobList);
-
   </script>
 
 
