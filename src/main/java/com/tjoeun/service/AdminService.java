@@ -281,6 +281,34 @@ public class AdminService {
     return recruitmentPage.map(RecruitmentDTO::new);
   }
 
+  public Page<RecruitmentDTO> getFilteredRecruitmentsByEs(
+    String title,
+    String content,
+    String region,
+    String company,
+    String startDate,
+    String endDate,
+    String deadlineSort,
+    int page,
+    int size) throws IOException {
+
+    // recruitmentSearchService.searchJobs 메서드가 이미 있음
+    Page<RecruitmentDocument> esPage = recruitmentSearchService.searchJobs(
+      title, content, region, company, startDate, endDate, deadlineSort, page, size);
+
+    List<RecruitmentDTO> dtoList = esPage.getContent().stream()
+      .map(doc -> RecruitmentDTO.builder()
+        .recruitmentIdx(doc.getRecruitmentIdx())
+        .title(doc.getTitle())
+        .company(doc.getCompany())
+        .deadline(doc.getDeadline())
+        .scrapCount(doc.getScrapCount() != null ? doc.getScrapCount() : 0)
+        .logoUrl(doc.getLogoUrl())
+        .build())
+      .toList();
+
+    return new PageImpl<>(dtoList, esPage.getPageable(), esPage.getTotalElements());
+  }
 
 
 }

@@ -128,7 +128,8 @@ public class AdminController {
       @PageableDefault(size = 10) Pageable pageable,
       Model model) throws IOException {
 
-        Page<RecruitmentDTO> recruitmentPage = adminService.getFilteredRecruitments(
+        // ES 기반 검색 호출
+        Page<RecruitmentDTO> recruitmentPage = adminService.getFilteredRecruitmentsByEs(
           title, content, region, company, startDate, endDate, deadlineSort, page, pageable.getPageSize()
         );
 
