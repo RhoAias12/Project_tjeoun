@@ -12,6 +12,8 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 public class RecruitmentSearchDocument {
+
+
     private String title;
     private String job;
     private String company;

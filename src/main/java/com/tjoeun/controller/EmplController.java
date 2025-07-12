@@ -1,6 +1,8 @@
 package com.tjoeun.controller;
 
 import com.tjoeun.dto.RecruitmentDTO;
+import com.tjoeun.entity.Users;
+import com.tjoeun.repository.UserRepository;
 import com.tjoeun.service.EmplService;
 import com.tjoeun.service.FavoriteService;
 import com.tjoeun.util.PaginationUtil;
@@ -21,6 +23,7 @@ public class EmplController {
 
     private final EmplService emplService;
     private final FavoriteService favoriteService;
+    private final UserRepository userRepository;
 
     @GetMapping("/empl_main")
     public String emplMainPage(
@@ -33,11 +36,21 @@ public class EmplController {
       @RequestParam(required = false) String company,
       @RequestParam(required = false) String startDate,
       @RequestParam(required = false) String endDate,
+      Principal principal,
       Model model) {
+
+        Integer userIdx = null;
+        if (principal != null) {
+            String userEmail = principal.getName();
+            Users user = userRepository.findByUserEmail(userEmail);
+            if (user != null) {
+                userIdx = user.getUserIdx();
+            }
+        }
 
         Page<RecruitmentDTO> jobPage = emplService.getJobPage(
           page, pageSize, sortOrder,
-          title, content, region, company, startDate, endDate);
+          title, content, region, company, startDate, endDate, userIdx);
 
         String prevUrl = emplService.buildPrevUrl(
           page, pageSize, sortOrder,

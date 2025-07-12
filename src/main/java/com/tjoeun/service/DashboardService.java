@@ -2,12 +2,16 @@ package com.tjoeun.service;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import com.tjoeun.dto.DashboardDTO;
+import com.tjoeun.elasticsearch.repository.SearchLogRepository;
+import com.tjoeun.repository.ApplyHistoryRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -15,64 +19,83 @@ public class DashboardService {
 
     private final ElasticsearchClient elasticsearchClient;
     private final ElasticsearchService elasticsearchService;
+    private final SearchLogRepository searchLogRepository;
+    private final ApplyHistoryRepository applyHistoryRepository;
 
-    public void populateUserDashboard(Model model) {
-
-        // 총 공고 수
-        long totalJobCount = elasticsearchService.countRecruitments();
-        model.addAttribute("totalJobCount", totalJobCount);
-
-        // 마감 임박 공고 수 (예: 7일 이내 마감)
-        long closingSoon = elasticsearchService.countClosedRecruitments();
-        model.addAttribute("closingSoonCount", closingSoon);
-
-        // 마감률 계산
-        long closedCount = elasticsearchService.countClosedRecruitments();
-        double closeRate = totalJobCount == 0 ? 0 : Math.round(((double) closedCount / totalJobCount) * 1000.0) / 10.0;
-        model.addAttribute("closeRate", closeRate);
-
-        // 인기 직무
-        Map<String, Long> topRoles = elasticsearchService.getTopRoles(5);
-        model.addAttribute("popularRoles", new ArrayList<>(topRoles.keySet()));
-        model.addAttribute("popularRoleCounts", new ArrayList<>(topRoles.values()));
-
-        // 키워드
-        Map<String, Long> topKeywords = elasticsearchService.getTopKeywords(5);
-        model.addAttribute("topKeywordLabels", new ArrayList<>(topKeywords.keySet()));
-        model.addAttribute("topKeywordCounts", new ArrayList<>(topKeywords.values()));
-
-        // 직무 비율
-        model.addAttribute("jobTypeLabels", new ArrayList<>(topRoles.keySet()));
-        model.addAttribute("jobTypeCounts", new ArrayList<>(topRoles.values()));
+    private double calculateCloseRate(long totalJobCount, long closedCount) {
+        if (totalJobCount == 0) return 0.0;
+        return Math.round(((double) closedCount / totalJobCount) * 1000.0) / 10.0;
     }
 
-    public void populateAdminDashboard(Model model) {
+    public DashboardDTO getUserDashboardData(Long userIdx) {
+        int myApplyCount = applyHistoryRepository.countByUserIdx(userIdx);
+
+        Double avgApplyCount = applyHistoryRepository.findAvgApplyCountPerUser();
+        if (avgApplyCount == null) avgApplyCount = 0.0;
+
+        long total = elasticsearchService.countRecruitments();
+        long closed = elasticsearchService.countClosedRecruitments();
+        long closingSoon = elasticsearchService.countClosingSoonRecruitments();
+        double closeRate = calculateCloseRate(total, closed);
+
+        Map<String, Long> topRoles = elasticsearchService.getTopRoles(5);
+        List<Map.Entry<String, Long>> topSearchKeywords = getTopSearchedKeywords(5);
+        Map<String, Long> regionData = elasticsearchService.getRegionDistribution();
+
+        System.out.println("✅ topRoles = " + topRoles);
+        System.out.println("🔍 topSearchKeywords = " + topSearchKeywords);
+
+
+        return DashboardDTO.builder()
+                .totalJobCount(total)
+                .closingSoonCount(closingSoon)
+                .closedCount(closed)
+                .closeRate(closeRate)
+
+                .myApplyCount(myApplyCount)
+                .avgApplyCount(avgApplyCount)
+
+                // 인기 직무
+                .popularRoles(new ArrayList<>(topRoles.keySet()))
+                .popularRoleCounts(new ArrayList<>(topRoles.values()))
+
+                // 인기 키워드
+                .topKeywordLabels(topSearchKeywords.stream().map(Map.Entry::getKey).toList())
+                .topKeywordCounts(topSearchKeywords.stream().map(Map.Entry::getValue).toList())
+
+                // 지역 분포
+                .regionLabels(new ArrayList<>(regionData.keySet()))
+                .regionCounts(new ArrayList<>(regionData.values()))
+                .build();
+    }
+
+    public DashboardDTO getAdminDashboardData() {
         long total = elasticsearchService.countRecruitments();
         long closed = elasticsearchService.countClosedRecruitments();
         long active = total - closed;
+        double closeRate = calculateCloseRate(total, closed);
 
-        model.addAttribute("totalJobs", total);
-        model.addAttribute("activeJobs", active);
-        model.addAttribute("closedJobs", closed);
-        model.addAttribute("userCount", fetchUserCount());
-        model.addAttribute("resumeRate", fetchResumeCompletionRate());
-        model.addAttribute("crawlStatus", 98.3); // TODO: 필요시 시스템 상태 기준으로 연결
+//        Map<String, Long> topSearchKeywords = topSearchKeywords();
 
-        // ✅ 관리자용 검색 키워드
-        Map<String, Long> topKeywords = elasticsearchService.getTopKeywords(5);
-        model.addAttribute("topSearchKeywords", new ArrayList<>(topKeywords.keySet()));
-        model.addAttribute("topSearchCounts", new ArrayList<>(topKeywords.values()));
+        return DashboardDTO.builder()
+                .totalJobCount(total)
+                .closedCount(closed)
+                .closeRate(closeRate)
+//                .userCount(fetchUserCount())
+//                .resumeRate(fetchResumeCompletionRate())
+                .crawlStatus(98.3)
+//                .topKeywordLabels(new ArrayList<>(topKeywords.keySet()))
+//                .topKeywordCounts(new ArrayList<>(topKeywords.values()))
+                .build();
     }
 
-    private long fetchUserCount() {
-        // TODO: 실제 회원 수 DB 연동 필요
-        return 1023;
+    public List<Map.Entry<String, Long>> getTopSearchedKeywords(int size) {
+        List<Object[]> result = searchLogRepository.findTopKeywords(PageRequest.of(0, size));
+        return result.stream()
+                .map(row -> Map.entry((String) row[0], ((Number) row[1]).longValue()))
+                .collect(Collectors.toList());
     }
 
-    private double fetchResumeCompletionRate() {
-        // TODO: 이력서 작성률 DB 연동 필요
-        return 72.5;
-    }
 
 
 }

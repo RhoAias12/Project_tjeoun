@@ -1,7 +1,9 @@
 package com.tjoeun.elasticsearch.document;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.elasticsearch.annotations.DateFormat;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
@@ -15,6 +17,7 @@ import java.util.Optional;
 @AllArgsConstructor
 @Builder
 @Document(indexName = "recruitments")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class RecruitmentDocument {
 
   @Id
@@ -26,7 +29,7 @@ public class RecruitmentDocument {
   @Field(type = FieldType.Keyword)
   private String company;
 
-  @Field(type = FieldType.Date, format = {}, pattern = "yyyy-MM-dd")
+  @Field(type = FieldType.Date, format = DateFormat.date, pattern = "yyyy-MM-dd")
   private LocalDate deadline;
 
   @Field(type = FieldType.Text)

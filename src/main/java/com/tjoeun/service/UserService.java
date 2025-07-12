@@ -7,6 +7,8 @@ import org.springframework.security.core.userdetails.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.Principal;
+
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -54,4 +56,16 @@ public class UserService implements UserDetailsService {
 
     return userRepository.findByUserEmail(email);
   }
+
+  public Integer getUserIdxFromPrincipal(Principal principal) {
+    String email = principal.getName(); // Security에서 로그인 식별자로 email 반환
+    Users user = userRepository.findByUserEmail(email);
+
+    if (user == null) {
+      throw new RuntimeException("사용자 없음");
+    }
+
+    return user.getUserIdx();
+  }
+
 }
