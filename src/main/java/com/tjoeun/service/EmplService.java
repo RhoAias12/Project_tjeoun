@@ -1,8 +1,10 @@
 package com.tjoeun.service;
 
+import com.tjoeun.constant.UserRole;
 import com.tjoeun.dto.RecruitmentDTO;
 import com.tjoeun.entity.Recruitment;
 import com.tjoeun.repository.RecruitmentRepository;
+import com.tjoeun.repository.UserRepository;
 import com.tjoeun.specification.RecruitmentSpecification;
 import jakarta.persistence.criteria.JoinType;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +30,7 @@ public class EmplService {
 
   private final RecruitmentRepository recruitmentRepository;
   private final RecruitmentSearchService recruitmentSearchService;
+  private final UserRepository userRepository;
 
   public Page<RecruitmentDTO> getJobPage(
     int page,
@@ -48,16 +51,25 @@ public class EmplService {
 
     if (!combinedKeyword.isBlank()) {
       try {
-        // ✅ userIdx가 null이 아닐 때만 사용자 기반 검색 로그 저장
         if (userIdx != null) {
-          recruitmentSearchService.search(combinedKeyword, Long.valueOf(userIdx));
+          // ✅ 먼저 관리자 여부 판단
+          boolean isAdmin = userRepository.findById(userIdx)
+                  .map(user -> user.getUserRole() == UserRole.ADMIN)
+                  .orElse(false);
+
+          // ✅ 일반 사용자일 경우만 로그 저장 메서드 호출
+          if (!isAdmin) {
+            recruitmentSearchService.search(combinedKeyword, Long.valueOf(userIdx));
+          }
         } else {
-          recruitmentSearchService.search(combinedKeyword); // 기존 방식 유지 (비로그인 사용자)
+          // 비로그인 사용자도 로그 저장 (userId 없이)
+          recruitmentSearchService.search(combinedKeyword, null);
         }
       } catch (IOException e) {
         System.out.println("❌ Elasticsearch 검색 로그 저장 실패: " + e.getMessage());
       }
     }
+
 
 
     // [2] 기존 JPA 조건 검색 로직 유지

@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.util.List;
+import java.util.Map;
 
 @Getter
 @Builder
@@ -30,9 +31,15 @@ public class DashboardDTO {
     private int myApplyCount;
     private double avgApplyCount;
 
+    private List<String> applyTrendLabels;
+    private List<Long> applyTrendCounts;
 
-    // 관리자용 전용 필드
-    private long userCount;
-    private double resumeRate;
-    private double crawlStatus;
+    // 관리자
+    private long totalUserCount;  // 사용자 수
+    private long totalApplyCount; // 지원 수
+
+    private List<String> ageGroupLabels;
+    private List<Long> ageGroupCounts;
+
+
 }

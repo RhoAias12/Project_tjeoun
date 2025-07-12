@@ -44,19 +44,17 @@ public class DashBoardController {
         DashboardDTO dto = dashboardService.getUserDashboardData(user.getUserIdx().longValue());
         model.addAttribute("dashboard", dto);
 
-        List<Map.Entry<String, Long>> keywordTop5 = elasticsearchService.getTopKeywords(5).entrySet().stream()
-                .collect(Collectors.toList());
-        model.addAttribute("keywordTop5", keywordTop5);
-
         return "dashboard/dashboard";
     }
 
 
     @GetMapping("/admin/dashboard")
     public String adminDashboard(Model model) {
-        DashboardDTO dto = dashboardService.getAdminDashboardData();
-        model.addAttribute("dashboard", dto);
-        return "dashboard/admin_dashboard";
+        DashboardDTO dashboard = dashboardService.getAdminDashboardData(); // null 필요 없으면 파라미터 없애도 됨
+        model.addAttribute("dashboard", dashboard);
+
+        return "dashboard/ad_dashboard";
     }
+
 
 }

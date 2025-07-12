@@ -10,6 +10,7 @@ import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch._types.aggregations.CalendarInterval;
 import co.elastic.clients.util.NamedValue;
 import com.tjoeun.document.RecruitmentSearchDocument;
+import com.tjoeun.repository.ApplyHistoryRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -271,41 +272,28 @@ public class ElasticsearchService {
 
 
 
+    // 지원 현황?
+    public Map<String, Long> getUserWeeklyApplyTrend(Long userIdx, ApplyHistoryRepository applyHistoryRepository) {
+        LocalDate today = LocalDate.now();
+        LocalDate weekAgo = today.minusDays(6);
 
-    // 일별 등록 추이(최근 7일 이내)
-    public Map<String, Long> getDailyTrends() {
-        try {
-            String minDate = LocalDate.now().minusDays(6).toString(); // 최근 7일 전
-            String maxDate = LocalDate.now().toString();              // 오늘
+        List<Object[]> result = applyHistoryRepository.countDailyApplies(userIdx, weekAgo, today);
 
-            SearchResponse<Void> response = elasticsearchClient.search(s -> s
-                    .index("recruitments")
-                    .size(0)
-                    .aggregations("daily", a -> a.dateHistogram(dh -> dh
-                            .field("createdAt")
-                            .calendarInterval(CalendarInterval.Day)
-                            .format("yyyy-MM-dd")
-                            .minDocCount(0)
-                            .extendedBounds(new ExtendedBounds.Builder()
-                                    .min(minDate)
-                                    .max(maxDate)
-                                    .build())
-                            .order(List.of(NamedValue.of("_key", SortOrder.Asc)))
-                    )), Void.class);
-
-            return response.aggregations()
-                    .get("daily").dateHistogram().buckets().array().stream()
-                    .collect(Collectors.toMap(
-                            b -> b.keyAsString(),
-                            b -> b.docCount(),
-                            (v1, v2) -> v1,
-                            LinkedHashMap::new
-                    ));
-        } catch (IOException e) {
-            e.printStackTrace();
-            return Map.of();
+        Map<String, Long> trend = new LinkedHashMap<>();
+        for (int i = 0; i < 7; i++) {
+            String date = weekAgo.plusDays(i).toString();
+            trend.put(date, 0L);
         }
+
+        for (Object[] row : result) {
+            String date = row[0].toString();
+            Long count = ((Number) row[1]).longValue();
+            trend.put(date, count);
+        }
+
+        return trend;
     }
+
 
     public void saveToES(RecruitmentSearchDocument doc) {
         try {

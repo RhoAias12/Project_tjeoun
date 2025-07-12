@@ -1,11 +1,7 @@
 package com.tjoeun.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
-import jakarta.persistence.Id;
 
 import java.time.LocalDateTime;
 
@@ -24,6 +20,7 @@ public class SearchLog {
 
     private String keyword;
 
+    @Column(name = "searched_at")
     private LocalDateTime searchedAt;
 
     private Long userId; // 선택: 로그인 사용자 구분

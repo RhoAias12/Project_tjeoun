@@ -6,16 +6,18 @@ import co.elastic.clients.elasticsearch.core.search.Hit;
 import com.tjoeun.elasticsearch.document.RecruitmentDocument;
 import com.tjoeun.elasticsearch.repository.SearchLogRepository;
 import com.tjoeun.entity.SearchLog;
+import com.tjoeun.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.tjoeun.constant.UserRole;
+
 
 import java.io.IOException;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
 
 @Service
 @RequiredArgsConstructor
@@ -24,15 +26,27 @@ public class RecruitmentSearchService {
   private final ElasticsearchClient esClient;
   private final SearchLogRepository searchLogRepository;
   private static final String INDEX_NAME = "recruitments";
+  private final UserRepository userRepository;
 
   @Transactional
   public List<RecruitmentDocument> search(String keyword, Long userIdx) throws IOException {
     if (keyword != null && !keyword.isBlank()) {
-      searchLogRepository.save(SearchLog.builder()
-              .keyword(keyword)
-              .searchedAt(LocalDateTime.now())
-              .userId(userIdx) // null도 허용 가능
-              .build());
+      // ✅ userIdx가 null이 아닌 경우에만 사용자 조회
+      boolean isAdmin = false;
+      if (userIdx != null) {
+        isAdmin = userRepository.findById(userIdx.intValue())
+                .map(user -> user.getUserRole() == UserRole.ADMIN)
+                .orElse(false);
+      }
+
+      // ✅ admin이 아닐 경우에만 로그 저장
+      if (!isAdmin) {
+        searchLogRepository.save(SearchLog.builder()
+                .keyword(keyword)
+                .searchedAt(LocalDateTime.now())
+                .userId(userIdx) // null 허용
+                .build());
+      }
     }
 
     SearchResponse<RecruitmentDocument> response = esClient.search(s -> s
@@ -49,10 +63,8 @@ public class RecruitmentSearchService {
             .collect(Collectors.toList());
   }
 
-  // ✅ 오버로딩: 비로그인 사용자용
-  public List<RecruitmentDocument> search(String keyword) throws IOException {
-    return search(keyword, null);  // userId 없이 저장됨
-  }
+
+
 
 
 

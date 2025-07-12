@@ -37,8 +37,8 @@ h1 {
 
 .metric {
   background-color: #e8f1ff;
-  width: 180px;
-  height: 70px;
+  min-width: 180px;
+  height: auto;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -49,7 +49,8 @@ h1 {
   font-weight: bold;
   color: #1a73e8;
   text-align: center;
-  font-size: 14px;
+  font-size: 15px;
+  word-break: keep-all;
 }
 
 .metric div {

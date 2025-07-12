@@ -18,14 +18,14 @@
   <!-- 주요 지표 요약 -->
   <div class="metric-boxes">
     <div class="metric">
-      <div>총 채용 공고 수: <strong>71</strong>건</div>
+      <div>총 채용 공고 수: <strong th:text="${dashboard.totalJobCount} + '건'">0건</strong></div>
     </div>
     <div class="metric">
-      <div>마감 임박 공고 수: <strong>7</strong>건</div>
+      <div>마감 임박 공고 수: <strong th:text="${dashboard.closingSoonCount} + '건'">0건</strong></div>
     </div>
     <div class="metric">
-      <div>내 지원 수: <strong>2</strong>건</div>
-      <div>평균 지원 수: <strong>2.5</strong>건</div>
+      <div>내 지원 수: <strong th:text="${dashboard.myApplyCount} + '건'">0건</strong></div>
+      <div>평균 지원 수: <strong th:text="${dashboard.avgApplyCount} + '건'">0건</strong></div>
     </div>
 
   </div>
@@ -47,10 +47,13 @@
   </div>
 
 
-  <div class="chart-container">
-    <h3>일별 공고 등록 추이 (최근 7일)</h3>
-    <canvas id="trendChart"></canvas>
+
+  <div class="chart-section">
+    <h3>내 주간 지원 활동 추이</h3>
+    <canvas id="applyTrendChart"></canvas>
   </div>
+
+
 </div>
 
 <div th:replace="include/footer :: footer"></div>
@@ -67,15 +70,15 @@
 
   const ctx = document.getElementById('regionChart').getContext('2d');
 
-  new Chart(document.getElementById('jobTypeChart'), {
-    type: 'pie',
-    data: {
-      labels: jobTypeLabels,
-      datasets: [{
-        data: jobTypeCounts
-      }]
-    }
-  });
+<!--  new Chart(document.getElementById('jobTypeChart'), {-->
+<!--    type: 'pie',-->
+<!--    data: {-->
+<!--      labels: jobTypeLabels,-->
+<!--      datasets: [{-->
+<!--        data: jobTypeCounts-->
+<!--      }]-->
+<!--    }-->
+<!--  });-->
 
   console.log("📍 지역 라벨:", regionLabels);
   console.log("📊 지역별 채용 수:", regionCounts);
@@ -155,6 +158,64 @@ console.log("🔑 키워드 수치:", topKeywordCounts);
     }
   });
 
+  const applyTrendLabels = /*[[${dashboard.applyTrendLabels}]]*/ [];
+const applyTrendCounts = /*[[${dashboard.applyTrendCounts}]]*/ [];
+
+
+  const applyTrendCtx = document.getElementById('applyTrendChart');
+  if (applyTrendCtx) {
+    new Chart(applyTrendCtx.getContext('2d'), {
+      type: 'line',
+      data: {
+        labels: applyTrendLabels,
+        datasets: [{
+          label: '일일 지원 횟수',
+          data: applyTrendCounts,
+          borderColor: 'rgba(54, 162, 235, 1)',
+          backgroundColor: 'rgba(54, 162, 235, 0.1)',
+          tension: 0.3,
+          fill: true,
+          pointRadius: 5,
+          pointHoverRadius: 7,
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              stepSize: 1
+            },
+            title: {
+              display: true,
+              text: '지원 횟수'
+            }
+          },
+          x: {
+            title: {
+              display: true,
+              text: '날짜'
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                return `${context.parsed.y}건 지원`;
+              }
+            }
+          }
+        }
+      }
+    });
+  } else {
+    console.error("⛔ applyTrendChart 요소를 찾을 수 없습니다.");
+  }
 </script>
 </body>
 </html>
