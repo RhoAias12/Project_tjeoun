@@ -39,6 +39,7 @@ public class MyPageService {
   private final ApplyHistoryRepository applyHistoryRepository;
   private final ResumeRepository resumeRepository;
   private final ApplyHistoryResumeRepository applyHistoryResumeRepository;
+  private final RecruitmentSyncService recruitmentSyncService;
 
   public Page<ApplyHistoryDTO> getPagedApplyHistories(String email, Pageable pageable) {
     Users user = userRepository.findByUserEmail(email);
@@ -373,7 +374,6 @@ public class MyPageService {
   }
 
 
-  // 즐겨찾기 등록 or 해제 (토글 방식)
   @Transactional
   public boolean toggleFavorite(String userEmail, Long recruitmentIdx) {
     Users user = userRepository.findByUserEmail(userEmail);
@@ -386,17 +386,28 @@ public class MyPageService {
 
     Optional<Favorite> existing = favoriteRepository.findByUserAndRecruitment(user, recruitment);
 
+    boolean isAdded;
     if (existing.isPresent()) {
       favoriteRepository.delete(existing.get());
-      return false; // 해제됨
+      isAdded = false; // 해제됨
     } else {
       Favorite favorite = new Favorite();
       favorite.setUser(user);
       favorite.setRecruitment(recruitment);
       favoriteRepository.save(favorite);
-      return true; // 등록됨
+      isAdded = true; // 등록됨
     }
+
+    try {
+      Recruitment updatedRecruitment = recruitmentRepository.findById(recruitmentIdx).get();
+      recruitmentSyncService.save(updatedRecruitment);  // 전체 문서 동기화
+    } catch (Exception e) {
+      System.err.println("Elasticsearch 전체 문서 동기화 실패: " + e.getMessage());
+    }
+
+    return isAdded;
   }
+
 
   // 해당 공고가 스크랩되었는지 여부
   public boolean isFavorited(String userEmail, Long recruitmentIdx) {

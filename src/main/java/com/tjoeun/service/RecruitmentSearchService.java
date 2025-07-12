@@ -89,7 +89,9 @@ public class RecruitmentSearchService {
     }));
 
     // 정렬
-    if ("deadline_asc".equals(sortOrder)) {
+    if ("all".equals(sortOrder)) {
+      builder.sort(s -> s.field(f -> f.field("recruitmentIdx").order(SortOrder.Asc)));
+    }else if ("deadline_asc".equals(sortOrder)) {
       builder.sort(s -> s.field(f -> f.field("deadline").order(SortOrder.Asc)));
     } else if ("deadline_desc".equals(sortOrder)) {
       builder.sort(s -> s.field(f -> f.field("deadline").order(SortOrder.Desc)));
@@ -109,6 +111,37 @@ public class RecruitmentSearchService {
 
     return new PageImpl<>(docs, PageRequest.of(page - 1, pageSize), total);
   }
+
+  public void updateScrapCountInES(Long recruitmentId, int newScrapCount) throws IOException {
+    // 문서 조회
+    RecruitmentDocument doc = getDocumentById(recruitmentId);
+    if (doc == null) {
+      throw new IllegalStateException("해당 공고 문서를 Elasticsearch에서 찾을 수 없습니다.");
+    }
+
+    // 스크랩 수 갱신
+    doc.setScrapCount(newScrapCount);
+
+    // 문서 업데이트 (덮어쓰기)
+    esClient.index(i -> i
+      .index(INDEX_NAME)
+      .id(String.valueOf(recruitmentId))
+      .document(doc)
+    );
+  }
+
+  public RecruitmentDocument getDocumentById(Long recruitmentId) throws IOException {
+    try {
+      return esClient.get(g -> g
+          .index(INDEX_NAME)
+          .id(String.valueOf(recruitmentId)),
+        RecruitmentDocument.class
+      ).source();
+    } catch (Exception e) {
+      return null;
+    }
+  }
+
 
 }
 
