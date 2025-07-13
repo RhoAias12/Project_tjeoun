@@ -1,6 +1,10 @@
 package com.tjoeun.service;
 
 import com.tjoeun.dto.*;
+import com.tjoeun.elasticsearch.repository.ApplyHistorySearchRepository;
+import com.tjoeun.elasticsearch.sync.ApplyHistorySyncService;
+import com.tjoeun.elasticsearch.sync.RecruitmentSyncService;
+import com.tjoeun.elasticsearch.sync.UserSyncService;
 import com.tjoeun.entity.*;
 import com.tjoeun.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +44,9 @@ public class MyPageService {
   private final ResumeRepository resumeRepository;
   private final ApplyHistoryResumeRepository applyHistoryResumeRepository;
   private final RecruitmentSyncService recruitmentSyncService;
+  private final ApplyHistorySyncService applyHistorySyncService;
+  private final UserSyncService userSyncService;
+  private final ApplyHistorySearchRepository applyHistorySearchRepository;
 
   public Page<ApplyHistoryDTO> getPagedApplyHistories(String email, Pageable pageable) {
     Users user = userRepository.findByUserEmail(email);
@@ -82,7 +89,7 @@ public class MyPageService {
       throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
     }
     if (!dto.getUserNickname().equals(user.getUserNickname()) &&
-            userService.nicknameExists(dto.getUserNickname())) {
+      userService.nicknameExists(dto.getUserNickname())) {
       model.addAttribute("nicknameError", "이미 사용 중인 닉네임입니다.");
       return "mypage/member_modify";
     }
@@ -91,8 +98,12 @@ public class MyPageService {
     }
     user.setUserNickname(dto.getUserNickname());
     userRepository.save(user);
+
+    userSyncService.save(user);
+
     return "redirect:/mypage/member_modify?success";
   }
+
 
 
 
@@ -101,6 +112,7 @@ public class MyPageService {
     Users user = userRepository.findByUserEmail(email);
     if (user != null) {
       userRepository.delete(user);
+      userSyncService.deleteById(user.getUserIdx().longValue());
     } else {
       throw new IllegalArgumentException("해당 이메일의 사용자가 존재하지 않습니다.");
     }
@@ -287,6 +299,7 @@ public class MyPageService {
       .build();
 
     applyHistoryRepository.save(applyHistory);
+    applyHistorySyncService.save(applyHistory); //
 
     ApplyHistoryResume applyHistoryResume = ApplyHistoryResume.builder()
       .applyHistory(applyHistory)

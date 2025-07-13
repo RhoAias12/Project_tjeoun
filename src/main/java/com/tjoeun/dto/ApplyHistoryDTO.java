@@ -34,6 +34,8 @@ public class ApplyHistoryDTO {
   private String recruitmentLocation;
   private String recruitmentLogoUrl;
 
+  private String status;
+
   // 추가 필드들 (Resume)
   private String resumeTitle;
   private String resumeImg;

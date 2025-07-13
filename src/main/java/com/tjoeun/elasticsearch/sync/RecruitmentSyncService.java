@@ -1,4 +1,4 @@
-package com.tjoeun.service;
+package com.tjoeun.elasticsearch.sync;
 
 import com.tjoeun.elasticsearch.document.RecruitmentDocument;
 import com.tjoeun.elasticsearch.repository.RecruitmentSearchRepository;
@@ -10,7 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 @Service

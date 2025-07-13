@@ -1,6 +1,7 @@
 package com.tjoeun.service;
 
 import com.tjoeun.dto.*;
+import com.tjoeun.elasticsearch.document.ApplyHistoryDocument;
 import com.tjoeun.elasticsearch.document.RecruitmentDocument;
 import com.tjoeun.elasticsearch.document.UserDocument;
 import com.tjoeun.elasticsearch.repository.UserDocumentRepository;
@@ -37,6 +38,7 @@ public class AdminService {
   private final RecruitmentSearchService recruitmentSearchService;
   private final UserSearchService userSearchService;
   private final UserDocumentRepository userDocumentRepository;
+  private final ApplyHistorySearchService applyHistorySearchService;
 
   // 모든 회원 리스트 조회
   public Page<UserListDto> getPagedUsers(int page, int size, String sortBy) {
@@ -238,7 +240,9 @@ public class AdminService {
     ApplyHistory.ApplyStatus status = ApplyHistory.ApplyStatus.valueOf(newStatus);
     applyHistory.setStatus(status);
     applyHistoryRepository.save(applyHistory);
+    applyHistorySearchService.updateStatusInES(applyHistoryId, status);
   }
+
 
   @Transactional
   public void updateRecruitment(RecruitmentDTO dto) {
@@ -352,5 +356,40 @@ public class AdminService {
 
     return new PageImpl<>(dtoList, esPage.getPageable(), esPage.getTotalElements());
   }
+
+  @Transactional(readOnly = true)
+  public Page<ApplyHistoryDTO> searchApplyHistoriesFromES(
+    String recruitmentTitle,
+    String recruitmentCompany,
+    String userEmail,
+    String userNickname,
+    String status,
+    String startDate,
+    String endDate,
+    int page,
+    int size,
+    String sortOption
+  ) throws IOException {
+
+    Page<ApplyHistoryDocument> esPage = applyHistorySearchService.searchApplyHistories(
+      recruitmentTitle, recruitmentCompany, userEmail, userNickname, status, startDate, endDate, page, size, sortOption
+    );
+
+    List<ApplyHistoryDTO> dtoList = esPage.getContent().stream()
+      .map(doc -> ApplyHistoryDTO.builder()
+        .applyHistoryId(doc.getApplyHistoryId())
+        .statusDisplay(getStatusDisplayName(doc.getStatus()))
+        .status(doc.getStatus())
+        .recruitmentTitle(doc.getRecruitmentTitle())
+        .recruitmentCompany(doc.getRecruitmentCompany())
+        .userEmail(doc.getUserEmail())
+        .userNickname(doc.getUserNickname())
+        .build())
+      .collect(Collectors.toList());
+
+    return new PageImpl<>(dtoList, esPage.getPageable(), esPage.getTotalElements());
+  }
+
+
 
 }

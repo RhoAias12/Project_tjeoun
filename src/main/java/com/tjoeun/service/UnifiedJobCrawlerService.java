@@ -1,5 +1,6 @@
 package com.tjoeun.service;
 
+import com.tjoeun.elasticsearch.sync.RecruitmentSyncService;
 import com.tjoeun.entity.Recruitment;
 import com.tjoeun.repository.RecruitmentRepository;
 import org.jsoup.Jsoup;
