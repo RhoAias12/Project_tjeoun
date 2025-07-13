@@ -6,6 +6,7 @@ import com.tjoeun.repository.ApplyHistoryRepository;
 import com.tjoeun.service.AdminService;
 
 import com.tjoeun.service.RecruitmentService;
+import com.tjoeun.service.UserService;
 import com.tjoeun.util.PaginationUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,6 +33,7 @@ import java.util.List;
 public class AdminController {
     private final AdminService adminService;
     private final RecruitmentService recruitmentService;
+    private final UserService userService;;
 
     @Value("${upload.path}")
     private String uploadRoot;
@@ -94,34 +96,56 @@ public class AdminController {
 
 
 
+//    @PostMapping("/member_list/delete")
+//    public String deleteMember(@RequestParam("userIdx") Integer userIdx,
+//                               @RequestParam(defaultValue = "1") int page,
+//                               @RequestParam(defaultValue = "latest") String sortBy) {
+//        adminService.deleteUserById(userIdx);
+//
+//        int totalUsers = adminService.getTotalUserCount();
+//        int pageSize = 10;
+//        int maxPage = (int) Math.ceil((double) totalUsers / pageSize);
+//
+//        if (page > maxPage && maxPage > 0) {
+//            page = maxPage;
+//        }
+//
+//        return "redirect:/admin/member_list?page=" + page + "&sortBy=" + sortBy;
+//    }
+
     @PostMapping("/member_list/delete")
-    public String deleteMember(@RequestParam("userIdx") Integer userIdx,
-                               @RequestParam(defaultValue = "1") int page,
-                               @RequestParam(defaultValue = "latest") String sortBy) {
-        adminService.deleteUserById(userIdx);
+    public String deleteMember(
+      @RequestParam("userIdx") Integer userIdx,
+      @RequestParam("page") int page,
+      @RequestParam("sortBy") String sortBy,
+      @RequestParam(required = false) String email,
+      @RequestParam(required = false) String nickname
+    ) {
+        userService.deleteById(userIdx);
 
-        int totalUsers = adminService.getTotalUserCount();
-        int pageSize = 10;
-        int maxPage = (int) Math.ceil((double) totalUsers / pageSize);
-
-        if (page > maxPage && maxPage > 0) {
-            page = maxPage;
-        }
-
-        return "redirect:/admin/member_list?page=" + page + "&sortBy=" + sortBy;
+        return "redirect:/admin/member_list?page=" + page +
+          "&sortBy=" + sortBy +
+          (email != null ? "&email=" + email : "") +
+          (nickname != null ? "&nickname=" + nickname : "");
     }
 
 
     @GetMapping("/member_modify")
     public String memberModify(@RequestParam("userIdx") Integer userIdx,
-                               @RequestParam(value = "page", required = false, defaultValue = "1") int page,
-                               @RequestParam(value = "sortBy", required = false, defaultValue = "latest") String sortBy,
+                               @RequestParam(value = "page", defaultValue = "1") int page,
+                               @RequestParam(value = "sortBy", defaultValue = "latest") String sortBy,
+                               @RequestParam(value = "email", required = false) String email,
+                               @RequestParam(value = "nickname", required = false) String nickname,
                                Model model) {
+        System.out.println("email = " + email);
+        System.out.println("nickname = " + nickname);
         UserFormDto dto = adminService.getUserFormDtoById(userIdx);
         model.addAttribute("userFormDto", dto);
         model.addAttribute("userIdx", userIdx);
         model.addAttribute("page", page);
-        model.addAttribute("sortBy", sortBy); // <-- 이 부분 꼭 필요
+        model.addAttribute("sortBy", sortBy);
+        model.addAttribute("email", email);
+        model.addAttribute("nickname", nickname);
         return "admin/ad_member_modify";
     }
 
@@ -135,20 +159,30 @@ public class AdminController {
       Model model,
       RedirectAttributes redirectAttributes,
       @RequestParam(value = "page", required = false, defaultValue = "1") int page,
-      @RequestParam(value = "sortBy", required = false, defaultValue = "latest") String sortBy
+      @RequestParam(value = "sortBy", required = false, defaultValue = "latest") String sortBy,
+      @RequestParam(value = "email", required = false) String email,
+      @RequestParam(value = "nickname", required = false) String nickname
     ) {
         try {
             adminService.updateUser(userIdx, dto, bindingResult, model);
             redirectAttributes.addFlashAttribute("successMessage", "회원정보가 성공적으로 수정되었습니다.");
-            return "redirect:/admin/member_modify?userIdx=" + userIdx + "&page=" + page + "&sortBy=" + sortBy + "&success";
+            return "redirect:/admin/member_modify?userIdx=" + userIdx +
+              "&page=" + page +
+              "&sortBy=" + sortBy +
+              (email != null ? "&email=" + email : "") +
+              (nickname != null ? "&nickname=" + nickname : "") +
+              "&success";
         } catch (IllegalStateException e) {
             model.addAttribute("errorMessage", e.getMessage());
             model.addAttribute("userIdx", userIdx);
             model.addAttribute("page", page);
             model.addAttribute("sortBy", sortBy);
+            model.addAttribute("email", email);
+            model.addAttribute("nickname", nickname);
             return "admin/ad_member_modify";
         }
     }
+
 
 
 

@@ -13,28 +13,32 @@
   />
   <script>
     window.addEventListener('DOMContentLoaded', () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const sortBy = urlParams.get('sortBy') || 'latest'; // 기본값 맞춰서
+      const urlParams = new URLSearchParams(window.location.search);
+      const sortBy = urlParams.get('sortBy') || 'latest';
+      const email = urlParams.get('email') || '';
+      const nickname = urlParams.get('nickname') || '';
 
-    document.querySelectorAll('.pagination a').forEach(link => {
-      const linkUrl = new URL(link.href);
-      linkUrl.searchParams.set('sortBy', sortBy);
-      link.href = linkUrl.toString();
+      document.querySelectorAll('.pagination a').forEach(link => {
+        const linkUrl = new URL(link.href);
+        linkUrl.searchParams.set('sortBy', sortBy);
+        if (email) linkUrl.searchParams.set('email', email);
+        if (nickname) linkUrl.searchParams.set('nickname', nickname);
+        link.href = linkUrl.toString();
+      });
     });
-  });
 
-  function handleSortChange(selectElement) {
-    const selectedSort = selectElement.value;
-    const url = new URL(window.location.href);
-    url.searchParams.set("sortBy", selectedSort);
-    url.searchParams.set("page", 1);
-    // email, nickname 유지
-    const email = url.searchParams.get("email");
-    const nickname = url.searchParams.get("nickname");
-    if(email) url.searchParams.set("email", email);
-    if(nickname) url.searchParams.set("nickname", nickname);
-    window.location.href = url.toString();
-  }
+    function handleSortChange(selectElement) {
+      const selectedSort = selectElement.value;
+      const url = new URL(window.location.href);
+      url.searchParams.set("sortBy", selectedSort);
+      url.searchParams.set("page", 1);
+      // email, nickname 유지
+      const email = url.searchParams.get("email");
+      const nickname = url.searchParams.get("nickname");
+      if(email) url.searchParams.set("email", email);
+      if(nickname) url.searchParams.set("nickname", nickname);
+      window.location.href = url.toString();
+    }
   </script>
   <title>회원관리</title>
 </head>
@@ -76,7 +80,13 @@
     <div class="apply-list" th:if="${userList}">
       <div class="apply-card" th:each="user : ${userList}">
         <div class="apply-info">
-          <a th:href="@{'/admin/member_modify'(userIdx=${user.userIdx}, page=${userPage.number + 1}, sortBy=${sortBy})}"
+          <a th:href="@{'/admin/member_modify'(
+              userIdx=${user.userIdx},
+              page=${userPage.number + 1},
+              sortBy=${sortBy},
+              email=${email},
+              nickname=${nickname}
+            )}"
              style="text-decoration:none; color:inherit; display:block;">
             <div class="job-title" th:text="${user.userEmail}">이메일</div>
             <div class="company-name" th:text="${user.userNickname}">닉네임</div>
@@ -88,8 +98,11 @@
             <input type="hidden" name="userIdx" th:value="${user.userIdx}" />
             <input type="hidden" name="page" th:value="${page}" />
             <input type="hidden" name="sortBy" th:value="${sortBy}" />
+            <input type="hidden" name="email" th:value="${email}" />
+            <input type="hidden" name="nickname" th:value="${nickname}" />
             <button type="submit" class="cancel-btn">삭제</button>
           </form>
+
 
         </div>
       </div>

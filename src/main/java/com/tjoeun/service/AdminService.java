@@ -3,6 +3,7 @@ package com.tjoeun.service;
 import com.tjoeun.dto.*;
 import com.tjoeun.elasticsearch.document.RecruitmentDocument;
 import com.tjoeun.elasticsearch.document.UserDocument;
+import com.tjoeun.elasticsearch.repository.UserDocumentRepository;
 import com.tjoeun.entity.*;
 import com.tjoeun.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ import org.springframework.validation.BindingResult;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -34,6 +36,7 @@ public class AdminService {
   private final RecruitmentRepository recruitmentRepository;
   private final RecruitmentSearchService recruitmentSearchService;
   private final UserSearchService userSearchService;
+  private final UserDocumentRepository userDocumentRepository;
 
   // 모든 회원 리스트 조회
   public Page<UserListDto> getPagedUsers(int page, int size, String sortBy) {
@@ -100,6 +103,7 @@ public class AdminService {
   }
 
 
+  @Transactional
   public void updateUser(Integer userIdx, UserFormDto dto, BindingResult bindingResult, Model model) {
     Users user = userRepository.findById(userIdx)
       .orElseThrow(() -> new IllegalArgumentException("해당 회원을 찾을 수 없습니다."));
@@ -126,6 +130,18 @@ public class AdminService {
     }
 
     userRepository.save(user);
+
+    UserDocument userDoc = UserDocument.builder()
+      .userIdx(user.getUserIdx())
+      .userName(user.getUserName())
+      .userEmail(user.getUserEmail())
+      .userNickname(user.getUserNickname())
+      .userBirth(user.getUserBirth().atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli())
+      .userRole(user.getUserRole().toString())
+      .userCreatedAt(user.getUserCreatedAt())
+      .build();
+
+    userDocumentRepository.save(userDoc);
   }
 
   public Page<ApplyHistoryDTO> getPagedApplyHistory(int page, int size, String sortOption) {

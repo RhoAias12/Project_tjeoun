@@ -9,6 +9,8 @@ import org.springframework.security.core.userdetails.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.ZoneId;
+
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -33,7 +35,7 @@ public class UserService implements UserDetailsService {
       .userName(user.getUserName())
       .userEmail(user.getUserEmail())
       .userNickname(user.getUserNickname())
-      .userBirth(user.getUserBirth())
+      .userBirth(user.getUserBirth().atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli())
       .userRole(user.getUserRole().toString())
       .userCreatedAt(user.getUserCreatedAt())
       .build();
@@ -75,4 +77,15 @@ public class UserService implements UserDetailsService {
 
     return userRepository.findByUserEmail(email);
   }
+
+  @Transactional
+  public void deleteById(Integer userIdx) {
+    Users user = userRepository.findById(userIdx)
+      .orElseThrow(() -> new IllegalArgumentException("사용자 없음"));
+    userRepository.delete(user);
+
+    // Elasticsearch 문서도 삭제
+    userDocumentRepository.deleteById(userIdx);
+  }
+
 }

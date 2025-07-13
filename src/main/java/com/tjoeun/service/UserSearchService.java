@@ -17,6 +17,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -81,7 +83,9 @@ public class UserSearchService {
         .userName(doc.getUserName())
         .userEmail(doc.getUserEmail())
         .userNickname(doc.getUserNickname())
-        .userBirth(doc.getUserBirth())
+        .userBirth(Instant.ofEpochMilli(doc.getUserBirth())
+          .atZone(ZoneId.systemDefault())
+          .toLocalDate())
         .build())
       .toList();
 

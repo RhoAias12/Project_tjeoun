@@ -7,8 +7,6 @@ import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.*;
 
-import java.time.LocalDate;
-
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Getter
 @Setter
@@ -30,7 +28,7 @@ public class UserDocument {
   private String userNickname;
 
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyyMMdd")
-  private LocalDate userBirth;
+  private  Long userBirth;
 
   @Field(type = FieldType.Keyword)
   private String userRole;
