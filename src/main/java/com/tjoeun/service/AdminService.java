@@ -84,6 +84,7 @@ public class AdminService {
     Users user = userRepository.findById(userIdx)
       .orElseThrow(() -> new IllegalArgumentException("사용자 없음"));
     userRepository.delete(user);
+    userDocumentRepository.deleteById(userIdx);
   }
   public int getTotalUserCount() {
     return (int) userRepository.count();
@@ -180,6 +181,11 @@ public class AdminService {
 
   public void deleteRecruitmentById(Long recruitmentIdx) {
     recruitmentRepository.deleteById(recruitmentIdx);
+    try {
+      recruitmentSearchService.deleteById(recruitmentIdx);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 
   public int countRecruitments() {
@@ -262,6 +268,27 @@ public class AdminService {
     entity.setEmploymentType(dto.getEmploymentType());
 
     recruitmentRepository.save(entity);
+
+    RecruitmentDocument doc = RecruitmentDocument.builder()
+      .recruitmentIdx(entity.getRecruitmentIdx())
+      .title(entity.getTitle())
+      .company(entity.getCompany())
+      .deadline(entity.getDeadline())
+      .qualifications(entity.getQualifications())
+      .logoUrl(entity.getLogoUrl())
+      .responsibilities(entity.getResponsibilities())
+      .preferred(entity.getPreferred())
+      .benefits(entity.getBenefits())
+      .location(entity.getLocation())
+      .salary(entity.getSalary())
+      .employmentType(entity.getEmploymentType())
+      .build();
+
+    try {
+      recruitmentSearchService.saveOrUpdate(doc);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 
   public String getStatusDisplayName(String status) {

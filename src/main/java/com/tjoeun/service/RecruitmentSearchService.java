@@ -142,6 +142,21 @@ public class RecruitmentSearchService {
     }
   }
 
+  public void saveOrUpdate(RecruitmentDocument doc) throws IOException {
+    esClient.index(i -> i
+      .index(INDEX_NAME)
+      .id(String.valueOf(doc.getRecruitmentIdx()))
+      .document(doc)
+    );
+  }
+
+  public void deleteById(Long recruitmentIdx) throws IOException {
+    esClient.delete(d -> d
+      .index(INDEX_NAME)
+      .id(String.valueOf(recruitmentIdx))
+    );
+  }
+
 
 }
 
