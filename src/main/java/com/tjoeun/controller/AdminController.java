@@ -36,24 +36,61 @@ public class AdminController {
     @Value("${upload.path}")
     private String uploadRoot;
 
+//    @GetMapping("/member_list")
+//    public String memberList(@RequestParam(defaultValue = "1") int page,
+//                             @RequestParam(defaultValue = "latest") String sortBy,
+//                             @PageableDefault(size = 10) Pageable pageable,
+//                             Model model) {
+//
+//        // 정렬은 서비스에 위임
+//        Page<UserListDto> userPage = adminService.getPagedUsers(page, pageable.getPageSize(), sortBy);
+//
+//        PaginationUtil.setPaging(model, userPage, "/admin/member_list?sortBy=" + sortBy);
+//
+//        model.addAttribute("userList", userPage.getContent());
+//        model.addAttribute("userPage", userPage);
+//        model.addAttribute("sortBy", sortBy);
+//        model.addAttribute("page", page);
+//
+//        return "admin/member_list";
+//    }
+
+
     @GetMapping("/member_list")
-    public String memberList(@RequestParam(defaultValue = "1") int page,
-                             @RequestParam(defaultValue = "latest") String sortBy,
-                             @PageableDefault(size = 10) Pageable pageable,
-                             Model model) {
+    public String memberList(
+      @RequestParam(defaultValue = "1") int page,
+      @RequestParam(defaultValue = "latest") String sortBy,
+      @RequestParam(required = false) String email,
+      @RequestParam(required = false) String nickname,
+      @PageableDefault(size = 10) Pageable pageable,
+      Model model) throws IOException {
 
-        // 정렬은 서비스에 위임
-        Page<UserListDto> userPage = adminService.getPagedUsers(page, pageable.getPageSize(), sortBy);
+        Page<UserListDto> userPage;
 
-        PaginationUtil.setPaging(model, userPage, "/admin/member_list?sortBy=" + sortBy);
+        if ((email != null && !email.isBlank()) || (nickname != null && !nickname.isBlank())) {
+            userPage = adminService.getUsersBySearchFromES(email, nickname, sortBy, page, pageable.getPageSize());
+        } else {
+            userPage = adminService.getPagedUsers(page, pageable.getPageSize(), sortBy);
+        }
+
+        StringBuilder url = new StringBuilder("/admin/member_list?sortBy=" + sortBy);
+        if (email != null && !email.isBlank()) url.append("&email=").append(email);
+        if (nickname != null && !nickname.isBlank()) url.append("&nickname=").append(nickname);
+
+        PaginationUtil.setPaging(model, userPage, url.toString());
 
         model.addAttribute("userList", userPage.getContent());
         model.addAttribute("userPage", userPage);
         model.addAttribute("sortBy", sortBy);
         model.addAttribute("page", page);
 
+        model.addAttribute("email", email);
+        model.addAttribute("nickname", nickname);
+
         return "admin/member_list";
     }
+
+
 
 
 

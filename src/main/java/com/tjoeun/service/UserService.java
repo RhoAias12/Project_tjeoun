@@ -1,5 +1,7 @@
 package com.tjoeun.service;
 
+import com.tjoeun.elasticsearch.document.UserDocument;
+import com.tjoeun.elasticsearch.repository.UserDocumentRepository;
 import com.tjoeun.entity.Users;
 import com.tjoeun.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,11 +15,30 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService implements UserDetailsService {
 
   private final UserRepository userRepository;
+  private final UserDocumentRepository userDocumentRepository;
 
   public Users saveUser(Users user) {
     validateDuplicateUser(user);
-    return userRepository.save(user);
+    Users savedUser = userRepository.save(user);
+
+    UserDocument userDoc = toUserDocument(savedUser);
+    userDocumentRepository.save(userDoc);
+
+    return savedUser;
   }
+
+  private UserDocument toUserDocument(Users user) {
+    return UserDocument.builder()
+      .userIdx(user.getUserIdx())
+      .userName(user.getUserName())
+      .userEmail(user.getUserEmail())
+      .userNickname(user.getUserNickname())
+      .userBirth(user.getUserBirth())
+      .userRole(user.getUserRole().toString())
+      .userCreatedAt(user.getUserCreatedAt())
+      .build();
+  }
+
 
   private void validateDuplicateUser(Users user) {
     if (userRepository.findByUserEmail(user.getUserEmail()) != null) {

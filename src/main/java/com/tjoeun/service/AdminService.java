@@ -2,6 +2,7 @@ package com.tjoeun.service;
 
 import com.tjoeun.dto.*;
 import com.tjoeun.elasticsearch.document.RecruitmentDocument;
+import com.tjoeun.elasticsearch.document.UserDocument;
 import com.tjoeun.entity.*;
 import com.tjoeun.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,7 @@ public class AdminService {
   private final ApplyHistoryRepository applyHistoryRepository;
   private final RecruitmentRepository recruitmentRepository;
   private final RecruitmentSearchService recruitmentSearchService;
+  private final UserSearchService userSearchService;
 
   // 모든 회원 리스트 조회
   public Page<UserListDto> getPagedUsers(int page, int size, String sortBy) {
@@ -310,5 +312,29 @@ public class AdminService {
     return new PageImpl<>(dtoList, esPage.getPageable(), esPage.getTotalElements());
   }
 
+
+  @Transactional(readOnly = true)
+  public Page<UserListDto> getUsersBySearchFromES(
+    String email,
+    String nickname,
+    String sortBy,
+    int page,
+    int size
+  ) throws IOException {
+
+    Page<UserListDto> esPage = userSearchService.searchUsers(email, nickname, sortBy, page, size);
+
+    List<UserListDto> dtoList = esPage.getContent().stream()
+      .map(doc -> UserListDto.builder()
+        .userIdx(doc.getUserIdx())
+        .userName(doc.getUserName())
+        .userEmail(doc.getUserEmail())
+        .userNickname(doc.getUserNickname())
+        .userBirth(doc.getUserBirth())
+        .build())
+      .toList();
+
+    return new PageImpl<>(dtoList, esPage.getPageable(), esPage.getTotalElements());
+  }
 
 }
