@@ -102,6 +102,10 @@ public class RecruitmentSearchService {
     return escaped;
   }
 
+  private String escapeWildcard(String input) {
+    return input.replaceAll("([\\*\\?\\[\\]])", "\\\\$1");
+  }
+
   public Page<RecruitmentDocument> searchJobs(
     String title,
     String content,
@@ -122,10 +126,13 @@ public class RecruitmentSearchService {
     builder.query(q -> q.bool(b -> {
 
       if (title != null && !title.isBlank()) {
+        // 제목에 포함된 특수문자들을 이스케이프 처리
         String escapedTitle = escapeSpecialCharsForSimpleQueryString(title);
-        b.must(m -> m.simpleQueryString(sqs -> sqs
-          .fields("title")
-          .query(escapedTitle)
+
+        // 쿼리에서 이스케이프된 제목을 사용
+        b.must(m -> m.queryString(qs -> qs
+                .fields("title")
+                .query(escapedTitle)  // 이스케이프된 제목으로 검색
         ));
       }
 
