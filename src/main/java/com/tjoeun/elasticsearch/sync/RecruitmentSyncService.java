@@ -4,13 +4,13 @@ import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import com.tjoeun.elasticsearch.document.RecruitmentDocument;
 import com.tjoeun.elasticsearch.repository.RecruitmentSearchRepository;
 import com.tjoeun.entity.Recruitment;
+import com.tjoeun.repository.FavoriteRepository;
 import com.tjoeun.repository.RecruitmentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
@@ -20,9 +20,12 @@ import java.util.Optional;
 public class RecruitmentSyncService {
 
   private final RecruitmentRepository recruitmentRepository;
+  private final RecruitmentSearchRepository recruitmentSearchRepository;
+  private final FavoriteRepository favoriteRepository;
   private final ElasticsearchClient esClient;
   private static final String INDEX_NAME = "recruitments";
 
+  // MariaDB 저장 후 Elasticsearch 색인 생성/갱신
   @Transactional
   public Recruitment save(Recruitment recruitment) throws IOException {
     Recruitment saved = recruitmentRepository.save(recruitment);
@@ -48,6 +51,8 @@ public class RecruitmentSyncService {
   }
 
   private RecruitmentDocument mapToDocument(Recruitment recruitment) {
+    int scrapCount = favoriteRepository.countByRecruitment(recruitment);
+
     return RecruitmentDocument.builder()
       .recruitmentIdx(recruitment.getRecruitmentIdx())
       .title(recruitment.getTitle())
@@ -73,7 +78,7 @@ public class RecruitmentSyncService {
         Optional.ofNullable(recruitment.getSalary()).orElse(""),
         Optional.ofNullable(recruitment.getEmploymentType()).orElse(""))
       )
-      .scrapCount(recruitment.getFavorites() != null ? recruitment.getFavorites().size() : 0)
+      .scrapCount(scrapCount)
       .build();
   }
 
