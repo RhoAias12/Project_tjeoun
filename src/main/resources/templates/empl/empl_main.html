@@ -170,22 +170,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
       <!-- 채용 카드 리스트 -->
-    <div class="card-grid">
-      <div class="job-card"
-           th:each="job : ${jobPage.content}">
-        <a th:href="@{'/empl/empl_detail/' + ${job.recruitmentIdx} + '?prevUrl=' + ${encodedPrevUrl}}">
-          <img th:src="${job.logoUrl}" alt="회사 로고" class="job-logo" />
-          <h3 class="job-title" th:text="${job.title}">공고 제목</h3>
-          <p class="job-deadline"
-             th:text="${#strings.startsWith(job.deadline.toString(), '9999') ? '상시채용' : '마감일: ' + job.deadline}">
-          </p>
-          <p class="scrap-count">
-            스크랩 수: <span th:text="${job.scrapCount != null ? job.scrapCount : 0}">0</span>
-          </p>
-        </a>
-      </div>
+      <div class="card-grid">
+        <div class="job-card"
+             th:each="job : ${jobPage.content}">
+          <a th:href="@{'/empl/empl_detail/' + ${job.recruitmentIdx} + '?prevUrl=' + ${encodedPrevUrl}}">
+            <img th:src="${job.logoUrl}" alt="회사 로고" class="job-logo" />
+            <h3 class="job-title" th:text="${job.title}">공고 제목</h3>
+            <p class="job-deadline"
+               th:text="${#strings.startsWith(job.deadline.toString(), '9999') ? '상시채용' : '마감일: ' + job.deadline}">
+            </p>
+            <p class="scrap-count">
+              스크랩 수: <span th:text="${job.scrapCount != null ? job.scrapCount : 0}">0</span>
+            </p>
+          </a>
+        </div>
 
-    </div>
+      </div>
 
       <!-- chat.html -->
       <!-- 채팅 토글 버튼 -->
