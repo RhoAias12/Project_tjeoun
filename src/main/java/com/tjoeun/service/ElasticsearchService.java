@@ -47,7 +47,7 @@ public class ElasticsearchService {
                 System.out.println("[Elasticsearch] 기존 인덱스 삭제 완료");
             }
 
-            // ✅ 새 인덱스 생성 (커스텀 분석기 포함)
+            //  새 인덱스 생성 (커스텀 분석기 포함)
             elasticsearchClient.indices().create(c -> c
                     .index("recruitments")
                     .settings(s -> s.withJson(new StringReader("""
@@ -93,7 +93,7 @@ public class ElasticsearchService {
         try {
             // 1. 기존 인덱스 삭제
             elasticsearchClient.indices().delete(d -> d.index("recruitments"));
-            System.out.println("🧹 기존 인덱스 삭제 완료");
+            System.out.println(" 기존 인덱스 삭제 완료");
 
             // 2. 인덱스 재생성
             createIndexIfNotExists();
@@ -101,10 +101,10 @@ public class ElasticsearchService {
             // 3. 전체 데이터 재동기화 (DB → Elasticsearch)
             recruitmentSyncService.syncAllToElasticsearch();
 
-            System.out.println("✅ 인덱스 재설정 및 전체 동기화 완료");
+            System.out.println(" 인덱스 재설정 및 전체 동기화 완료");
 
         } catch (IOException e) {
-            System.err.println("❌ 인덱스 재설정 실패");
+            System.err.println(" 인덱스 재설정 실패");
             e.printStackTrace();
         }
     }
