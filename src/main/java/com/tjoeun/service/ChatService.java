@@ -61,39 +61,34 @@ public class ChatService {
 
     try {
       ResponseEntity<String> response = restTemplate.postForEntity(
-        OPENAI_API_URL, request, String.class);
+              OPENAI_API_URL, request, String.class);
+
+      MediaType contentType = response.getHeaders().getContentType();
+      if (contentType == null || !contentType.includes(MediaType.APPLICATION_JSON)) {
+        return "❌ OpenAI 서버 오류 또는 유효하지 않은 응답 형식입니다.";
+      }
 
       ObjectMapper mapper = new ObjectMapper();
       JsonNode root = mapper.readTree(response.getBody());
 
       String reply = root.get("choices")
-        .get(0)
-        .get("message")
-        .get("content")
-        .asText();
+              .get(0)
+              .get("message")
+              .get("content")
+              .asText();
 
-      // Builder 패턴으로 안전하게 저장!
-      ChatHistory userMsg = ChatHistory.builder()
-        .userId(userId)
-        .role("user")
-        .content(prompt)
-        .createdAt(LocalDateTime.now())
-        .build();
-
-      ChatHistory botMsg = ChatHistory.builder()
-        .userId(userId)
-        .role("assistant")
-        .content(reply)
-        .createdAt(LocalDateTime.now())
-        .build();
-
-      chatHistoryRepository.saveAll(List.of(userMsg, botMsg));
+      // DB 저장
+      chatHistoryRepository.saveAll(List.of(
+              ChatHistory.builder().userId(userId).role("user").content(prompt).createdAt(LocalDateTime.now()).build(),
+              ChatHistory.builder().userId(userId).role("assistant").content(reply).createdAt(LocalDateTime.now()).build()
+      ));
 
       return reply.trim();
 
     } catch (Exception e) {
       e.printStackTrace();
-      return "❌ 오류 발생: " + e.getMessage();
+      return "❌ GPT 응답 처리 중 오류: " + e.getMessage();
     }
+
   }
 }
