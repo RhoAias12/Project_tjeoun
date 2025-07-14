@@ -14,14 +14,12 @@ public class UserRestController {
 
   private final UserService userService;
 
-  // 이메일 중복 확인
   @GetMapping("/check-email")
   public ResponseEntity<?> checkEmail(@RequestParam String email) {
     boolean exists = userService.emailExists(email);
     return ResponseEntity.ok(Collections.singletonMap("exists", exists));
   }
 
-  // 닉네임 중복 확인
   @GetMapping("/check-nickname")
   public ResponseEntity<?> checkNickname(@RequestParam String nickname) {
     boolean exists = userService.nicknameExists(nickname);

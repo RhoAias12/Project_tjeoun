@@ -38,7 +38,6 @@ public class UserController {
     if (bindingResult.hasErrors()) {
       return "user/signup";
     }
-
     try {
       Users user = Users.createUser(dto, passwordEncoder);
       userService.saveUser(user);
@@ -46,9 +45,9 @@ public class UserController {
       model.addAttribute("errorMessage", e.getMessage());
       return "user/signup";
     }
-
     return "redirect:/";
   }
+
 
   // 로그인 폼
   @GetMapping("/login")
