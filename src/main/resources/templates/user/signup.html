@@ -90,7 +90,7 @@
       nicknameChecked = false;
       return;
     }
-    const res = await fetch(`/api/user/check-nickname?nickname=${nickname}`);
+    const res = await fetch(`/api/user/check-nickname?nickname=${encodeURIComponent(nickname)}`);
     const data = await res.json();
     if (data.exists) {
       msg.textContent = "이미 존재하는 닉네임입니다.";
