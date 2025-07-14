@@ -14,78 +14,76 @@
     <script>
       //chat 챗봇
   function toggleChat() {
-    const popup = document.getElementById("chatPopup");
-    popup.style.display = (popup.style.display === "block") ? "none" : "block";
-    }
+  const popup = document.getElementById("chatPopup");
+  popup.style.display = (popup.style.display === "block") ? "none" : "block";
+}
 
-    async function sendMessage() {
-    const inputEl = document.getElementById("userInput");
-    const message = inputEl.value.trim();
-    if (!message) return;
+async function sendMessage() {
+  const inputEl = document.getElementById("userInput");
+  const message = inputEl.value.trim();
+  if (!message) return;
 
-    const chatBox = document.getElementById("chatBox");
+  const chatBox = document.getElementById("chatBox");
 
-    // 유저 메시지 추가
-    const userMsg = document.createElement("div");
-    userMsg.className = "message user-message";
-    userMsg.textContent = message;
-    chatBox.appendChild(userMsg);
+  // 유저 메시지 추가
+  const userMsg = document.createElement("div");
+  userMsg.className = "message user-message";
+  userMsg.textContent = message;
+  chatBox.appendChild(userMsg);
 
-    inputEl.value = "";
+  inputEl.value = "";
 
-    try {
+  // 작성중 메시지 추가
+  const botMsg = document.createElement("div");
+  botMsg.className = "message bot-message";
+  botMsg.textContent = "... 작성중입니다";
+  chatBox.appendChild(botMsg);
+  chatBox.scrollTop = chatBox.scrollHeight;
+
+  try {
     const response = await fetch("/api/chat", {
-       method: "POST",
-       headers: { "Content-Type": "application/json" },
-       body: JSON.stringify({ input: message }),
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ input: message }),
     });
 
     if (!response.ok) {
-     const errorText = await response.text();
-     console.error("서버 오류:", errorText);
+      const errorText = await response.text();
+      console.error("서버 오류:", errorText);
 
-     // ❌ 에러도 챗봇 메시지로 표시
-     const botMsg = document.createElement("div");
-     botMsg.className = "message bot-message error-message";
-     botMsg.textContent = "❌ 서버 오류가 발생했어요.\n" + errorText;
-     chatBox.appendChild(botMsg);
-
-     chatBox.scrollTop = chatBox.scrollHeight;
-     return;
+      // 작성중 메시지를 에러로 대체
+      botMsg.classList.add("error-message");
+      botMsg.textContent = "❌ 서버 오류가 발생했어요.\n" + errorText;
+      chatBox.scrollTop = chatBox.scrollHeight;
+      return;
     }
 
     const data = await response.json();
 
-    const botMsg = document.createElement("div");
-    botMsg.className = "message bot-message";
+    // 작성중 메시지를 답변으로 대체
     botMsg.textContent = data.reply;
-    chatBox.appendChild(botMsg);
-
     chatBox.scrollTop = chatBox.scrollHeight;
 
-    } catch (error) {
-      console.error("요청 실패:", error);
+  } catch (error) {
+    console.error("요청 실패:", error);
 
-    // ❌ 네트워크 에러도 챗봇 메시지로 표시
-    const botMsg = document.createElement("div");
-    botMsg.className = "message bot-message error-message";
+    // 작성중 메시지를 네트워크 에러로 대체
+    botMsg.classList.add("error-message");
     botMsg.textContent = "❌ 요청 실패: " + error;
-    chatBox.appendChild(botMsg);
-
     chatBox.scrollTop = chatBox.scrollHeight;
-      }
-    }
+  }
+}
 
-    // 엔터 키로 전송
-    document.addEventListener("DOMContentLoaded", () => {
-      const inputEl = document.getElementById("userInput");
-      inputEl.addEventListener("keydown", function(event) {
-         if (event.key === "Enter" && !event.shiftKey) {
-           event.preventDefault();
-           sendMessage();
-      }
-    });
+// 엔터 키로 전송
+document.addEventListener("DOMContentLoaded", () => {
+  const inputEl = document.getElementById("userInput");
+  inputEl.addEventListener("keydown", function(event) {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      sendMessage();
+    }
   });
+});
 
 
 
