@@ -73,12 +73,11 @@ public class EmplService {
 
 
 
-      // Elasticsearch에서 검색
+    try {
       Page<RecruitmentDocument> esPage = recruitmentSearchService.searchJobs(
               title, content, region, company, startDate, endDate, sortOrder, page, pageSize
       );
 
-      // 문서를 DTO로 변환
       List<RecruitmentDTO> dtoList = esPage.getContent().stream()
               .map(doc -> RecruitmentDTO.builder()
                       .recruitmentIdx(doc.getRecruitmentIdx())
@@ -87,10 +86,16 @@ public class EmplService {
                       .deadline(doc.getDeadline())
                       .scrapCount(doc.getScrapCount() != null ? doc.getScrapCount() : 0)
                       .logoUrl(doc.getLogoUrl())
-                      .build()
-              ).toList();
+                      .build())
+              .toList();
 
       return new PageImpl<>(dtoList, esPage.getPageable(), esPage.getTotalElements());
+
+    } catch (IOException e) {
+      System.out.println("❌ Elasticsearch 공고 검색 실패: " + e.getMessage());
+      return Page.empty();  // 빈 페이지 반환 등 예외 상황 처리
+    }
+
   }
 
 

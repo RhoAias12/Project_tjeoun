@@ -7,6 +7,7 @@ import com.tjoeun.repository.RecruitmentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -38,7 +39,7 @@ public class RecruitmentSaveService {
                     .title(dto.getTitle())
                     .company(dto.getCompany())
                     .location(dto.getLocation())
-                    .deadline(dto.getDeadline())
+                    .deadline(LocalDate.from(dto.getDeadline()))
                     .qualifications(dto.getQualifications())
                     .responsibilities(dto.getResponsibilities())
                     .preferred(dto.getPreferred())

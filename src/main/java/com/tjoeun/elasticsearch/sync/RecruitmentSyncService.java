@@ -1,90 +1,111 @@
 package com.tjoeun.elasticsearch.sync;
 
-import com.tjoeun.document.RecruitmentSearchDocument;
 import com.tjoeun.elasticsearch.document.RecruitmentDocument;
 import com.tjoeun.elasticsearch.repository.RecruitmentSearchRepository;
 import com.tjoeun.entity.Recruitment;
 import com.tjoeun.repository.RecruitmentRepository;
+import com.tjoeun.service.ElasticsearchService;
+import com.tjoeun.elasticsearch.KoreanNounExtractor;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.tjoeun.elasticsearch.KoreanNounExtractor;
 
-
-import java.util.List;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class RecruitmentSyncService {
 
-  private final RecruitmentRepository recruitmentRepository;
-  private final RecruitmentSearchRepository recruitmentSearchRepository;
-  private final ElasticsearchService elasticsearchService;
+    private final RecruitmentRepository recruitmentRepository;
 
-  // MariaDB 저장 후 Elasticsearch 색인 생성/갱신
-  @Transactional
-  public Recruitment save(Recruitment recruitment) {
-    Recruitment saved = recruitmentRepository.save(recruitment);
+    @Lazy
+    private final RecruitmentSearchRepository recruitmentSearchRepository;
 
-    RecruitmentDocument doc = mapToDocument(saved);
-    recruitmentSearchRepository.save(doc);
+    private final ElasticsearchService elasticsearchService;
 
-    return saved;
-  }
-
-  // MariaDB 삭제 후 Elasticsearch 색인 삭제
-  @Transactional
-  public void delete(Long recruitmentIdx) {
-    recruitmentRepository.deleteById(recruitmentIdx);
-    recruitmentSearchRepository.deleteById(recruitmentIdx);
-  }
-
-  private RecruitmentDocument mapToDocument(Recruitment recruitment) {
-    String combined = Optional.ofNullable(recruitment.getTitle()).orElse("") + " " +
-            Optional.ofNullable(recruitment.getResponsibilities()).orElse("");
-
-    String jobKeywords = String.join(" ", KoreanNounExtractor.extractNouns(combined));
+    @PostConstruct
+    public void init() {
+        if (recruitmentSearchRepository.count() == 0) {
+            System.out.println("자동 동기화 실행됨 ✅");
+            syncAllToElasticsearch();
+        } else {
+            System.out.println("ES에 이미 데이터 있음, 자동 동기화 생략");
+        }
+    }
 
 
-    return RecruitmentDocument.builder()
-      .recruitmentIdx(recruitment.getRecruitmentIdx())
-      .title(recruitment.getTitle())
-      .company(recruitment.getCompany())
-      .deadline(safeFormatDeadline(recruitment.getDeadline()))
-      .qualifications(recruitment.getQualifications())
-      .logoUrl(recruitment.getLogoUrl())
-      .responsibilities(recruitment.getResponsibilities())
-      .preferred(recruitment.getPreferred())
-      .benefits(recruitment.getBenefits())
-      .location(recruitment.getLocation())
-      .salary(recruitment.getSalary())
-      .employmentType(recruitment.getEmploymentType())
-      .createdAt(recruitment.getCreatedAt())
-      .combinedContent(String.join(" ",
-        Optional.ofNullable(recruitment.getQualifications()).orElse(""),
-        Optional.ofNullable(recruitment.getResponsibilities()).orElse(""),
-        Optional.ofNullable(recruitment.getPreferred()).orElse(""),
-        Optional.ofNullable(recruitment.getBenefits()).orElse(""),
-        Optional.ofNullable(recruitment.getSalary()).orElse(""),
-        Optional.ofNullable(recruitment.getEmploymentType()).orElse(""))
-      )
-      .scrapCount(recruitment.getFavorites() != null ? recruitment.getFavorites().size() : 0)
-      .jobKeywords(jobKeywords)
-      .build();
-  }
+    // MariaDB 저장 후 Elasticsearch 색인 생성/갱신
+    @Transactional
+    public Recruitment save(Recruitment recruitment) {
+        Recruitment saved = recruitmentRepository.save(recruitment);
+        RecruitmentDocument doc = mapToDocument(saved);
+        recruitmentSearchRepository.save(doc);
+        return saved;
+    }
+
+    // MariaDB 삭제 후 Elasticsearch 색인 삭제
+    @Transactional
+    public void delete(Long recruitmentIdx) {
+        recruitmentRepository.deleteById(recruitmentIdx);
+        recruitmentSearchRepository.deleteById(recruitmentIdx);
+    }
 
     // 전체 DB 데이터를 ES에 동기화
     public void syncAllToElasticsearch() {
-      List<Recruitment> recruitments = recruitmentRepository.findAll();
+        List<Recruitment> recruitments = recruitmentRepository.findAllWithFavorites();
+        System.out.println("불러온 DB 데이터 수: " + recruitments.size());
 
-      for (Recruitment r : recruitments) {
-        recruitmentSearchRepository.save(mapToDocument(r));
-      }
+        int count = 0;
+        for (Recruitment r : recruitments) {
+            try {
+                RecruitmentDocument doc = mapToDocument(r);
+                System.out.println("색인할 문서: " + doc);
+                recruitmentSearchRepository.save(doc);
+                count++;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
 
-      System.out.println(" 전체 ES 동기화 완료: " + recruitments.size() + "건");
+        System.out.println("전체 ES 동기화 완료 ✅ 총 색인 건수: " + count);
+    }
+
+    private RecruitmentDocument mapToDocument(Recruitment recruitment) {
+        String combined = Optional.ofNullable(recruitment.getTitle()).orElse("") + " " +
+                Optional.ofNullable(recruitment.getResponsibilities()).orElse("");
+
+        String jobKeywords = String.join(" ", KoreanNounExtractor.extractNouns(combined));
+
+        return RecruitmentDocument.builder()
+                .recruitmentIdx(recruitment.getRecruitmentIdx())
+                .title(recruitment.getTitle())
+                .company(recruitment.getCompany())
+                .deadline(safeFormatDeadline(recruitment.getDeadline()))
+                .qualifications(recruitment.getQualifications())
+                .logoUrl(recruitment.getLogoUrl())
+                .responsibilities(recruitment.getResponsibilities())
+                .preferred(recruitment.getPreferred())
+                .benefits(recruitment.getBenefits())
+                .location(recruitment.getLocation())
+                .salary(recruitment.getSalary())
+                .employmentType(recruitment.getEmploymentType())
+                .createdAt(recruitment.getCreatedAt())
+                .combinedContent(String.join(" ",
+                        Optional.ofNullable(recruitment.getQualifications()).orElse(""),
+                        Optional.ofNullable(recruitment.getResponsibilities()).orElse(""),
+                        Optional.ofNullable(recruitment.getPreferred()).orElse(""),
+                        Optional.ofNullable(recruitment.getBenefits()).orElse(""),
+                        Optional.ofNullable(recruitment.getSalary()).orElse(""),
+                        Optional.ofNullable(recruitment.getEmploymentType()).orElse(""))
+                )
+                .scrapCount(recruitment.getFavorites() != null ? recruitment.getFavorites().size() : 0)
+                .jobKeywords(jobKeywords)
+                .build();
     }
 
     private LocalDateTime safeFormatDeadline(Object deadline) {
@@ -94,7 +115,6 @@ public class RecruitmentSyncService {
             } else if (deadline instanceof LocalDate) {
                 return ((LocalDate) deadline).atStartOfDay();
             } else if (deadline instanceof String) {
-                // 예: "9999" 같은 잘못된 문자열이면 null 반환
                 return null;
             }
         } catch (Exception e) {

@@ -1,7 +1,7 @@
 package com.tjoeun.elasticsearch;
 
+import com.tjoeun.elasticsearch.sync.RecruitmentSyncService;
 import com.tjoeun.service.ElasticsearchService;
-import com.tjoeun.service.RecruitmentSyncService;
 import com.tjoeun.service.UnifiedJobCrawlerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.ApplicationArguments;
@@ -19,12 +19,11 @@ public class ElasticsearchInitializer implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) {
 
+//        unifiedJobCrawlerService.runCrawler();
 
-//        elasticsearchService.createIndexIfNotExists();
+//       elasticsearchService.createIndexIfNotExists();
 
-     //   unifiedJobCrawlerService.runCrawler();
-
-        elasticsearchService.resetRecruitmentIndex(recruitmentSyncService);
+//        elasticsearchService.resetRecruitmentIndex(recruitmentSyncService);
 
     }
 }

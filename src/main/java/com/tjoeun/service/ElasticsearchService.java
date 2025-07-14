@@ -10,6 +10,7 @@ import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch._types.aggregations.CalendarInterval;
 import co.elastic.clients.util.NamedValue;
 import com.tjoeun.document.RecruitmentSearchDocument;
+import com.tjoeun.elasticsearch.sync.RecruitmentSyncService;
 import com.tjoeun.repository.ApplyHistoryRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +34,12 @@ import java.util.LinkedHashMap;
 public class ElasticsearchService {
 
     private final ElasticsearchClient elasticsearchClient;
+
+    @PostConstruct
+    public void initIndex() {
+        createIndexIfNotExists();
+    }
+
 
     public void createIndexIfNotExists() {
         String indexName = "recruitments";
@@ -74,8 +81,8 @@ public class ElasticsearchService {
                             .properties("title", p -> p.text(t -> t.analyzer("korean_custom")))
                             .properties("combinedContent", p -> p.text(t -> t.analyzer("korean_custom")))
                             .properties("company", p -> p.keyword(k -> k))
-                            .properties("deadline", p -> p.date(d -> d.format("yyyy-MM-dd")))
-                            .properties("createdAt", p -> p.date(d -> d.format("yyyy-MM-dd")))
+                            .properties("deadline", p -> p.date(d -> d.format("strict_date_optional_time")))
+                            .properties("createdAt", p -> p.date(d -> d.format("strict_date_optional_time")))
                             .properties("location", p -> p.keyword(k -> k))
                             .properties("_class", p -> p.keyword(k -> k.index(false).docValues(false)))
                     )

@@ -1,5 +1,6 @@
 package com.tjoeun.dto;
 
+import com.tjoeun.entity.Recruitment;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -50,4 +51,5 @@ public class RecruitmentDTO {
         this.employmentType = entity.getEmploymentType();
         this.scrapCount = entity.getFavorites() != null ? entity.getFavorites().size() : 0;
     }
+
 }

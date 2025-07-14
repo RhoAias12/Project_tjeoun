@@ -62,7 +62,9 @@ public class Recruitment {
   @Column
   private LocalDateTime createdAt;
 
+  @Column(length = 2000)
   private String jobKeywords;
+
 
 
   @PrePersist

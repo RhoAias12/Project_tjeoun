@@ -48,39 +48,35 @@ public class EmplController {
                 userIdx = user.getUserIdx();
             }
         }
-        try {
-            Page<RecruitmentDTO> jobPage = emplService.getJobPage(
-              page, pageSize, sortOrder,
-              title, content, region, company, startDate, endDate);
 
-            String prevUrl = emplService.buildPrevUrl(
-              page, pageSize, sortOrder,
-              title, content, region, company, startDate, endDate);
+        Page<RecruitmentDTO> jobPage = emplService.getJobPage(
+          page, pageSize, sortOrder,
+          title, content, region, company, startDate, endDate, userIdx);
 
-            String encodedPrevUrl = URLEncoder.encode(prevUrl, StandardCharsets.UTF_8);
+        String prevUrl = emplService.buildPrevUrl(
+          page, pageSize, sortOrder,
+          title, content, region, company, startDate, endDate);
 
-            model.addAttribute("jobList", jobPage.getContent());
-            model.addAttribute("jobPage", jobPage);
-            model.addAttribute("sortOrder", sortOrder);
-            model.addAttribute("prevUrl", prevUrl);
-            model.addAttribute("encodedPrevUrl", encodedPrevUrl);
+        String encodedPrevUrl = URLEncoder.encode(prevUrl, StandardCharsets.UTF_8);
 
-            model.addAttribute("title", title);
-            model.addAttribute("content", content);
-            model.addAttribute("region", region);
-            model.addAttribute("company", company);
-            model.addAttribute("startDate", startDate);
-            model.addAttribute("endDate", endDate);
+        model.addAttribute("jobList", jobPage.getContent());
+        model.addAttribute("jobPage", jobPage);
+        model.addAttribute("sortOrder", sortOrder);
+        model.addAttribute("prevUrl", prevUrl);
+        model.addAttribute("encodedPrevUrl", encodedPrevUrl);
 
-            PaginationUtil.setPaging(model, jobPage, "/empl/empl_main",
-              sortOrder, 10,
-              title, content, region, company, startDate, endDate);
+        model.addAttribute("title", title);
+        model.addAttribute("content", content);
+        model.addAttribute("region", region);
+        model.addAttribute("company", company);
+        model.addAttribute("startDate", startDate);
+        model.addAttribute("endDate", endDate);
 
-            return "empl/empl_main";
-      } catch (IOException e) {
-        e.printStackTrace();
-        return "/main";
-      }
+        PaginationUtil.setPaging(model, jobPage, "/empl/empl_main",
+          sortOrder, 10,
+          title, content, region, company, startDate, endDate);
+
+        return "empl/empl_main";
     }
 
     @GetMapping("/empl_detail/{id}")

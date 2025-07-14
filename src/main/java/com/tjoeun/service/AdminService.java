@@ -213,7 +213,7 @@ public class AdminService {
     return ApplyDetailDTO.builder()
       .recruitmentTitle(recruitment.getTitle())
       .recruitmentCompany(recruitment.getCompany())
-      .recruitmentDeadline(recruitment.getDeadline())
+      .recruitmentDeadline(LocalDate.from(recruitment.getDeadline()))
       .recruitmentLocation(recruitment.getLocation())
       .recruitmentLogoUrl(recruitment.getLogoUrl())
 
@@ -352,7 +352,7 @@ public class AdminService {
     };
   }
 
-  public List<RecruitmentDTO> searchAndSortWithFilter(
+  public Page<RecruitmentDTO> searchAndSortWithFilter(
     String title,
     String content,
     String region,
