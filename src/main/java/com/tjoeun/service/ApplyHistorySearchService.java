@@ -129,11 +129,10 @@ public class ApplyHistorySearchService {
       // 특수문자 이스케이프 처리
       String escapedNickname = escapeWildcard(decodedNickname);
 
-      // 특수문자 처리된 nickname을 `wildcard` 쿼리로 사용
       mustQueries.add(Query.of(q -> q
         .wildcard(w -> w
-          .field("userNickname.keyword")  // keyword 필드 사용
-          .value("*" + escapedNickname + "*")  // 이스케이프된 특수문자 포함된 값 검색
+          .field("userNickname")
+          .value("*" + escapedNickname + "*")
         )
       ));
     }
