@@ -3,6 +3,7 @@ package com.tjoeun.dto;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -16,7 +17,7 @@ public class FavoriteDTO {
   private Long recruitmentIdx;
   private String title;
   private String company;
-  private LocalDate deadline;
+  private LocalDateTime deadline;
   private Integer scrapCount;
   private boolean isApplied;
 

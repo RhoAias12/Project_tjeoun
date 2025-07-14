@@ -123,6 +123,8 @@
     <input type="hidden" th:name="userIdx" th:value="${userIdx}" />
     <input type="hidden" name="page" th:value="${page}" />
     <input type="hidden" name="sortBy" th:value="${sortBy}" />
+    <input type="hidden" name="email" th:value="${email}" />
+    <input type="hidden" name="nickname" th:value="${nickname}" />
 
     <!-- 이름 -->
     <div class="form-group">
@@ -168,7 +170,6 @@
     </div>
 
     <!-- 권한 -->
-    <!-- 권한 -->
     <div class="form-group">
       <label>권한</label>
       <div class="role-toggle">
@@ -187,7 +188,7 @@
     <!-- 버튼 -->
     <div class="button-box">
       <button type="submit" class="action-button">수정</button>
-      <a th:href="@{/admin/member_list(page=${page}, sortBy=${sortBy})}" class="action-button">
+      <a th:href="@{/admin/member_list(page=${page}, sortBy=${sortBy}, email=${email}, nickname=${nickname})}" class="action-button">
         목록
       </a>
     </div>

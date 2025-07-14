@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Repository
 public interface RecruitmentRepository extends JpaRepository<Recruitment, Long> , JpaSpecificationExecutor<Recruitment> {
@@ -17,7 +18,7 @@ public interface RecruitmentRepository extends JpaRepository<Recruitment, Long> 
   int deleteByDeadlineBefore(LocalDate date);
 
   // 중복 공고 확인용 메서드 추가
-  boolean existsByTitleAndCompanyAndDeadline(String title, String company, LocalDate deadline);
+  boolean existsByTitleAndCompanyAndDeadline(String title, String company, LocalDateTime deadline);
 
   // 페이징 메서드
   Page<Recruitment> findAll(Pageable pageable);

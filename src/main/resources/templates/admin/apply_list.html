@@ -59,6 +59,35 @@
     });
   </script>
 
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const queryParams = new URLSearchParams(window.location.search);
+      const keys = [
+        "page", "sortOption", "title", "company", "email",
+        "nickname", "status", "startDate", "endDate"
+      ];
+
+      const paramMap = new URLSearchParams();
+      keys.forEach(key => {
+        const val = queryParams.get(key);
+        if (val && val.trim() !== "" && val !== "null") {
+          paramMap.set(key, val);
+        }
+      });
+
+      document.querySelectorAll(".apply-card").forEach(card => {
+        card.addEventListener("click", function (e) {
+          e.preventDefault();
+          const applyId = card.getAttribute("data-id");
+          const baseUrl = `/admin/apply_detail/${applyId}`;
+          const finalUrl = baseUrl + (paramMap.toString() ? `?${paramMap.toString()}` : "");
+          window.location.href = finalUrl;
+        });
+      });
+    });
+  </script>
+
+
 </head>
 <body>
 <!-- 헤더 -->
@@ -71,32 +100,33 @@
 
     <!-- 검색 및 정렬 영역 -->
     <div class="search">
-      <section class="search-bar">
-        <input type="text" placeholder="공고이름" name="title" />
-        <input type="text" placeholder="공고내용" name="content" />
-        <input type="text" placeholder="지역" name="region" />
-        <input type="text" placeholder="회사명" name="company" />
-        <input type="text" placeholder="이메일" name="email" />
-        <input type="text" placeholder="닉네임" name="nickname" />
+      <form class="search-bar" method="get" th:action="@{/admin/apply_list}" id="searchSortForm">
+        <input type="text" name="title" placeholder="공고이름" th:value="${title}" />
+        <input type="text" name="company" placeholder="회사명" th:value="${company}" />
+        <input type="text" name="email" placeholder="이메일" th:value="${email}" />
+        <input type="text" name="nickname" placeholder="닉네임" th:value="${nickname}" />
 
         <div class="date-range">
           <div class="date-group">
             <label for="startDate">시작일</label>
-            <input type="date" name="startDate" id="startDate" />
+            <input type="date" name="startDate" id="startDate" th:value="${startDate}" />
           </div>
           <span class="tilde">-</span>
           <div class="date-group">
             <label for="endDate">마감일</label>
-            <input type="date" name="endDate" id="endDate" />
+            <input type="date" name="endDate" id="endDate" th:value="${endDate}" />
           </div>
+          <button type="submit">검색</button>
         </div>
 
-        <button type="submit">검색</button>
-      </section>
+        <div class="sort-wrapper">
+          <select class="sort-select" name="status" onchange="this.form.submit()">
+            <option value="" th:selected="${status == null}">상태 전체</option>
+            <option value="SUBMITTED" th:selected="${status == 'SUBMITTED'}">진행중</option>
+            <option value="FINALIZED" th:selected="${status == 'FINALIZED'}">합격</option>
+            <option value="REJECTED" th:selected="${status == 'REJECTED'}">불합격</option>
+          </select>
 
-      <!-- 정렬 -->
-      <div class="sort-wrapper">
-        <form method="get" th:action="@{/admin/apply_list}" id="sortForm" style="display: flex; gap: 10px;">
           <select name="sortOption" class="sort-select" onchange="this.form.submit()">
             <option value="all" th:selected="${sortOption == 'all'}">전체</option>
             <option value="apply_latest" th:selected="${sortOption == 'apply_latest'}">지원일: 최신순</option>
@@ -105,22 +135,15 @@
             <option value="deadline_oldest" th:selected="${sortOption == 'deadline_oldest'}">마감일: 오래된순</option>
           </select>
 
-          <select name="statusFilter" class="sort-select" onchange="this.form.submit()">
-            <option value="">상태 전체</option>
-            <option value="SUBMITTED">진행중</option>
-            <option value="PASS">합격</option>
-            <option value="FAIL">불합격</option>
-          </select>
-
           <input type="hidden" name="page" value="1" />
-        </form>
-      </div>
+        </div>
+      </form>
     </div>
 
     <!-- 게시물 리스트 -->
     <div class="apply-list" th:each="apply : ${applyList}">
-      <a th:href="|/admin/apply_detail/${apply.applyHistoryId}?page=${applyPage.number + 1}&sortOption=${sortOption}|" class="apply-card">
-      <div class="apply-info">
+      <a href="#" class="apply-card" th:attr="data-id=${apply.applyHistoryId}">
+        <div class="apply-info">
           <div class="job-title" th:text="${apply.recruitmentTitle}">공고명</div>
           <div class="company-name" th:text="${apply.recruitmentCompany}">회사명</div>
           <div class="nickname">
@@ -129,7 +152,6 @@
             <span th:text="${apply.userNickname}">닉네임</span>
           </div>
         </div>
-
         <div class="apply-buttons">
           <div class="situation open" th:text="${apply.statusDisplay}">지원상태</div>
         </div>

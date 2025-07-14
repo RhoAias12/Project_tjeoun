@@ -2,6 +2,7 @@ package com.tjoeun.service;
 
 import com.tjoeun.constant.UserRole;
 import com.tjoeun.dto.RecruitmentDTO;
+import com.tjoeun.elasticsearch.document.RecruitmentDocument;
 import com.tjoeun.entity.Recruitment;
 import com.tjoeun.repository.RecruitmentRepository;
 import com.tjoeun.repository.UserRepository;
@@ -40,8 +41,8 @@ public class EmplService {
     String content,
     String region,
     String company,
-    String startDateStr,
-    String endDateStr,
+    String startDate,
+    String endDate,
     Integer userIdx) {
 
     // [1] 검색 키워드 존재 시, 로그만 저장 (ES 검색 결과는 안 씀)
@@ -72,59 +73,24 @@ public class EmplService {
 
 
 
-    // [2] 기존 JPA 조건 검색 로직 유지
-    Pageable pageable = PageRequest.of(Math.max(page - 1, 0), pageSize);
+      // Elasticsearch에서 검색
+      Page<RecruitmentDocument> esPage = recruitmentSearchService.searchJobs(
+              title, content, region, company, startDate, endDate, sortOrder, page, pageSize
+      );
 
-    Specification<Recruitment> spec = Specification.where(RecruitmentSpecification.titleContains(title))
-      .and(RecruitmentSpecification.contentContains(content))
-      .and(RecruitmentSpecification.regionContains(region))
-      .and(RecruitmentSpecification.companyContains(company))
-      .and(RecruitmentSpecification.deadlineBetween(startDateStr, endDateStr));
+      // 문서를 DTO로 변환
+      List<RecruitmentDTO> dtoList = esPage.getContent().stream()
+              .map(doc -> RecruitmentDTO.builder()
+                      .recruitmentIdx(doc.getRecruitmentIdx())
+                      .title(doc.getTitle())
+                      .company(doc.getCompany())
+                      .deadline(doc.getDeadline())
+                      .scrapCount(doc.getScrapCount() != null ? doc.getScrapCount() : 0)
+                      .logoUrl(doc.getLogoUrl())
+                      .build()
+              ).toList();
 
-    Specification<Recruitment> finalSpec = (root, query, cb) -> {
-      Predicate basePredicate = spec.toPredicate(root, query, cb);
-
-      if (sortOrder != null && sortOrder.toLowerCase().startsWith("scrap")) {
-        var favoriteJoin = root.join("favorites", JoinType.LEFT);
-        query.groupBy(root.get("recruitmentIdx"));
-
-        if ("scrap_desc".equalsIgnoreCase(sortOrder)) {
-          query.orderBy(cb.desc(cb.countDistinct(favoriteJoin.get("id"))));
-        } else {
-          query.orderBy(cb.asc(cb.countDistinct(favoriteJoin.get("id"))));
-        }
-      } else {
-        switch (sortOrder != null ? sortOrder.toLowerCase() : "") {
-          case "deadline_asc" -> query.orderBy(cb.asc(root.get("deadline")));
-          case "deadline_desc" -> query.orderBy(cb.desc(root.get("deadline")));
-          default -> query.orderBy(cb.desc(root.get("createdAt")));
-        }
-      }
-
-      return basePredicate;
-    };
-
-    Page<Recruitment> recruitmentPage = recruitmentRepository.findAll(finalSpec, pageable);
-
-    List<RecruitmentDTO> dtoList = recruitmentPage.stream()
-      .map(entity -> RecruitmentDTO.builder()
-        .recruitmentIdx(entity.getRecruitmentIdx())
-        .title(entity.getTitle())
-        .company(entity.getCompany())
-        .deadline(entity.getDeadline())
-        .scrapCount(entity.getFavorites() != null ? entity.getFavorites().size() : 0)
-        .qualifications(entity.getQualifications())
-        .logoUrl(entity.getLogoUrl())
-        .responsibilities(entity.getResponsibilities())
-        .preferred(entity.getPreferred())
-        .benefits(entity.getBenefits())
-        .location(entity.getLocation())
-        .salary(entity.getSalary())
-        .employmentType(entity.getEmploymentType())
-        .build())
-      .collect(Collectors.toList());
-
-    return new PageImpl<>(dtoList, pageable, recruitmentPage.getTotalElements());
+      return new PageImpl<>(dtoList, esPage.getPageable(), esPage.getTotalElements());
   }
 
 

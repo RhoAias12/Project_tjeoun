@@ -9,15 +9,16 @@ import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Document(indexName = "recruitments")
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class RecruitmentDocument {
 
   @Id
@@ -29,8 +30,11 @@ public class RecruitmentDocument {
   @Field(type = FieldType.Keyword)
   private String company;
 
-  @Field(type = FieldType.Date, format = DateFormat.date, pattern = "yyyy-MM-dd")
-  private LocalDate deadline;
+//  @Field(type = FieldType.Date, format = DateFormat.date, pattern = "yyyy-MM-dd")
+//  private LocalDate deadline;
+
+  @Field(type = FieldType.Date, format = DateFormat.date_hour_minute_second)
+  private LocalDateTime deadline;
 
   @Field(type = FieldType.Text)
   private String qualifications;
@@ -56,10 +60,15 @@ public class RecruitmentDocument {
   @Field(type = FieldType.Keyword)
   private String employmentType;
 
+  @Field(type = FieldType.Date, format = DateFormat.date_hour_minute_second)
+  private LocalDateTime createdAt;
+
   @Field(type = FieldType.Text)
   private String combinedContent;
 
   @Field(type = FieldType.Text, analyzer = "korean_custom", fielddata = true)
   private String jobKeywords;
-}
 
+  @Field(type = FieldType.Integer)
+  private Integer scrapCount;
+}

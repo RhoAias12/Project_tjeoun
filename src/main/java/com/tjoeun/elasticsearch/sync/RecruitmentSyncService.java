@@ -1,4 +1,4 @@
-package com.tjoeun.service;
+package com.tjoeun.elasticsearch.sync;
 
 import com.tjoeun.document.RecruitmentSearchDocument;
 import com.tjoeun.elasticsearch.document.RecruitmentDocument;
@@ -12,6 +12,8 @@ import com.tjoeun.elasticsearch.KoreanNounExtractor;
 
 
 import java.util.List;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
@@ -48,28 +50,30 @@ public class RecruitmentSyncService {
 
 
     return RecruitmentDocument.builder()
-            .recruitmentIdx(recruitment.getRecruitmentIdx())
-            .title(recruitment.getTitle())
-            .company(recruitment.getCompany())
-            .deadline(recruitment.getDeadline())
-            .qualifications(recruitment.getQualifications())
-            .logoUrl(recruitment.getLogoUrl())
-            .responsibilities(recruitment.getResponsibilities())
-            .preferred(recruitment.getPreferred())
-            .benefits(recruitment.getBenefits())
-            .location(recruitment.getLocation())
-            .salary(recruitment.getSalary())
-            .employmentType(recruitment.getEmploymentType())
-            .combinedContent(String.join(" ",
-                    Optional.ofNullable(recruitment.getQualifications()).orElse(""),
-                    Optional.ofNullable(recruitment.getResponsibilities()).orElse(""),
-                    Optional.ofNullable(recruitment.getPreferred()).orElse(""),
-                    Optional.ofNullable(recruitment.getBenefits()).orElse(""),
-                    Optional.ofNullable(recruitment.getSalary()).orElse(""),
-                    Optional.ofNullable(recruitment.getEmploymentType()).orElse("")
-            ))
-            .jobKeywords(jobKeywords)
-            .build();
+      .recruitmentIdx(recruitment.getRecruitmentIdx())
+      .title(recruitment.getTitle())
+      .company(recruitment.getCompany())
+      .deadline(safeFormatDeadline(recruitment.getDeadline()))
+      .qualifications(recruitment.getQualifications())
+      .logoUrl(recruitment.getLogoUrl())
+      .responsibilities(recruitment.getResponsibilities())
+      .preferred(recruitment.getPreferred())
+      .benefits(recruitment.getBenefits())
+      .location(recruitment.getLocation())
+      .salary(recruitment.getSalary())
+      .employmentType(recruitment.getEmploymentType())
+      .createdAt(recruitment.getCreatedAt())
+      .combinedContent(String.join(" ",
+        Optional.ofNullable(recruitment.getQualifications()).orElse(""),
+        Optional.ofNullable(recruitment.getResponsibilities()).orElse(""),
+        Optional.ofNullable(recruitment.getPreferred()).orElse(""),
+        Optional.ofNullable(recruitment.getBenefits()).orElse(""),
+        Optional.ofNullable(recruitment.getSalary()).orElse(""),
+        Optional.ofNullable(recruitment.getEmploymentType()).orElse(""))
+      )
+      .scrapCount(recruitment.getFavorites() != null ? recruitment.getFavorites().size() : 0)
+      .jobKeywords(jobKeywords)
+      .build();
   }
 
     // 전체 DB 데이터를 ES에 동기화
@@ -83,4 +87,19 @@ public class RecruitmentSyncService {
       System.out.println(" 전체 ES 동기화 완료: " + recruitments.size() + "건");
     }
 
+    private LocalDateTime safeFormatDeadline(Object deadline) {
+        try {
+            if (deadline instanceof LocalDateTime) {
+                return (LocalDateTime) deadline;
+            } else if (deadline instanceof LocalDate) {
+                return ((LocalDate) deadline).atStartOfDay();
+            } else if (deadline instanceof String) {
+                // 예: "9999" 같은 잘못된 문자열이면 null 반환
+                return null;
+            }
+        } catch (Exception e) {
+            return null;
+        }
+        return null;
+    }
 }

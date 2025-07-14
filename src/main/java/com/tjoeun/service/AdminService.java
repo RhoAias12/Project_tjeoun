@@ -1,7 +1,10 @@
 package com.tjoeun.service;
 
 import com.tjoeun.dto.*;
+import com.tjoeun.elasticsearch.document.ApplyHistoryDocument;
 import com.tjoeun.elasticsearch.document.RecruitmentDocument;
+import com.tjoeun.elasticsearch.document.UserDocument;
+import com.tjoeun.elasticsearch.repository.UserDocumentRepository;
 import com.tjoeun.entity.*;
 import com.tjoeun.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +17,8 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -31,6 +36,9 @@ public class AdminService {
   private final ApplyHistoryRepository applyHistoryRepository;
   private final RecruitmentRepository recruitmentRepository;
   private final RecruitmentSearchService recruitmentSearchService;
+  private final UserSearchService userSearchService;
+  private final UserDocumentRepository userDocumentRepository;
+  private final ApplyHistorySearchService applyHistorySearchService;
 
   // 모든 회원 리스트 조회
   public Page<UserListDto> getPagedUsers(int page, int size, String sortBy) {
@@ -76,6 +84,7 @@ public class AdminService {
     Users user = userRepository.findById(userIdx)
       .orElseThrow(() -> new IllegalArgumentException("사용자 없음"));
     userRepository.delete(user);
+    userDocumentRepository.deleteById(userIdx);
   }
   public int getTotalUserCount() {
     return (int) userRepository.count();
@@ -97,6 +106,7 @@ public class AdminService {
   }
 
 
+  @Transactional
   public void updateUser(Integer userIdx, UserFormDto dto, BindingResult bindingResult, Model model) {
     Users user = userRepository.findById(userIdx)
       .orElseThrow(() -> new IllegalArgumentException("해당 회원을 찾을 수 없습니다."));
@@ -123,6 +133,18 @@ public class AdminService {
     }
 
     userRepository.save(user);
+
+    UserDocument userDoc = UserDocument.builder()
+      .userIdx(user.getUserIdx())
+      .userName(user.getUserName())
+      .userEmail(user.getUserEmail())
+      .userNickname(user.getUserNickname())
+      .userBirth(user.getUserBirth().atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli())
+      .userRole(user.getUserRole().toString())
+      .userCreatedAt(user.getUserCreatedAt())
+      .build();
+
+    userDocumentRepository.save(userDoc);
   }
 
   public Page<ApplyHistoryDTO> getPagedApplyHistory(int page, int size, String sortOption) {
@@ -159,6 +181,11 @@ public class AdminService {
 
   public void deleteRecruitmentById(Long recruitmentIdx) {
     recruitmentRepository.deleteById(recruitmentIdx);
+    try {
+      recruitmentSearchService.deleteById(recruitmentIdx);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 
   public int countRecruitments() {
@@ -219,7 +246,9 @@ public class AdminService {
     ApplyHistory.ApplyStatus status = ApplyHistory.ApplyStatus.valueOf(newStatus);
     applyHistory.setStatus(status);
     applyHistoryRepository.save(applyHistory);
+    applyHistorySearchService.updateStatusInES(applyHistoryId, status);
   }
+
 
   @Transactional
   public void updateRecruitment(RecruitmentDTO dto) {
@@ -239,6 +268,27 @@ public class AdminService {
     entity.setEmploymentType(dto.getEmploymentType());
 
     recruitmentRepository.save(entity);
+
+    RecruitmentDocument doc = RecruitmentDocument.builder()
+      .recruitmentIdx(entity.getRecruitmentIdx())
+      .title(entity.getTitle())
+      .company(entity.getCompany())
+      .deadline(entity.getDeadline())
+      .qualifications(entity.getQualifications())
+      .logoUrl(entity.getLogoUrl())
+      .responsibilities(entity.getResponsibilities())
+      .preferred(entity.getPreferred())
+      .benefits(entity.getBenefits())
+      .location(entity.getLocation())
+      .salary(entity.getSalary())
+      .employmentType(entity.getEmploymentType())
+      .build();
+
+    try {
+      recruitmentSearchService.saveOrUpdate(doc);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 
   public String getStatusDisplayName(String status) {
@@ -324,37 +374,6 @@ public class AdminService {
       sort = Sort.unsorted();
     }
 
-    Pageable pageable = PageRequest.of(page - 1, size, sort);
-
-    Page<Recruitment> recruitmentPage = recruitmentRepository.findAll(spec, pageable);
-
-    return recruitmentPage.stream()
-      .map(RecruitmentDTO::new)
-      .collect(Collectors.toList());
-  }
-
-  public Page<RecruitmentDTO> getFilteredRecruitments(
-    String title,
-    String content,
-    String region,
-    String company,
-    String startDate,
-    String endDate,
-    String deadlineSort,
-    int page,
-    int size) {
-
-    Specification<Recruitment> spec = RecruitmentSpecification.searchWithFilter(title, content, region, company, startDate, endDate);
-
-    Sort sort;
-    if ("deadline_desc".equals(deadlineSort)) {
-      sort = Sort.by(Sort.Direction.DESC, "deadline");
-    } else if ("deadline_asc".equals(deadlineSort)) {
-      sort = Sort.by(Sort.Direction.ASC, "deadline");
-    } else {
-      sort = Sort.unsorted();
-    }
-
     int currentPage = Math.max(page - 1, 0);
     Pageable pageable = PageRequest.of(currentPage, size, sort);
 
@@ -363,18 +382,92 @@ public class AdminService {
     return recruitmentPage.map(RecruitmentDTO::new);
   }
 
+  public Page<RecruitmentDTO> getFilteredRecruitmentsByEs(
+    String title,
+    String content,
+    String region,
+    String company,
+    String startDate,
+    String endDate,
+    String deadlineSort,
+    int page,
+    int size) throws IOException {
 
+    // recruitmentSearchService.searchJobs 메서드가 이미 있음
+    Page<RecruitmentDocument> esPage = recruitmentSearchService.searchJobs(
+      title, content, region, company, startDate, endDate, deadlineSort, page, size);
 
-  private Sort getSortByDeadline(String deadlineSort) {
-    return switch (deadlineSort) {
-      case "deadline_desc" -> Sort.by(Sort.Direction.DESC, "deadline");
-      case "deadline_asc" -> Sort.by(Sort.Direction.ASC, "deadline");
-      default -> Sort.unsorted();
-    };
+    List<RecruitmentDTO> dtoList = esPage.getContent().stream()
+      .map(doc -> RecruitmentDTO.builder()
+        .recruitmentIdx(doc.getRecruitmentIdx())
+        .title(doc.getTitle())
+        .company(doc.getCompany())
+        .deadline(doc.getDeadline())
+        .scrapCount(doc.getScrapCount() != null ? doc.getScrapCount() : 0)
+        .logoUrl(doc.getLogoUrl())
+        .build())
+      .toList();
+
+    return new PageImpl<>(dtoList, esPage.getPageable(), esPage.getTotalElements());
   }
 
 
+  @Transactional(readOnly = true)
+  public Page<UserListDto> getUsersBySearchFromES(
+    String email,
+    String nickname,
+    String sortBy,
+    int page,
+    int size
+  ) throws IOException {
 
+    Page<UserListDto> esPage = userSearchService.searchUsers(email, nickname, sortBy, page, size);
+
+    List<UserListDto> dtoList = esPage.getContent().stream()
+      .map(doc -> UserListDto.builder()
+        .userIdx(doc.getUserIdx())
+        .userName(doc.getUserName())
+        .userEmail(doc.getUserEmail())
+        .userNickname(doc.getUserNickname())
+        .userBirth(doc.getUserBirth())
+        .build())
+      .toList();
+
+    return new PageImpl<>(dtoList, esPage.getPageable(), esPage.getTotalElements());
+  }
+
+  @Transactional(readOnly = true)
+  public Page<ApplyHistoryDTO> searchApplyHistoriesFromES(
+    String recruitmentTitle,
+    String recruitmentCompany,
+    String userEmail,
+    String userNickname,
+    String status,
+    String startDate,
+    String endDate,
+    int page,
+    int size,
+    String sortOption
+  ) throws IOException {
+
+    Page<ApplyHistoryDocument> esPage = applyHistorySearchService.searchApplyHistories(
+      recruitmentTitle, recruitmentCompany, userEmail, userNickname, status, startDate, endDate, page, size, sortOption
+    );
+
+    List<ApplyHistoryDTO> dtoList = esPage.getContent().stream()
+      .map(doc -> ApplyHistoryDTO.builder()
+        .applyHistoryId(doc.getApplyHistoryId())
+        .statusDisplay(getStatusDisplayName(doc.getStatus()))
+        .status(doc.getStatus())
+        .recruitmentTitle(doc.getRecruitmentTitle())
+        .recruitmentCompany(doc.getRecruitmentCompany())
+        .userEmail(doc.getUserEmail())
+        .userNickname(doc.getUserNickname())
+        .build())
+      .collect(Collectors.toList());
+
+    return new PageImpl<>(dtoList, esPage.getPageable(), esPage.getTotalElements());
+  }
 
 
 
