@@ -314,7 +314,7 @@ public class AdminService {
         .recruitmentIdx(doc.getRecruitmentIdx())
         .title(doc.getTitle())
         .company(doc.getCompany())
-        .deadline(doc.getDeadline())
+        .deadline(LocalDateTime.parse(doc.getDeadline(), DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")))
         .location(doc.getLocation())
         .logoUrl(doc.getLogoUrl())
         .build())

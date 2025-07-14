@@ -34,7 +34,7 @@ public class ElasticsearchIndexConfig {
                                 "filter": {
                                   "my_stop": {
                                     "type": "stop",
-                                    "stopwords": ["이", "자", "직", "주요", "사", "관리", "동"]
+                                    "stopwords": ["이", "자", "직", "주요", "사", "관리", "동", "님", "만수"]
                                   }
                                 }
                               }

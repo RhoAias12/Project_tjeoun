@@ -23,7 +23,7 @@ public class ElasticsearchInitializer implements ApplicationRunner {
 
 //       elasticsearchService.createIndexIfNotExists();
 
-//        elasticsearchService.resetRecruitmentIndex(recruitmentSyncService);
+        elasticsearchService.resetRecruitmentIndex(recruitmentSyncService);
 
     }
 }
