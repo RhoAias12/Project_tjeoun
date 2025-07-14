@@ -7,10 +7,8 @@ import com.tjoeun.service.EmplService;
 import com.tjoeun.service.MyPageService;
 import com.tjoeun.util.PaginationUtil;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
-import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,21 +16,16 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
-import java.util.Collections;
-import java.util.List;
 
-@RestController
-@RequestMapping("/api/empl")
+@Controller
 @RequiredArgsConstructor
+@RequestMapping("/empl")
 public class EmplController {
-
-    private static final Logger log = LoggerFactory.getLogger(EmplController.class);
 
     private final EmplService emplService;
     private final MyPageService myPageService;
     private final UserRepository userRepository;
 
-    // ✅ [1] 채용공고 메인 페이지 (Thymeleaf 렌더링)
     @GetMapping("/empl_main")
     public String emplMainPage(
             @RequestParam(defaultValue = "1") int page,
@@ -45,8 +38,8 @@ public class EmplController {
             @RequestParam(required = false) String startDate,
             @RequestParam(required = false) String endDate,
             Principal principal,
-            Model model
-    ) {
+            Model model) {
+
         Integer userIdx = null;
         if (principal != null) {
             String userEmail = principal.getName();
@@ -86,7 +79,6 @@ public class EmplController {
         return "empl/empl_main";
     }
 
-    // ✅ [2] 채용공고 상세 페이지 (Thymeleaf 렌더링)
     @GetMapping("/empl_detail/{id}")
     public String emplDetailPage(
             @PathVariable("id") Long id,
@@ -100,8 +92,8 @@ public class EmplController {
             @RequestParam(required = false) String startDate,
             @RequestParam(required = false) String endDate,
             Model model,
-            Principal principal
-    ) {
+            Principal principal) {
+
         RecruitmentDTO dto = emplService.getRecruitmentDetail(id);
         if (dto == null) {
             return "/main";
@@ -126,29 +118,5 @@ public class EmplController {
         model.addAttribute("endDate", endDate);
 
         return "empl/empl_detail";
-    }
-
-    // ✅ [3] 채용공고 리스트 (JSON 반환용 API)
-    @GetMapping("/list")
-    public ResponseEntity<List<RecruitmentDTO>> getRecruitments() {
-        try {
-            List<RecruitmentDTO> list = emplService.getJobPage(
-                    1, 25, "all", null, null, null, null, null, null
-            ).getContent();
-            return ResponseEntity.ok(list);
-        } catch (Exception e) {
-            log.error("채용공고 리스트 조회 실패", e);
-            return ResponseEntity.internalServerError().body(Collections.emptyList());
-        }
-    }
-
-    // ✅ [4] 채용공고 상세 (JSON 반환용 API)
-    @GetMapping("/{id}")
-    public ResponseEntity<RecruitmentDTO> getRecruitment(@PathVariable Long id) {
-        RecruitmentDTO dto = emplService.getRecruitmentDetail(id);
-        if (dto == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(dto);
     }
 }

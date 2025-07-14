@@ -6,14 +6,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-
 
 @Configuration
 @EnableWebSecurity
@@ -25,42 +23,30 @@ public class SecurityConfig {
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     return http
-      .csrf(csrf -> csrf
-        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-        .ignoringRequestMatchers("/api/**")
-      )
-//      .csrf(csrf -> csrf
-//        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-//      )
-//      .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
-      .authorizeHttpRequests(auth -> auth
-        .requestMatchers(
-          "/css/**", "/js/**", "/images/**", "/static/**",
-          "/", "/user/signup", "/user/login", "/api/user/**", "/user/login/error",
-          "/empl/empl_main", "/empl/empl_detail/**", "/api/**"
-        ).permitAll()
-        .requestMatchers("/admin/**").hasRole("ADMIN")
-        .requestMatchers("/mypage/**").authenticated()
-        .anyRequest().authenticated()
-      )
-      .formLogin(form -> form
-        .loginPage("/user/login")
-        .defaultSuccessUrl("/", true)
-        .usernameParameter("userEmail")
-        .failureHandler(new FormLoginAuthenticationFailureHandler())
-      )
-      .logout(logout -> logout
-        .logoutRequestMatcher(new AntPathRequestMatcher("/user/logout"))
-        .logoutSuccessUrl("/")
-      );
-    return http.build();
-  }
-
-  @Bean
-  public WebSecurityCustomizer webSecurityCustomizer() {
-    return (web) -> web.ignoring().requestMatchers(
-      "/static/**", "/css/**", "/js/**", "/images/**"
-    );
+            .csrf(csrf -> csrf
+                    .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                    .ignoringRequestMatchers("/api/chat") // ✅ CSRF 예외 처리 추가!
+            )
+            .authorizeHttpRequests(auth -> auth
+                    .requestMatchers("/css/**", "/js/**", "/images/**", "/static/**").permitAll()
+                    .requestMatchers("/", "/user/signup", "/user/login", "/api/user/**", "/user/login/error").permitAll()
+                    .requestMatchers("/empl/empl_main", "/empl/empl_detail/**").permitAll()
+                    .requestMatchers("/admin/**").hasRole("ADMIN")
+                    .requestMatchers("/mypage/**").authenticated()  // 마이페이지는 로그인 사용자만
+                    .requestMatchers("/api/chat").authenticated()
+                    .anyRequest().authenticated()
+            )
+            .formLogin(form -> form
+                    .loginPage("/user/login")
+                    .defaultSuccessUrl("/", true)
+                    .usernameParameter("userEmail")
+                    .failureHandler(new FormLoginAuthenticationFailureHandler())
+            )
+            .logout(logout -> logout
+                    .logoutRequestMatcher(new AntPathRequestMatcher("/user/logout"))
+                    .logoutSuccessUrl("/")
+            )
+            .build();
   }
 
   @Bean
