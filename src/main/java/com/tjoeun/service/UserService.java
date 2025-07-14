@@ -1,5 +1,7 @@
 package com.tjoeun.service;
 
+import com.tjoeun.elasticsearch.document.UserDocument;
+import com.tjoeun.elasticsearch.repository.UserDocumentRepository;
 import com.tjoeun.entity.Users;
 import com.tjoeun.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -7,17 +9,38 @@ import org.springframework.security.core.userdetails.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.ZoneId;
+
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class UserService implements UserDetailsService {
 
   private final UserRepository userRepository;
+  private final UserDocumentRepository userDocumentRepository;
 
   public Users saveUser(Users user) {
     validateDuplicateUser(user);
-    return userRepository.save(user);
+    Users savedUser = userRepository.save(user);
+
+    UserDocument userDoc = toUserDocument(savedUser);
+    userDocumentRepository.save(userDoc);
+
+    return savedUser;
   }
+
+  private UserDocument toUserDocument(Users user) {
+    return UserDocument.builder()
+      .userIdx(user.getUserIdx())
+      .userName(user.getUserName())
+      .userEmail(user.getUserEmail())
+      .userNickname(user.getUserNickname())
+      .userBirth(user.getUserBirth().atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli())
+      .userRole(user.getUserRole().toString())
+      .userCreatedAt(user.getUserCreatedAt())
+      .build();
+  }
+
 
   private void validateDuplicateUser(Users user) {
     if (userRepository.findByUserEmail(user.getUserEmail()) != null) {
@@ -54,4 +77,15 @@ public class UserService implements UserDetailsService {
 
     return userRepository.findByUserEmail(email);
   }
+
+  @Transactional
+  public void deleteById(Integer userIdx) {
+    Users user = userRepository.findById(userIdx)
+      .orElseThrow(() -> new IllegalArgumentException("사용자 없음"));
+    userRepository.delete(user);
+
+    // Elasticsearch 문서도 삭제
+    userDocumentRepository.deleteById(userIdx);
+  }
+
 }

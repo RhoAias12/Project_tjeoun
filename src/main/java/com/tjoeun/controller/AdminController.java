@@ -6,6 +6,7 @@ import com.tjoeun.repository.ApplyHistoryRepository;
 import com.tjoeun.service.AdminService;
 
 import com.tjoeun.service.RecruitmentService;
+import com.tjoeun.service.UserService;
 import com.tjoeun.util.PaginationUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,59 +33,119 @@ import java.util.List;
 public class AdminController {
     private final AdminService adminService;
     private final RecruitmentService recruitmentService;
+    private final UserService userService;;
 
     @Value("${upload.path}")
     private String uploadRoot;
 
+//    @GetMapping("/member_list")
+//    public String memberList(@RequestParam(defaultValue = "1") int page,
+//                             @RequestParam(defaultValue = "latest") String sortBy,
+//                             @PageableDefault(size = 10) Pageable pageable,
+//                             Model model) {
+//
+//        // 정렬은 서비스에 위임
+//        Page<UserListDto> userPage = adminService.getPagedUsers(page, pageable.getPageSize(), sortBy);
+//
+//        PaginationUtil.setPaging(model, userPage, "/admin/member_list?sortBy=" + sortBy);
+//
+//        model.addAttribute("userList", userPage.getContent());
+//        model.addAttribute("userPage", userPage);
+//        model.addAttribute("sortBy", sortBy);
+//        model.addAttribute("page", page);
+//
+//        return "admin/member_list";
+//    }
+
+
     @GetMapping("/member_list")
-    public String memberList(@RequestParam(defaultValue = "1") int page,
-                             @RequestParam(defaultValue = "latest") String sortBy,
-                             @PageableDefault(size = 10) Pageable pageable,
-                             Model model) {
+    public String memberList(
+      @RequestParam(defaultValue = "1") int page,
+      @RequestParam(defaultValue = "latest") String sortBy,
+      @RequestParam(required = false) String email,
+      @RequestParam(required = false) String nickname,
+      @PageableDefault(size = 10) Pageable pageable,
+      Model model) throws IOException {
 
-        // 정렬은 서비스에 위임
-        Page<UserListDto> userPage = adminService.getPagedUsers(page, pageable.getPageSize(), sortBy);
+        Page<UserListDto> userPage;
 
-        PaginationUtil.setPaging(model, userPage, "/admin/member_list?sortBy=" + sortBy);
+        if ((email != null && !email.isBlank()) || (nickname != null && !nickname.isBlank())) {
+            userPage = adminService.getUsersBySearchFromES(email, nickname, sortBy, page, pageable.getPageSize());
+        } else {
+            userPage = adminService.getPagedUsers(page, pageable.getPageSize(), sortBy);
+        }
+
+        StringBuilder url = new StringBuilder("/admin/member_list?sortBy=" + sortBy);
+        if (email != null && !email.isBlank()) url.append("&email=").append(email);
+        if (nickname != null && !nickname.isBlank()) url.append("&nickname=").append(nickname);
+
+        PaginationUtil.setPaging(model, userPage, url.toString());
 
         model.addAttribute("userList", userPage.getContent());
         model.addAttribute("userPage", userPage);
         model.addAttribute("sortBy", sortBy);
         model.addAttribute("page", page);
 
+        model.addAttribute("email", email);
+        model.addAttribute("nickname", nickname);
+
         return "admin/member_list";
     }
 
 
 
+
+
+//    @PostMapping("/member_list/delete")
+//    public String deleteMember(@RequestParam("userIdx") Integer userIdx,
+//                               @RequestParam(defaultValue = "1") int page,
+//                               @RequestParam(defaultValue = "latest") String sortBy) {
+//        adminService.deleteUserById(userIdx);
+//
+//        int totalUsers = adminService.getTotalUserCount();
+//        int pageSize = 10;
+//        int maxPage = (int) Math.ceil((double) totalUsers / pageSize);
+//
+//        if (page > maxPage && maxPage > 0) {
+//            page = maxPage;
+//        }
+//
+//        return "redirect:/admin/member_list?page=" + page + "&sortBy=" + sortBy;
+//    }
+
     @PostMapping("/member_list/delete")
-    public String deleteMember(@RequestParam("userIdx") Integer userIdx,
-                               @RequestParam(defaultValue = "1") int page,
-                               @RequestParam(defaultValue = "latest") String sortBy) {
-        adminService.deleteUserById(userIdx);
+    public String deleteMember(
+      @RequestParam("userIdx") Integer userIdx,
+      @RequestParam("page") int page,
+      @RequestParam("sortBy") String sortBy,
+      @RequestParam(required = false) String email,
+      @RequestParam(required = false) String nickname
+    ) {
+        userService.deleteById(userIdx);
 
-        int totalUsers = adminService.getTotalUserCount();
-        int pageSize = 10;
-        int maxPage = (int) Math.ceil((double) totalUsers / pageSize);
-
-        if (page > maxPage && maxPage > 0) {
-            page = maxPage;
-        }
-
-        return "redirect:/admin/member_list?page=" + page + "&sortBy=" + sortBy;
+        return "redirect:/admin/member_list?page=" + page +
+          "&sortBy=" + sortBy +
+          (email != null ? "&email=" + email : "") +
+          (nickname != null ? "&nickname=" + nickname : "");
     }
 
 
     @GetMapping("/member_modify")
     public String memberModify(@RequestParam("userIdx") Integer userIdx,
-                               @RequestParam(value = "page", required = false, defaultValue = "1") int page,
-                               @RequestParam(value = "sortBy", required = false, defaultValue = "latest") String sortBy,
+                               @RequestParam(value = "page", defaultValue = "1") int page,
+                               @RequestParam(value = "sortBy", defaultValue = "latest") String sortBy,
+                               @RequestParam(value = "email", required = false) String email,
+                               @RequestParam(value = "nickname", required = false) String nickname,
                                Model model) {
+        System.out.println("email = " + email);
+        System.out.println("nickname = " + nickname);
         UserFormDto dto = adminService.getUserFormDtoById(userIdx);
         model.addAttribute("userFormDto", dto);
         model.addAttribute("userIdx", userIdx);
         model.addAttribute("page", page);
-        model.addAttribute("sortBy", sortBy); // <-- 이 부분 꼭 필요
+        model.addAttribute("sortBy", sortBy);
+        model.addAttribute("email", email);
+        model.addAttribute("nickname", nickname);
         return "admin/ad_member_modify";
     }
 
@@ -98,20 +159,30 @@ public class AdminController {
       Model model,
       RedirectAttributes redirectAttributes,
       @RequestParam(value = "page", required = false, defaultValue = "1") int page,
-      @RequestParam(value = "sortBy", required = false, defaultValue = "latest") String sortBy
+      @RequestParam(value = "sortBy", required = false, defaultValue = "latest") String sortBy,
+      @RequestParam(value = "email", required = false) String email,
+      @RequestParam(value = "nickname", required = false) String nickname
     ) {
         try {
             adminService.updateUser(userIdx, dto, bindingResult, model);
             redirectAttributes.addFlashAttribute("successMessage", "회원정보가 성공적으로 수정되었습니다.");
-            return "redirect:/admin/member_modify?userIdx=" + userIdx + "&page=" + page + "&sortBy=" + sortBy + "&success";
+            return "redirect:/admin/member_modify?userIdx=" + userIdx +
+              "&page=" + page +
+              "&sortBy=" + sortBy +
+              (email != null ? "&email=" + email : "") +
+              (nickname != null ? "&nickname=" + nickname : "") +
+              "&success";
         } catch (IllegalStateException e) {
             model.addAttribute("errorMessage", e.getMessage());
             model.addAttribute("userIdx", userIdx);
             model.addAttribute("page", page);
             model.addAttribute("sortBy", sortBy);
+            model.addAttribute("email", email);
+            model.addAttribute("nickname", nickname);
             return "admin/ad_member_modify";
         }
     }
+
 
 
 
@@ -128,7 +199,8 @@ public class AdminController {
       @PageableDefault(size = 10) Pageable pageable,
       Model model) throws IOException {
 
-        Page<RecruitmentDTO> recruitmentPage = adminService.getFilteredRecruitments(
+        // ES 기반 검색 호출
+        Page<RecruitmentDTO> recruitmentPage = adminService.getFilteredRecruitmentsByEs(
           title, content, region, company, startDate, endDate, deadlineSort, page, pageable.getPageSize()
         );
 
@@ -214,52 +286,156 @@ public class AdminController {
     }
 
     @GetMapping("/apply_list")
-    public String applyListPage(@RequestParam(defaultValue = "1") int page,
-                                @RequestParam(defaultValue = "10") int size,
-                                @RequestParam(defaultValue = "all") String sortOption,
-                                Model model) {
+    public String applyListPage(
+      @RequestParam(defaultValue = "1") int page,
+      @RequestParam(defaultValue = "10") int size,
+      @RequestParam(defaultValue = "all") String sortOption,
+      @RequestParam(required = false) String title,
+      @RequestParam(required = false) String company,
+      @RequestParam(required = false) String email,
+      @RequestParam(required = false) String nickname,
+      @RequestParam(required = false) String status,
+      @RequestParam(required = false) String startDate,
+      @RequestParam(required = false) String endDate,
+      Model model
+    ) throws IOException {
+        System.out.println("status: " + status);
+
         int pageIndex = (page < 1) ? 0 : (page - 1);
 
-        Page<ApplyHistoryDTO> applyPage = adminService.getPagedApplyHistory(pageIndex, size, sortOption);
-        PaginationUtil.setPaging(model, applyPage, "/admin/apply_list");
+        Page<ApplyHistoryDTO> applyPage;
+
+        if ((title != null && !title.isBlank()) ||
+          (company != null && !company.isBlank()) ||
+          (email != null && !email.isBlank()) ||
+          (nickname != null && !nickname.isBlank()) ||
+          (status != null && !status.isBlank()) ||
+          (startDate != null && !startDate.isBlank()) ||
+          (endDate != null && !endDate.isBlank())) {
+
+            applyPage = adminService.searchApplyHistoriesFromES(
+              title, company, email, nickname, status, startDate, endDate, pageIndex, size, sortOption
+            );
+
+        } else {
+            applyPage = adminService.getPagedApplyHistory(pageIndex, size, sortOption);
+        }
+
+        StringBuilder url = new StringBuilder("/admin/apply_list?sortOption=" + sortOption);
+        if (title != null && !title.isBlank()) url.append("&title=").append(title);
+        if (company != null && !company.isBlank()) url.append("&company=").append(company);
+        if (email != null && !email.isBlank()) url.append("&email=").append(email);
+        if (nickname != null && !nickname.isBlank()) url.append("&nickname=").append(nickname);
+        if (status != null && !status.isBlank()) url.append("&status=").append(status);
+        if (startDate != null && !startDate.isBlank()) url.append("&startDate=").append(startDate);
+        if (endDate != null && !endDate.isBlank()) url.append("&endDate=").append(endDate);
+
+        PaginationUtil.setPaging(model, applyPage, url.toString());
 
         model.addAttribute("applyList", applyPage.getContent());
         model.addAttribute("applyPage", applyPage);
         model.addAttribute("sortOption", sortOption);
 
+        model.addAttribute("title", title);
+        model.addAttribute("company", company);
+        model.addAttribute("email", email);
+        model.addAttribute("nickname", nickname);
+        model.addAttribute("status", status);
+        model.addAttribute("startDate", startDate);
+        model.addAttribute("endDate", endDate);
+
         return "admin/apply_list";
     }
 
 
-
-    // 상세 페이지 - applyDetail 메서드
     @GetMapping("/apply_detail/{applyHistoryId}")
-    public String applyDetail(
-      @PathVariable Integer applyHistoryId,
-      @RequestParam(value = "page", defaultValue = "1") int page,
-      @RequestParam(value = "sortOption", defaultValue = "all") String sortOption,
-      Model model
-    ) {
+    public String applyDetail(@PathVariable Integer applyHistoryId,
+                              @RequestParam(value = "page", defaultValue = "1") int page,
+                              @RequestParam(value = "sortOption", defaultValue = "all") String sortOption,
+                              @RequestParam(required = false) String title,
+                              @RequestParam(required = false) String company,
+                              @RequestParam(required = false) String email,
+                              @RequestParam(required = false) String nickname,
+                              @RequestParam(required = false) String status,
+                              @RequestParam(required = false) String startDate,
+                              @RequestParam(required = false) String endDate,
+                              Model model) {
+
         ApplyDetailDTO applyDetail = adminService.getApplyDetailById(applyHistoryId);
         model.addAttribute("applyDetail", applyDetail);
         model.addAttribute("applyHistoryId", applyHistoryId);
         model.addAttribute("page", page);
         model.addAttribute("sortOption", sortOption);
+        model.addAttribute("title", title);
+        model.addAttribute("company", company);
+        model.addAttribute("email", email);
+        model.addAttribute("nickname", nickname);
+        model.addAttribute("status", status);
+        model.addAttribute("startDate", startDate);
+        model.addAttribute("endDate", endDate);
         return "admin/apply_detail";
     }
 
-    // 상태 변경 후 리다이렉트 메서드도 파라미터 이름 맞춤
+
     @PostMapping("/apply_detail/{applyHistoryId}/updateStatus")
     public String updateApplyStatus(@PathVariable Integer applyHistoryId,
                                     @RequestParam("newStatus") String newStatus,
                                     @RequestParam(value = "page", defaultValue = "1") int page,
                                     @RequestParam(value = "sortOption", defaultValue = "apply_latest") String sortOption,
-                                    RedirectAttributes redirectAttributes) {
+                                    @RequestParam(required = false) String title,
+                                    @RequestParam(required = false) String company,
+                                    @RequestParam(required = false) String email,
+                                    @RequestParam(required = false) String nickname,
+                                    @RequestParam(required = false) String status,
+                                    @RequestParam(required = false) String startDate,
+                                    @RequestParam(required = false) String endDate,
+                                    RedirectAttributes redirectAttributes) throws IOException {
+
+        // 1) 상태 변경 처리
         adminService.updateApplyStatus(applyHistoryId, newStatus);
+
+        // 2) 상태명 가져오기
         String statusDisplay = adminService.getStatusDisplayName(newStatus);
+
+        // 3) 변경 후 다시 현재 조건으로 조회해서 페이징 체크
+        int size = 10; // 페이지 사이즈, 실제 사용하는 값과 동일하게 설정 필요
+        int pageIndex = page - 1 < 0 ? 0 : page - 1;
+
+        Page<ApplyHistoryDTO> applyPage;
+
+        if ((title != null && !title.isBlank()) ||
+          (company != null && !company.isBlank()) ||
+          (email != null && !email.isBlank()) ||
+          (nickname != null && !nickname.isBlank()) ||
+          (status != null && !status.isBlank()) ||
+          (startDate != null && !startDate.isBlank()) ||
+          (endDate != null && !endDate.isBlank())) {
+
+            applyPage = adminService.searchApplyHistoriesFromES(
+              title, company, email, nickname, status, startDate, endDate, pageIndex, size, sortOption
+            );
+        } else {
+            applyPage = adminService.getPagedApplyHistory(pageIndex, size, sortOption);
+        }
+
+        // 4) 현재 페이지에 데이터가 없고, page > 1 이면 page를 1 감소
+        if (applyPage.isEmpty() && page > 1) {
+            page = page - 1;
+        }
+
+        // 5) 리다이렉트 시 파라미터 설정
         redirectAttributes.addAttribute("statusChanged", statusDisplay);
         redirectAttributes.addAttribute("page", page);
-        redirectAttributes.addAttribute("sortOption", sortOption);  // 여기 이름 맞춤
+        redirectAttributes.addAttribute("sortOption", sortOption);
+
+        if (title != null) redirectAttributes.addAttribute("title", title);
+        if (company != null) redirectAttributes.addAttribute("company", company);
+        if (email != null) redirectAttributes.addAttribute("email", email);
+        if (nickname != null) redirectAttributes.addAttribute("nickname", nickname);
+        if (status != null) redirectAttributes.addAttribute("status", status);
+        if (startDate != null) redirectAttributes.addAttribute("startDate", startDate);
+        if (endDate != null) redirectAttributes.addAttribute("endDate", endDate);
+
         return "redirect:/admin/apply_detail/" + applyHistoryId;
     }
 

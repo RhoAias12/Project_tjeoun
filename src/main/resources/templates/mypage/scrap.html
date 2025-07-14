@@ -147,7 +147,7 @@ function deleteScrap(recruitmentIdx, userIdx) {
             </div>
             <div class="apply-side">
               <span class="deadline"
-                    th:classappend="${favorite.deadline.isBefore(T(java.time.LocalDate).now())} ? 'gray-text'">
+                    th:classappend="${favorite.deadline.toLocalDate().isBefore(T(java.time.LocalDate).now())} ? 'gray-text'">
                 <span th:if="${favorite.deadline == T(java.time.LocalDate).parse('9999-12-31')}" th:utext="'상시채용'"></span>
                 <span th:unless="${favorite.deadline == T(java.time.LocalDate).parse('9999-12-31')}"
                       th:utext="'마감일<br/>' + ${#temporals.format(favorite.deadline, 'yyyy.MM.dd')}"></span>
