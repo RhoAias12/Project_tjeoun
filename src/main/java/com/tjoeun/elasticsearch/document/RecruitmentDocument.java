@@ -27,8 +27,7 @@ public class RecruitmentDocument {
   private String title;
   private String company;
 
-  @Field(type = FieldType.Date, format = DateFormat.date_hour_minute_second)
-  private LocalDateTime deadline;
+  private String deadline;
 
   private String qualifications;
   private String logoUrl;
