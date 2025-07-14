@@ -14,6 +14,8 @@ import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
@@ -60,6 +62,19 @@ public class ApplyHistorySearchService {
     };
   }
 
+  private String escapeWildcard(String input) {
+    if (input == null) return null;
+    String escaped = input;
+    String[] specialChars = { "+", "-", "&&", "||", "!", "(", ")", "{", "}", "[", "]", "^", "\"", "~", "*", "?", ":", "\\", "/" };
+
+    for (String ch : specialChars) {
+      escaped = escaped.replace(ch, "\\" + ch);
+    }
+
+    return escaped;
+  }
+
+
   public Page<ApplyHistoryDocument> searchApplyHistories(
     String recruitmentTitle,
     String recruitmentCompany,
@@ -73,20 +88,10 @@ public class ApplyHistorySearchService {
     String sortOption
   ) throws IOException {
 
-    System.out.println("searchApplyHistories params -> recruitmentTitle: " + recruitmentTitle
-      + ", recruitmentCompany: " + recruitmentCompany
-      + ", userEmail: " + userEmail
-      + ", userNickname: " + userNickname
-      + ", status: " + status
-      + ", startDate: " + startDate
-      + ", endDate: " + endDate
-      + ", page: " + page
-      + ", size: " + size
-      + ", sortOption: " + sortOption);
-
     BoolQuery.Builder boolQueryBuilder = new BoolQuery.Builder();
     List<Query> mustQueries = new java.util.ArrayList<>();
 
+    // 제목 필터링
     if (recruitmentTitle != null && !recruitmentTitle.isBlank()) {
       mustQueries.add(Query.of(q -> q
         .wildcard(w -> w
@@ -96,6 +101,7 @@ public class ApplyHistorySearchService {
       ));
     }
 
+    // 회사명 필터링
     if (recruitmentCompany != null && !recruitmentCompany.isBlank()) {
       mustQueries.add(Query.of(q -> q
         .wildcard(w -> w
@@ -105,6 +111,7 @@ public class ApplyHistorySearchService {
       ));
     }
 
+    // 이메일 필터링
     if (userEmail != null && !userEmail.isBlank()) {
       mustQueries.add(Query.of(q -> q
         .wildcard(w -> w
@@ -114,15 +121,23 @@ public class ApplyHistorySearchService {
       ));
     }
 
+    // 사용자 닉네임 필터링
     if (userNickname != null && !userNickname.isBlank()) {
+      // URL 디코딩
+      String decodedNickname = URLDecoder.decode(userNickname, StandardCharsets.UTF_8);
+
+      // 특수문자 이스케이프 처리
+      String escapedNickname = escapeWildcard(decodedNickname);
+
       mustQueries.add(Query.of(q -> q
         .wildcard(w -> w
           .field("userNickname")
-          .value("*" + userNickname.toLowerCase() + "*")
+          .value("*" + escapedNickname + "*")
         )
       ));
     }
 
+    // 상태 필터링
     if (status != null && !status.isBlank()) {
       mustQueries.add(Query.of(q -> q
         .term(t -> t
