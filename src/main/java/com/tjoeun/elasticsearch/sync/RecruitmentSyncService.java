@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 @Service
@@ -64,19 +65,12 @@ public class RecruitmentSyncService {
       .build();
   }
 
-  private LocalDateTime safeFormatDeadline(Object deadline) {
+  private String safeFormatDeadline(LocalDateTime deadline) {
     try {
-      if (deadline instanceof LocalDateTime) {
-        return (LocalDateTime) deadline;
-      } else if (deadline instanceof LocalDate) {
-        return ((LocalDate) deadline).atStartOfDay();
-      } else if (deadline instanceof String) {
-        // 예: "9999" 같은 잘못된 문자열이면 null 반환
-        return null;
-      }
+      return deadline != null ? deadline.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")) : null;
     } catch (Exception e) {
       return null;
     }
-    return null;
   }
+
 }
