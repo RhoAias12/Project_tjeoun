@@ -1,6 +1,7 @@
 package com.tjoeun.service;
 
 import com.tjoeun.dto.RecruitmentDTO;
+import com.tjoeun.elasticsearch.document.RecruitmentDocument;
 import com.tjoeun.entity.Recruitment;
 import com.tjoeun.repository.RecruitmentRepository;
 import com.tjoeun.specification.RecruitmentSpecification;
@@ -12,83 +13,64 @@ import org.springframework.stereotype.Service;
 
 import jakarta.persistence.criteria.Predicate;
 
+import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
 public class EmplService {
 
   private final RecruitmentRepository recruitmentRepository;
+  private final RecruitmentSearchService recruitmentSearchService;
 
   public Page<RecruitmentDTO> getJobPage(
-    int page,
-    int pageSize,
+    int page, int pageSize,
     String sortOrder,
     String title,
     String content,
     String region,
     String company,
-    String startDateStr,
-    String endDateStr) {
+    String startDate,
+    String endDate
+  ) throws IOException {
 
-    Pageable pageable = PageRequest.of(Math.max(page - 1, 0), pageSize);
+    // Elasticsearch에서 검색
+    Page<RecruitmentDocument> esPage = recruitmentSearchService.searchJobs(
+      title, content, region, company, startDate, endDate, sortOrder, page, pageSize
+    );
 
-    Specification<Recruitment> spec = Specification.where(RecruitmentSpecification.titleContains(title))
-      .and(RecruitmentSpecification.contentContains(content))
-      .and(RecruitmentSpecification.regionContains(region))
-      .and(RecruitmentSpecification.companyContains(company))
-      .and(RecruitmentSpecification.deadlineBetween(startDateStr, endDateStr));
+    // 문서를 DTO로 변환
+    List<RecruitmentDTO> dtoList = esPage.getContent().stream()
+      .map(doc -> RecruitmentDTO.builder()
+        .recruitmentIdx(doc.getRecruitmentIdx())
+        .title(doc.getTitle())
+        .company(doc.getCompany())
+        .deadline(parseDeadline(doc.getDeadline()))
+        .scrapCount(doc.getScrapCount() != null ? doc.getScrapCount() : 0)
+        .logoUrl(doc.getLogoUrl())
+        .build()
+      ).toList();
 
-    Specification<Recruitment> finalSpec = (root, query, cb) -> {
-      Predicate basePredicate = spec.toPredicate(root, query, cb);
+    return new PageImpl<>(dtoList, esPage.getPageable(), esPage.getTotalElements());
+  }
 
-      if (sortOrder != null && sortOrder.toLowerCase().startsWith("scrap")) {
-        var favoriteJoin = root.join("favorites", JoinType.LEFT);
-        query.groupBy(root.get("recruitmentIdx"));
-
-        if ("scrap_desc".equalsIgnoreCase(sortOrder)) {
-          query.orderBy(cb.desc(cb.countDistinct(favoriteJoin.get("id"))));
-        } else {
-          query.orderBy(cb.asc(cb.countDistinct(favoriteJoin.get("id"))));
-        }
-      } else {
-        switch (sortOrder != null ? sortOrder.toLowerCase() : "") {
-          case "deadline_asc" -> query.orderBy(cb.asc(root.get("deadline")));
-          case "deadline_desc" -> query.orderBy(cb.desc(root.get("deadline")));
-          default -> query.orderBy(cb.desc(root.get("createdAt")));
-        }
-      }
-
-      return basePredicate;
-    };
-
-    Page<Recruitment> recruitmentPage = recruitmentRepository.findAll(finalSpec, pageable);
-
-    List<RecruitmentDTO> dtoList = recruitmentPage.stream()
-      .map(entity -> RecruitmentDTO.builder()
-        .recruitmentIdx(entity.getRecruitmentIdx())
-        .title(entity.getTitle())
-        .company(entity.getCompany())
-        .deadline(entity.getDeadline())
-        .scrapCount(entity.getFavorites() != null ? entity.getFavorites().size() : 0)
-        .qualifications(entity.getQualifications())
-        .logoUrl(entity.getLogoUrl())
-        .responsibilities(entity.getResponsibilities())
-        .preferred(entity.getPreferred())
-        .benefits(entity.getBenefits())
-        .location(entity.getLocation())
-        .salary(entity.getSalary())
-        .employmentType(entity.getEmploymentType())
-        .build())
-      .collect(Collectors.toList());
-
-    return new PageImpl<>(dtoList, pageable, recruitmentPage.getTotalElements());
+  private LocalDateTime parseDeadline(String deadlineStr) {
+    try {
+      return deadlineStr != null
+        ? LocalDateTime.parse(deadlineStr, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+        : null;
+    } catch (DateTimeParseException e) {
+      return null; // 파싱 실패 시 null 반환
+    }
   }
 
 

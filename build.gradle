@@ -61,6 +61,8 @@ dependencies {
     implementation 'co.elastic.clients:elasticsearch-java:8.12.2'
     implementation 'com.fasterxml.jackson.core:jackson-databind'
     implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
+
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 }
 
 def querydslDir = "$buildDir/generated/querydsl"

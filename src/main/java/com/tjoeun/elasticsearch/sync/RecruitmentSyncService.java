@@ -1,4 +1,4 @@
-package com.tjoeun.service;
+package com.tjoeun.elasticsearch.sync;
 
 import com.tjoeun.elasticsearch.document.RecruitmentDocument;
 import com.tjoeun.elasticsearch.repository.RecruitmentSearchRepository;
@@ -8,6 +8,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 @Service
@@ -40,7 +43,7 @@ public class RecruitmentSyncService {
       .recruitmentIdx(recruitment.getRecruitmentIdx())
       .title(recruitment.getTitle())
       .company(recruitment.getCompany())
-      .deadline(recruitment.getDeadline())
+      .deadline(safeFormatDeadline(recruitment.getDeadline()))
       .qualifications(recruitment.getQualifications())
       .logoUrl(recruitment.getLogoUrl())
       .responsibilities(recruitment.getResponsibilities())
@@ -49,6 +52,7 @@ public class RecruitmentSyncService {
       .location(recruitment.getLocation())
       .salary(recruitment.getSalary())
       .employmentType(recruitment.getEmploymentType())
+      .createdAt(recruitment.getCreatedAt())
       .combinedContent(String.join(" ",
         Optional.ofNullable(recruitment.getQualifications()).orElse(""),
         Optional.ofNullable(recruitment.getResponsibilities()).orElse(""),
@@ -57,7 +61,16 @@ public class RecruitmentSyncService {
         Optional.ofNullable(recruitment.getSalary()).orElse(""),
         Optional.ofNullable(recruitment.getEmploymentType()).orElse(""))
       )
+      .scrapCount(recruitment.getFavorites() != null ? recruitment.getFavorites().size() : 0)
       .build();
+  }
+
+  private String safeFormatDeadline(LocalDateTime deadline) {
+    try {
+      return deadline != null ? deadline.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")) : null;
+    } catch (Exception e) {
+      return null;
+    }
   }
 
 }
