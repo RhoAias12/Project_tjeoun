@@ -3,10 +3,7 @@ package com.tjoeun.elasticsearch.document;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.elasticsearch.annotations.DateFormat;
-import org.springframework.data.elasticsearch.annotations.Document;
-import org.springframework.data.elasticsearch.annotations.Field;
-import org.springframework.data.elasticsearch.annotations.FieldType;
+import org.springframework.data.elasticsearch.annotations.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -42,7 +39,12 @@ public class RecruitmentDocument {
   @Field(type = FieldType.Date, format = DateFormat.date_hour_minute_second)
   private LocalDateTime createdAt;
 
-  @Field(type = FieldType.Text)
+  @MultiField(
+    mainField = @Field(type = FieldType.Text),
+    otherFields = {
+      @InnerField(suffix = "keyword", type = FieldType.Keyword)
+    }
+  )
   private String combinedContent;
 
   @Field(type = FieldType.Integer)

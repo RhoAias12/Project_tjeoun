@@ -47,16 +47,32 @@ public class RecruitmentSearchService {
     builder.query(q -> q.bool(b -> {
       // title, content, region, company 필터
       if (title != null && !title.isBlank()) {
-        b.must(m -> m.wildcard(wc -> wc.field("title").value("*" + title + "*")));
+        String escaped = escapeSpecialChars(title);
+        b.must(m -> m.wildcard(w -> w
+          .field("title.keyword")
+          .value("*" + escaped + "*")
+        ));
       }
       if (content != null && !content.isBlank()) {
-        b.must(m -> m.wildcard(mm -> mm.field("combinedContent").value("*" + content + "*")));
+        String escaped = escapeSpecialChars(content);
+        b.must(m -> m.wildcard(w -> w
+          .field("combinedContent.keyword")
+          .value("*" + escaped + "*")
+        ));
       }
       if (region != null && !region.isBlank()) {
-        b.must(m -> m.wildcard(mm -> mm.field("location").value("*" + region + "*")));
+        String escaped = escapeSpecialChars(region);
+        b.must(m -> m.wildcard(w -> w
+          .field("location.keyword")
+          .value("*" + escaped + "*")
+        ));
       }
       if (company != null && !company.isBlank()) {
-        b.must(m -> m.wildcard(wc -> wc.field("combinedContent").value("*" + company + "*")));
+        String escaped = escapeSpecialChars(company);
+        b.must(m -> m.wildcard(w -> w
+          .field("company.keyword")
+          .value("*" + escaped + "*")
+        ));
       }
 
       // 날짜 필터 조건 (deadline or 9999-12-31T00:00:00)
@@ -155,6 +171,12 @@ public class RecruitmentSearchService {
       .index(INDEX_NAME)
       .id(String.valueOf(recruitmentIdx))
     );
+  }
+
+  //추가
+  private String escapeSpecialChars(String input) {
+    if (input == null) return null;
+    return input.replaceAll("([\\\\\\[\\](){}+\\-!^\"~*?:/])", "\\\\$1");
   }
 
 
