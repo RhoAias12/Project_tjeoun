@@ -1,5 +1,6 @@
 package com.tjoeun.elasticsearch.sync;
 
+import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import com.tjoeun.elasticsearch.document.RecruitmentDocument;
 import com.tjoeun.elasticsearch.repository.RecruitmentSearchRepository;
 import com.tjoeun.entity.Recruitment;
@@ -13,7 +14,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -24,8 +25,10 @@ import java.util.Optional;
 public class RecruitmentSyncService {
 
   private final RecruitmentRepository recruitmentRepository;
-  private final FavoriteRepository favoriteRepository;
 
+  private final FavoriteRepository favoriteRepository;
+  private final ElasticsearchClient esClient;
+  private static final String INDEX_NAME = "recruitments";
   @Lazy
   private final RecruitmentSearchRepository recruitmentSearchRepository;
 
@@ -41,22 +44,31 @@ public class RecruitmentSyncService {
         }
     }
 
+  // MariaDB 저장 후 Elasticsearch 색인 생성/갱신
+  @Transactional
+  public Recruitment save(Recruitment recruitment) throws IOException {
+    Recruitment saved = recruitmentRepository.save(recruitment);
+    RecruitmentDocument doc = mapToDocument(saved);
 
-    // MariaDB 저장 후 Elasticsearch 색인 생성/갱신
-    @Transactional
-    public Recruitment save(Recruitment recruitment) {
-        Recruitment saved = recruitmentRepository.save(recruitment);
-        RecruitmentDocument doc = mapToDocument(saved);
-        recruitmentSearchRepository.save(doc);
-        return saved;
-    }
+    esClient.index(i -> i
+      .index(INDEX_NAME)
+      .id(String.valueOf(doc.getRecruitmentIdx()))
+      .document(doc)
+    );
 
-    // MariaDB 삭제 후 Elasticsearch 색인 삭제
-    @Transactional
-    public void delete(Long recruitmentIdx) {
-        recruitmentRepository.deleteById(recruitmentIdx);
-        recruitmentSearchRepository.deleteById(recruitmentIdx);
-    }
+    return saved;
+  }
+
+
+  @Transactional
+  public void delete(Long recruitmentIdx) throws IOException {
+    recruitmentRepository.deleteById(recruitmentIdx);
+
+    esClient.delete(d -> d
+      .index(INDEX_NAME)
+      .id(String.valueOf(recruitmentIdx))
+    );
+  }
 
     // 전체 DB 데이터를 ES에 동기화
     public void syncAllToElasticsearch() {
@@ -86,39 +98,42 @@ public class RecruitmentSyncService {
 
         int scrapCount = favoriteRepository.countByRecruitment(recruitment);
 
-        return RecruitmentDocument.builder()
-                .recruitmentIdx(recruitment.getRecruitmentIdx())
-                .title(recruitment.getTitle())
-                .company(recruitment.getCompany())
-                .deadline(safeFormatDeadline(recruitment.getDeadline()))
-                .qualifications(recruitment.getQualifications())
-                .logoUrl(recruitment.getLogoUrl())
-                .responsibilities(recruitment.getResponsibilities())
-                .preferred(recruitment.getPreferred())
-                .benefits(recruitment.getBenefits())
-                .location(recruitment.getLocation())
-                .salary(recruitment.getSalary())
-                .employmentType(recruitment.getEmploymentType())
-                .createdAt(recruitment.getCreatedAt())
-                .combinedContent(String.join(" ",
-                        Optional.ofNullable(recruitment.getQualifications()).orElse(""),
-                        Optional.ofNullable(recruitment.getResponsibilities()).orElse(""),
-                        Optional.ofNullable(recruitment.getPreferred()).orElse(""),
-                        Optional.ofNullable(recruitment.getBenefits()).orElse(""),
-                        Optional.ofNullable(recruitment.getSalary()).orElse(""),
-                        Optional.ofNullable(recruitment.getEmploymentType()).orElse(""))
-                )
-                .scrapCount(scrapCount)
-                .jobKeywords(jobKeywords)
-                .build();
-    }
+    return RecruitmentDocument.builder()
+      .recruitmentIdx(recruitment.getRecruitmentIdx())
+      .title(recruitment.getTitle())
+      .company(recruitment.getCompany())
+      .deadline(safeFormatDeadline(recruitment.getDeadline()))
+      .qualifications(recruitment.getQualifications())
+      .logoUrl(recruitment.getLogoUrl())
+      .responsibilities(recruitment.getResponsibilities())
+      .preferred(recruitment.getPreferred())
+      .benefits(recruitment.getBenefits())
+      .location(recruitment.getLocation())
+      .salary(recruitment.getSalary())
+      .employmentType(recruitment.getEmploymentType())
+      .createdAt(
+        Optional.ofNullable(recruitment.getCreatedAt())
+          .orElse(LocalDateTime.now())
+      )
+      .combinedContent(String.join(" ",
+        Optional.ofNullable(recruitment.getQualifications()).orElse(""),
+        Optional.ofNullable(recruitment.getResponsibilities()).orElse(""),
+        Optional.ofNullable(recruitment.getPreferred()).orElse(""),
+        Optional.ofNullable(recruitment.getBenefits()).orElse(""),
+        Optional.ofNullable(recruitment.getSalary()).orElse(""),
+        Optional.ofNullable(recruitment.getEmploymentType()).orElse(""))
+      )
+      .scrapCount(scrapCount)
+      .jobKeywords(jobKeywords)
+      .build();
+  }
 
-    private String safeFormatDeadline(LocalDateTime deadline) {
-        try {
-            return deadline != null ? deadline.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")) : null;
-        } catch (Exception e) {
-            return null;
-        }
+  private String safeFormatDeadline(LocalDateTime deadline) {
+    try {
+      return deadline != null ? deadline.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")) : null;
+    } catch (Exception e) {
+      return null;
     }
+  }
+
 }
-

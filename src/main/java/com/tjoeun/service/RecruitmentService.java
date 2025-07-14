@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -189,12 +190,20 @@ public class RecruitmentService {
 
     public Recruitment saveOrUpdate(Recruitment recruitment) {
         Recruitment saved = recruitmentRepository.save(recruitment);
-        recruitmentSyncService.save(saved);
+        try {
+            recruitmentSyncService.save(saved);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         return saved;
     }
 
     public void deleteById(Long id) {
-        recruitmentSyncService.delete(id);
+        try {
+            recruitmentSyncService.delete(id);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

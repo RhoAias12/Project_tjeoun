@@ -20,6 +20,7 @@ import com.tjoeun.constant.UserRole;
 
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -88,134 +89,171 @@ public class RecruitmentSearchService {
             .collect(Collectors.toList());
   }
 
-    public Page<RecruitmentDocument> searchJobs(
-            String title,
-            String content,
-            String region,
-            String company,
-            String startDate,
-            String endDate,
-            String sortOrder,
-            int page,
-            int pageSize
-    ) throws IOException {
+  private static final String[] SPECIAL_CHARS_FOR_SQS = {
+    "+", "-", "&&", "||", "!", "(", ")", "{", "}", "[", "]", "^", "\"", "~", "*", "?", ":", "\\", "/"
+  };
 
-        SearchRequest.Builder builder = new SearchRequest.Builder()
-                .index(INDEX_NAME)
-                .from((page - 1) * pageSize)
-                .size(pageSize);
+  private String escapeSpecialCharsForSimpleQueryString(String input) {
+    if (input == null) return null;
+    String escaped = input;
+    for (String ch : SPECIAL_CHARS_FOR_SQS) {
+      escaped = escaped.replace(ch, "\\" + ch);
+    }
+    return escaped;
+  }
 
-        builder.query(q -> q.bool(b -> {
-            // title, content, region, company 필터
-            if (title != null && !title.isBlank()) {
-                b.must(m -> m.wildcard(wc -> wc.field("title").value("*" + title + "*")));
-            }
-            if (content != null && !content.isBlank()) {
-                b.must(m -> m.wildcard(mm -> mm.field("combinedContent").value("*" + content + "*")));
-            }
-            if (region != null && !region.isBlank()) {
-                b.must(m -> m.wildcard(mm -> mm.field("location").value("*" + region + "*")));
-            }
-            if (company != null && !company.isBlank()) {
-                b.must(m -> m.wildcard(wc -> wc.field("combinedContent").value("*" + company + "*")));
-            }
+  public Page<RecruitmentDocument> searchJobs(
+    String title,
+    String content,
+    String region,
+    String company,
+    String startDate,
+    String endDate,
+    String sortOrder,
+    int page,
+    int pageSize
+  ) throws IOException {
 
-            // 날짜 필터 조건 (deadline or 9999-12-31T00:00:00)
-            if ((startDate != null && !startDate.isBlank()) || (endDate != null && !endDate.isBlank())) {
-                b.filter(f -> f.bool(boolQuery -> {
-                    boolQuery.should(s1 -> s1.range(r -> {
-                        r.field("deadline");
-                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
-                        if (startDate != null && !startDate.isBlank()) {
-                            LocalDateTime start = LocalDate.parse(startDate).atStartOfDay();
-                            r.gte(JsonData.of(start.format(formatter)));
-                        }
-                        if (endDate != null && !endDate.isBlank()) {
-                            LocalDateTime end = LocalDate.parse(endDate).atTime(23, 59, 59);
-                            r.lte(JsonData.of(end.format(formatter)));
-                        }
-                        return r;
-                    }));
+    SearchRequest.Builder builder = new SearchRequest.Builder()
+      .index(INDEX_NAME)
+      .from((page - 1) * pageSize)
+      .size(pageSize);
 
-                    boolQuery.should(s2 -> s2.term(t ->
-                            t.field("deadline").value("9999-12-31T00:00:00")
-                    ));
+    builder.query(q -> q.bool(b -> {
 
-                    boolQuery.minimumShouldMatch("1");
-                    return boolQuery;
-                }));
-            }
+      if (title != null && !title.isBlank()) {
+        String escapedTitle = escapeSpecialCharsForSimpleQueryString(title);
+        b.must(m -> m.simpleQueryString(sqs -> sqs
+          .fields("title")
+          .query(escapedTitle)
+        ));
+      }
 
-            return b;
+      if (content != null && !content.isBlank()) {
+        String escapedContent = escapeSpecialCharsForSimpleQueryString(content);
+        b.must(m -> m.simpleQueryString(sqs -> sqs
+          .fields("combinedContent")
+          .query(escapedContent)
+        ));
+      }
+
+      if (region != null && !region.isBlank()) {
+        String escapedRegion = escapeSpecialCharsForSimpleQueryString(region);
+        b.must(m -> m.simpleQueryString(sqs -> sqs
+          .fields("location")
+          .query(escapedRegion)
+        ));
+      }
+
+      if (company != null && !company.isBlank()) {
+        String escapedCompany = escapeSpecialCharsForSimpleQueryString(company);
+        b.must(m -> m.simpleQueryString(sqs -> sqs
+          .fields("company")
+          .query(escapedCompany)
+        ));
+      }
+
+      // 날짜 범위 필터 (deadline)
+      if ((startDate != null && !startDate.isBlank()) || (endDate != null && !endDate.isBlank())) {
+        b.filter(f -> f.range(r -> {
+          r.field("deadline");
+          DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+          if (startDate != null && !startDate.isBlank()) {
+            LocalDateTime start = LocalDate.parse(startDate).atStartOfDay();
+            r.gte(JsonData.of(start.format(formatter)));
+          }
+          if (endDate != null && !endDate.isBlank()) {
+            LocalDateTime end = LocalDate.parse(endDate).atTime(23, 59, 59);
+            r.lte(JsonData.of(end.format(formatter)));
+          }
+          return r;
         }));
+      }
 
-        // 정렬
-        if ("all".equals(sortOrder)) {
-            builder.sort(s -> s.field(f -> f.field("recruitmentIdx").order(SortOrder.Asc)));
-        }else if ("deadline_asc".equals(sortOrder)) {
-            builder.sort(s -> s.field(f -> f.field("deadline").order(SortOrder.Asc)));
-        } else if ("deadline_desc".equals(sortOrder)) {
-            builder.sort(s -> s.field(f -> f.field("deadline").order(SortOrder.Desc)));
-        } else if ("scrap_desc".equals(sortOrder)) {
-            builder.sort(s -> s.field(f -> f.field("scrapCount").order(SortOrder.Desc)));
-        } else if ("scrap_asc".equals(sortOrder)) {
-            builder.sort(s -> s.field(f -> f.field("scrapCount").order(SortOrder.Asc)));
-        } else {
-            builder.sort(s -> s.field(f -> f.field("createdAt").order(SortOrder.Desc)));
-        }
+      return b;
+    }));
 
-        SearchResponse<RecruitmentDocument> response = esClient.search(builder.build(), RecruitmentDocument.class);
-        List<RecruitmentDocument> docs = response.hits().hits().stream()
-                .map(Hit::source)
-                .collect(Collectors.toList());
-        long total = response.hits().total().value();
-
-        return new PageImpl<>(docs, PageRequest.of(page - 1, pageSize), total);
+    // 정렬
+    switch (sortOrder) {
+      case "all":
+        builder.sort(s -> s.field(f -> f.field("recruitmentIdx").order(SortOrder.Asc)));
+        break;
+      case "deadline_asc":
+        builder.sort(s -> s.field(f -> f.field("deadline").order(SortOrder.Asc)));
+        break;
+      case "deadline_desc":
+        builder.sort(s -> s.field(f -> f.field("deadline").order(SortOrder.Desc)));
+        break;
+      case "scrap_desc":
+        builder.sort(s -> s.field(f -> f.field("scrapCount").order(SortOrder.Desc)));
+        break;
+      case "scrap_asc":
+        builder.sort(s -> s.field(f -> f.field("scrapCount").order(SortOrder.Asc)));
+        break;
+      default:
+        builder.sort(s -> s.field(f -> f.field("createdAt").order(SortOrder.Desc)));
+        break;
     }
 
-    public void updateScrapCountInES(Long recruitmentId, int newScrapCount) throws IOException {
-        // 문서 조회
-        RecruitmentDocument doc = getDocumentById(recruitmentId);
-        if (doc == null) {
-            throw new IllegalStateException("해당 공고 문서를 Elasticsearch에서 찾을 수 없습니다.");
-        }
+    SearchRequest request = builder.build();
 
-        // 스크랩 수 갱신
-        doc.setScrapCount(newScrapCount);
+    SearchResponse<RecruitmentDocument> response = esClient.search(request, RecruitmentDocument.class);
 
-        // 문서 업데이트 (덮어쓰기)
-        esClient.index(i -> i
-                .index(INDEX_NAME)
-                .id(String.valueOf(recruitmentId))
-                .document(doc)
-        );
+    List<RecruitmentDocument> docs = response.hits().hits().stream()
+      .map(Hit::source)
+      .collect(Collectors.toList());
+
+    long total = response.hits().total().value();
+
+    return new PageImpl<>(docs, PageRequest.of(page - 1, pageSize), total);
+  }
+
+
+  public void updateScrapCountInES(Long recruitmentId, int newScrapCount) throws IOException {
+    // 문서 조회
+    RecruitmentDocument doc = getDocumentById(recruitmentId);
+    if (doc == null) {
+      throw new IllegalStateException("해당 공고 문서를 Elasticsearch에서 찾을 수 없습니다.");
     }
 
-    public RecruitmentDocument getDocumentById(Long recruitmentId) throws IOException {
-        try {
-            return esClient.get(g -> g
-                            .index(INDEX_NAME)
-                            .id(String.valueOf(recruitmentId)),
-                    RecruitmentDocument.class
-            ).source();
-        } catch (Exception e) {
-            return null;
-        }
-    }
+    // 스크랩 수 갱신
+    doc.setScrapCount(newScrapCount);
 
-    public void saveOrUpdate(RecruitmentDocument doc) throws IOException {
-        esClient.index(i -> i
-                .index(INDEX_NAME)
-                .id(String.valueOf(doc.getRecruitmentIdx()))
-                .document(doc)
-        );
-    }
+    // 문서 업데이트 (덮어쓰기)
+    esClient.index(i -> i
+      .index(INDEX_NAME)
+      .id(String.valueOf(recruitmentId))
+      .document(doc)
+    );
+  }
 
-    public void deleteById(Long recruitmentIdx) throws IOException {
-        esClient.delete(d -> d
-                .index(INDEX_NAME)
-                .id(String.valueOf(recruitmentIdx))
-        );
+  public RecruitmentDocument getDocumentById(Long recruitmentId) throws IOException {
+    try {
+      return esClient.get(g -> g
+          .index(INDEX_NAME)
+          .id(String.valueOf(recruitmentId)),
+        RecruitmentDocument.class
+      ).source();
+    } catch (Exception e) {
+      return null;
     }
+  }
+
+  public void saveOrUpdate(RecruitmentDocument doc) throws IOException {
+    esClient.index(i -> i
+      .index(INDEX_NAME)
+      .id(String.valueOf(doc.getRecruitmentIdx()))
+      .document(doc)
+    );
+  }
+
+  public void deleteById(Long recruitmentIdx) throws IOException {
+    esClient.delete(d -> d
+      .index(INDEX_NAME)
+      .id(String.valueOf(recruitmentIdx))
+    );
+  }
+
+
 }
 

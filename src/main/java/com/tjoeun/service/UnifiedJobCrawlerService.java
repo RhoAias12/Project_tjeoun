@@ -49,7 +49,7 @@ public class UnifiedJobCrawlerService {
   private RecruitmentSyncService recruitmentSyncService;
 
   private final String logoSaveDir = "src/main/resources/static/images/logos/";
-  @Scheduled(cron = "0 0 4 * * *", zone = "Asia/Seoul")
+  @Scheduled(cron = "0 17 16 * * *", zone = "Asia/Seoul")
 //  @Scheduled(fixedDelay = 10000) // 10초마다 실행
   public void runCrawler() {
     List<Recruitment> allJobs = new ArrayList<>();
@@ -81,10 +81,11 @@ public class UnifiedJobCrawlerService {
     for (Recruitment job : cleanedJobs) {
       try {
         Recruitment saved = repository.save(job);
-        recruitmentSyncService.save(saved); // Elasticsearch에 색인
+        recruitmentSyncService.save(saved);
         savedCount++;
       } catch (Exception e) {
         System.out.println("[저장 실패] 중복 또는 오류: " + job.getTitle());
+        e.printStackTrace();
       }
     }
 
