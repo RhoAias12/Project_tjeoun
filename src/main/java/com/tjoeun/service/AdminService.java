@@ -18,7 +18,9 @@ import org.springframework.validation.BindingResult;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -39,6 +41,8 @@ public class AdminService {
   private final UserSearchService userSearchService;
   private final UserDocumentRepository userDocumentRepository;
   private final ApplyHistorySearchService applyHistorySearchService;
+
+  DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
   // 모든 회원 리스트 조회
   public Page<UserListDto> getPagedUsers(int page, int size, String sortBy) {
@@ -273,7 +277,7 @@ public class AdminService {
       .recruitmentIdx(entity.getRecruitmentIdx())
       .title(entity.getTitle())
       .company(entity.getCompany())
-      .deadline(entity.getDeadline())
+      .deadline(entity.getDeadline() != null ? entity.getDeadline().format(formatter) : null)
       .qualifications(entity.getQualifications())
       .logoUrl(entity.getLogoUrl())
       .responsibilities(entity.getResponsibilities())
@@ -402,7 +406,7 @@ public class AdminService {
         .recruitmentIdx(doc.getRecruitmentIdx())
         .title(doc.getTitle())
         .company(doc.getCompany())
-        .deadline(doc.getDeadline())
+        .deadline(doc.getDeadline() != null ? LocalDateTime.parse(doc.getDeadline(), formatter) : null)
         .scrapCount(doc.getScrapCount() != null ? doc.getScrapCount() : 0)
         .logoUrl(doc.getLogoUrl())
         .build())

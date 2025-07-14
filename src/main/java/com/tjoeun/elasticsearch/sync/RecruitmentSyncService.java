@@ -3,6 +3,7 @@ package com.tjoeun.elasticsearch.sync;
 import com.tjoeun.elasticsearch.document.RecruitmentDocument;
 import com.tjoeun.elasticsearch.repository.RecruitmentSearchRepository;
 import com.tjoeun.entity.Recruitment;
+import com.tjoeun.repository.FavoriteRepository;
 import com.tjoeun.repository.RecruitmentRepository;
 import com.tjoeun.service.ElasticsearchService;
 import com.tjoeun.elasticsearch.KoreanNounExtractor;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,12 +23,13 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class RecruitmentSyncService {
 
-    private final RecruitmentRepository recruitmentRepository;
+  private final RecruitmentRepository recruitmentRepository;
+  private final FavoriteRepository favoriteRepository;
 
-    @Lazy
-    private final RecruitmentSearchRepository recruitmentSearchRepository;
+  @Lazy
+  private final RecruitmentSearchRepository recruitmentSearchRepository;
 
-    private final ElasticsearchService elasticsearchService;
+  private final ElasticsearchService elasticsearchService;
 
     @PostConstruct
     public void init() {
@@ -81,6 +84,8 @@ public class RecruitmentSyncService {
 
         String jobKeywords = String.join(" ", KoreanNounExtractor.extractNouns(combined));
 
+        int scrapCount = favoriteRepository.countByRecruitment(recruitment);
+
         return RecruitmentDocument.builder()
                 .recruitmentIdx(recruitment.getRecruitmentIdx())
                 .title(recruitment.getTitle())
@@ -103,23 +108,18 @@ public class RecruitmentSyncService {
                         Optional.ofNullable(recruitment.getSalary()).orElse(""),
                         Optional.ofNullable(recruitment.getEmploymentType()).orElse(""))
                 )
-                .scrapCount(recruitment.getFavorites() != null ? recruitment.getFavorites().size() : 0)
+                .scrapCount(scrapCount)
                 .jobKeywords(jobKeywords)
                 .build();
     }
 
-    private LocalDateTime safeFormatDeadline(Object deadline) {
+    private String safeFormatDeadline(LocalDateTime deadline) {
         try {
-            if (deadline instanceof LocalDateTime) {
-                return (LocalDateTime) deadline;
-            } else if (deadline instanceof LocalDate) {
-                return ((LocalDate) deadline).atStartOfDay();
-            } else if (deadline instanceof String) {
-                return null;
-            }
+            return deadline != null ? deadline.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")) : null;
         } catch (Exception e) {
             return null;
         }
-        return null;
     }
+}
+
 }

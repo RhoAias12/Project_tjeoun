@@ -30,11 +30,12 @@ public class RecruitmentDocument {
   @Field(type = FieldType.Keyword)
   private String company;
 
+  private String deadline;
 //  @Field(type = FieldType.Date, format = DateFormat.date, pattern = "yyyy-MM-dd")
 //  private LocalDate deadline;
 
-  @Field(type = FieldType.Date, format = DateFormat.date_hour_minute_second)
-  private LocalDateTime deadline;
+//  @Field(type = FieldType.Date, format = DateFormat.date_hour_minute_second)
+//  private LocalDateTime deadline;
 
   @Field(type = FieldType.Text)
   private String qualifications;

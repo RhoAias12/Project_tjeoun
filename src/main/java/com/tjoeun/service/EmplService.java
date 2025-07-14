@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,8 +36,7 @@ public class EmplService {
   private final UserRepository userRepository;
 
   public Page<RecruitmentDTO> getJobPage(
-    int page,
-    int pageSize,
+    int page, int pageSize,
     String sortOrder,
     String title,
     String content,
@@ -78,16 +79,17 @@ public class EmplService {
               title, content, region, company, startDate, endDate, sortOrder, page, pageSize
       );
 
-      List<RecruitmentDTO> dtoList = esPage.getContent().stream()
-              .map(doc -> RecruitmentDTO.builder()
-                      .recruitmentIdx(doc.getRecruitmentIdx())
-                      .title(doc.getTitle())
-                      .company(doc.getCompany())
-                      .deadline(doc.getDeadline())
-                      .scrapCount(doc.getScrapCount() != null ? doc.getScrapCount() : 0)
-                      .logoUrl(doc.getLogoUrl())
-                      .build())
-              .toList();
+    // 문서를 DTO로 변환
+    List<RecruitmentDTO> dtoList = esPage.getContent().stream()
+      .map(doc -> RecruitmentDTO.builder()
+        .recruitmentIdx(doc.getRecruitmentIdx())
+        .title(doc.getTitle())
+        .company(doc.getCompany())
+        .deadline(parseDeadline(doc.getDeadline()))
+        .scrapCount(doc.getScrapCount() != null ? doc.getScrapCount() : 0)
+        .logoUrl(doc.getLogoUrl())
+        .build()
+      ).toList();
 
       return new PageImpl<>(dtoList, esPage.getPageable(), esPage.getTotalElements());
 
@@ -96,6 +98,16 @@ public class EmplService {
       return Page.empty();  // 빈 페이지 반환 등 예외 상황 처리
     }
 
+  }
+
+  private LocalDateTime parseDeadline(String deadlineStr) {
+    try {
+      return deadlineStr != null
+        ? LocalDateTime.parse(deadlineStr, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+        : null;
+    } catch (DateTimeParseException e) {
+      return null; // 파싱 실패 시 null 반환
+    }
   }
 
 
