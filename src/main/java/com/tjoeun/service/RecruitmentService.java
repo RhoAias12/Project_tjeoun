@@ -28,20 +28,6 @@ public class RecruitmentService {
     @Autowired
     private FavoriteRepository favoriteRepository;
 
-    @Autowired
-    private RecruitmentSyncService recruitmentSyncService;
-
-    public List<RecruitmentDTO> getAllPosts() {
-        List<Recruitment> list = recruitmentRepository.findAll();
-
-        return list.stream()
-                .map(r -> {
-                    int count = favoriteRepository.countByRecruitment(r);
-                    return convertToDTO(r, count);
-                })
-                .collect(Collectors.toList());
-    }
-
     public RecruitmentDTO getPostById(Long id) {
         return recruitmentRepository.findById(id)
                 .map(entity -> {
@@ -49,21 +35,6 @@ public class RecruitmentService {
                     return convertToDTO(entity, scrapCount);
                 })
                 .orElse(null);
-    }
-
-
-    // 🔽 customSort에 따른 정렬 리스트 반환
-
-    public List<RecruitmentDTO> getAllPosts(String customSort) {
-        List<Recruitment> list = recruitmentRepository.findAll();
-
-        return list.stream()
-                .map(r -> {
-                    int count = favoriteRepository.countByRecruitment(r);
-                    return convertToDTO(r, count); // scrapCount 반영
-                })
-                .sorted(getComparator(customSort)) // 아래 comparator 분리
-                .collect(Collectors.toList());
     }
 
     private Comparator<RecruitmentDTO> getComparator(String sort) {
@@ -80,61 +51,6 @@ public class RecruitmentService {
             default -> Comparator.comparing(RecruitmentDTO::getRecruitmentIdx);
         };
     }
-
-
-
-    public Page<RecruitmentDTO> getPagedPosts(Pageable pageable) {
-        List<Recruitment> recruitments = recruitmentRepository.findAll();
-
-        List<RecruitmentDTO> dtoList = recruitments.stream()
-                .map(r -> {
-                    int count = favoriteRepository.countByRecruitment(r);
-                    return convertToDTO(r, count);
-                })
-                .collect(Collectors.toList());
-
-        int start = (int) pageable.getOffset();
-        int end = Math.min((start + pageable.getPageSize()), dtoList.size());
-        List<RecruitmentDTO> pageContent = dtoList.subList(start, end);
-
-        return new PageImpl<>(pageContent, pageable, dtoList.size());
-    }
-
-
-    // customSort에 따른 정렬 Page 반환
-    public Page<RecruitmentDTO> getPagedPosts(Pageable pageable, String customSort) {
-        List<Recruitment> recruitments = recruitmentRepository.findAll();
-
-        List<RecruitmentDTO> dtoList = recruitments.stream()
-                .map(r -> {
-                    int count = favoriteRepository.countByRecruitment(r);
-                    return convertToDTO(r, count);
-                })
-                .sorted(getComparator(customSort))
-                .collect(Collectors.toList());
-
-        int start = (int) pageable.getOffset();
-        int end = Math.min((start + pageable.getPageSize()), dtoList.size());
-        List<RecruitmentDTO> pageContent = dtoList.subList(start, end);
-
-        return new PageImpl<>(pageContent, pageable, dtoList.size());
-    }
-
-
-    // 정렬 조건 처리 메서드
-    private Sort resolveSort(String customSort) {
-        if (customSort == null || customSort.isEmpty()) {
-            return Sort.by(Sort.Direction.DESC, "createdAt"); // 기본 정렬
-        }
-
-        return switch (customSort) {
-            case "deadline-asc" -> Sort.by(Sort.Direction.ASC, "deadline");
-            case "deadline-desc" -> Sort.by(Sort.Direction.DESC, "deadline");
-            // ⚠️ scrap 관련 정렬은 제거해야 함
-            default -> Sort.by(Sort.Direction.DESC, "createdAt");
-        };
-    }
-
 
     private RecruitmentDTO convertToDTO(Recruitment entity, int scrapCount) {
         return RecruitmentDTO.builder()
@@ -154,56 +70,10 @@ public class RecruitmentService {
                 .build();
     }
 
-    public Page<RecruitmentDTO> getSortedPagedPosts(Pageable pageable, String deadlineSort) {
-        List<Recruitment> recruitments = recruitmentRepository.findAll();
-
-        Comparator<Recruitment> comparator;
-
-        if ("deadline_desc".equals(deadlineSort)) {
-            comparator = Comparator.comparing(Recruitment::getDeadline).reversed();
-        } else if ("deadline_asc".equals(deadlineSort)) {
-            comparator = Comparator.comparing(Recruitment::getDeadline);
-        } else {
-            comparator = Comparator.comparing(Recruitment::getRecruitmentIdx); // recruitmentIdx 기준 기본 정렬
-        }
-
-        Stream<Recruitment> stream = recruitments.stream().sorted(comparator);
-
-        List<RecruitmentDTO> sortedList = stream
-                .map(r -> {
-                    int count = favoriteRepository.countByRecruitment(r);
-                    return convertToDTO(r, count);
-                })
-                .collect(Collectors.toList());
-
-        int start = (int) pageable.getOffset();
-        int end = Math.min((start + pageable.getPageSize()), sortedList.size());
-        List<RecruitmentDTO> pageContent = sortedList.subList(start, end);
-
-        return new PageImpl<>(pageContent, pageable, sortedList.size());
-    }
-
     public Recruitment getEntityById(Long id) {
         return recruitmentRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("채용공고 없음"));
     }
 
-    public Recruitment saveOrUpdate(Recruitment recruitment) {
-        Recruitment saved = recruitmentRepository.save(recruitment);
-        try {
-            recruitmentSyncService.save(saved);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        return saved;
-    }
-
-    public void deleteById(Long id) {
-        try {
-            recruitmentSyncService.delete(id);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
 }
