@@ -25,12 +25,10 @@ public class RecruitmentDocument {
   @Id
   private Long recruitmentIdx;
 
-  // @Field(type = FieldType.Keyword)
-  @Field(type = FieldType.Text, analyzer = "ngram_analyzer", searchAnalyzer = "standard")
+  @Field(type = FieldType.Text, analyzer = "ngram_analyzer", searchAnalyzer = "ngram_analyzer")
   private String title;
 
-  // @Field(type = FieldType.Keyword)
-  @Field(type = FieldType.Text, analyzer = "ngram_analyzer", searchAnalyzer = "standard")
+  @Field(type = FieldType.Text, analyzer = "ngram_analyzer", searchAnalyzer = "ngram_analyzer")
   private String company;
 
   private String deadline;
@@ -55,8 +53,7 @@ public class RecruitmentDocument {
   @Field(type = FieldType.Text)
   private String benefits;
 
-  //  @Field(type = FieldType.Keyword)
-  @Field(type = FieldType.Text, analyzer = "ngram_analyzer", searchAnalyzer = "standard")
+  @Field(type = FieldType.Text, analyzer = "ngram_analyzer", searchAnalyzer = "ngram_analyzer")
   private String location;
 
 
@@ -70,7 +67,7 @@ public class RecruitmentDocument {
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
   private LocalDateTime createdAt;
 
-  @Field(type = FieldType.Text, analyzer = "ngram_analyzer", searchAnalyzer = "standard")
+  @Field(type = FieldType.Text, analyzer = "ngram_analyzer", searchAnalyzer = "ngram_analyzer")
   private String combinedContent;
 
   @Field(type = FieldType.Text, analyzer = "korean_custom", fielddata = true)
