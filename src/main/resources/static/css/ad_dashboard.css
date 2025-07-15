@@ -1,37 +1,71 @@
-.admin-dashboard-container {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 40px;
+/* 기본 배경 및 폰트 */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Noto Sans KR', sans-serif;
+  background-color: #f7f9fc;
 }
 
+/* 전체 대시보드 컨테이너 */
+.dashboard-container {
+  max-width: 900px;
+  margin: 40px auto;
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+/* 제목 */
 h2 {
-  margin-bottom: 24px;
-  font-size: 1.8rem;
+  font-size: 24px;
+  margin-bottom: 30px;
+  text-align: center;
 }
 
-.admin-metrics {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 24px;
+/* 지표 박스 영역 */
+.metric-boxes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+  margin-bottom: 30px;
+}
+
+/* 개별 지표 박스 */
+.metric {
+  background-color: #e8f1ff;
+  min-width: 160px;
+  padding: 15px 20px;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: bold;
+  color: #1a73e8;
+  font-size: 15px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  line-height: 1.5;
+}
+
+/* 차트 섹션 전체 */
+.chart-section {
   margin-bottom: 40px;
 }
 
-.metric {
-  background-color: #f9f9f9;
-  padding: 20px;
-  border-radius: 10px;
-  text-align: center;
-  font-size: 1.1rem;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-}
-
+/* 각 차트 컨테이너 */
 .chart-container {
-  margin-top: 40px;
-  max-width: 800px;
-  margin-left: auto;
-  margin-right: auto;
+  margin-top: 20px;
+  text-align: center;
 }
 
+/* 차트 제목 */
+.chart-container h3 {
+  font-size: 16px;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+/* 차트 크기 제한 */
 canvas {
-  max-height: 400px;
+  width: 100% !important;
+  max-height: 300px;
 }

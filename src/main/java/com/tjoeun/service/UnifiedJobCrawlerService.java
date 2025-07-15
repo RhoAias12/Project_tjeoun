@@ -8,6 +8,8 @@ import org.jsoup.Connection;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.openkoreantext.processor.OpenKoreanTextProcessorJava;
+import org.openkoreantext.processor.tokenizer.KoreanTokenizer;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
@@ -19,6 +21,9 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import scala.collection.JavaConverters;
+import scala.collection.Seq;
+
 
 import java.io.File;
 import java.io.InputStream;
@@ -44,6 +49,7 @@ public class UnifiedJobCrawlerService {
   private RecruitmentSyncService recruitmentSyncService;
 
   private final String logoSaveDir = "src/main/resources/static/images/logos/";
+
   @Scheduled(cron = "0 0 4 * * *", zone = "Asia/Seoul")
 //  @Scheduled(fixedDelay = 10000) // 10초마다 실행
   public void runCrawler() {
@@ -76,10 +82,11 @@ public class UnifiedJobCrawlerService {
     for (Recruitment job : cleanedJobs) {
       try {
         Recruitment saved = repository.save(job);
-        recruitmentSyncService.save(saved); // Elasticsearch에 색인
+        recruitmentSyncService.save(saved);
         savedCount++;
       } catch (Exception e) {
         System.out.println("[저장 실패] 중복 또는 오류: " + job.getTitle());
+        e.printStackTrace();
       }
     }
 
@@ -483,6 +490,25 @@ public class UnifiedJobCrawlerService {
           job.setSalary("회사내규에 따름");
         if (job.getEmploymentType() == null || job.getEmploymentType().isBlank())
           job.setEmploymentType("면접 후 결정");
+
+        try {
+          String combinedText = (job.getTitle() + " " + job.getResponsibilities()).trim();
+          CharSequence normalized = OpenKoreanTextProcessorJava.normalize(combinedText);
+          Seq<KoreanTokenizer.KoreanToken> tokens = OpenKoreanTextProcessorJava.tokenize(normalized);
+
+          List<String> nouns = OpenKoreanTextProcessorJava.tokensToJavaKoreanTokenList(tokens)
+                  .stream()
+                  .filter(token -> token.getPos().toString().equals("Noun"))
+                  .map(token -> token.toString())
+                  .distinct()
+                  .collect(Collectors.toList());
+
+          job.setJobKeywords(String.join(", ", nouns));
+        } catch (Exception e) {
+          System.out.println("[명사 추출 실패] " + job.getTitle() + ": " + e.getMessage());
+          job.setJobKeywords("");
+        }
+
       })
       .collect(Collectors.toList());
   }

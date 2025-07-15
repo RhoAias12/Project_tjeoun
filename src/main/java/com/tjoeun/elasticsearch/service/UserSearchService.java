@@ -1,11 +1,9 @@
-package com.tjoeun.service;
+package com.tjoeun.elasticsearch.service;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch._types.SortOptions;
 import co.elastic.clients.elasticsearch._types.SortOrder;
-import co.elastic.clients.elasticsearch._types.query_dsl.MatchQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
-import co.elastic.clients.elasticsearch._types.query_dsl.WildcardQuery;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import com.tjoeun.dto.UserListDto;
@@ -29,6 +27,11 @@ public class UserSearchService {
   private final ElasticsearchClient esClient;
   private final String indexName = "users";
 
+  // escape 메서드 추가
+  private String escapeWildcard(String input) {
+    return input.replaceAll("([\\*\\?])", "\\\\$1"); // *와 ?를 \* 와 \? 로 escape
+  }
+
   public Page<UserListDto> searchUsers(
     String email, String nickname, String sortBy, int page, int size
   ) throws IOException {
@@ -37,20 +40,23 @@ public class UserSearchService {
 
     // 필터 조건 설정
     List<Query> mustQueries = new ArrayList<>();
+
     if (email != null && !email.isBlank()) {
+      String escapedEmail = escapeWildcard(email);
       mustQueries.add(Query.of(q -> q
         .wildcard(w -> w
           .field("userEmail")
-          .wildcard("*" + email + "*")
+          .wildcard("*" + escapedEmail + "*")
         )
       ));
     }
     if (nickname != null && !nickname.isBlank()) {
+      String escapedNickname = escapeWildcard(nickname);
       mustQueries.add(Query.of(q -> q
-        .wildcard(w -> w
-          .field("userNickname")
-          .wildcard("*" + nickname + "*")
-        )
+              .wildcard(w -> w
+                      .field("userNickname")
+                      .wildcard("*" + escapedNickname + "*")
+              )
       ));
     }
 

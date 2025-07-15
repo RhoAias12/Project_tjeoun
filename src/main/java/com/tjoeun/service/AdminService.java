@@ -4,7 +4,11 @@ import com.tjoeun.dto.*;
 import com.tjoeun.elasticsearch.document.ApplyHistoryDocument;
 import com.tjoeun.elasticsearch.document.RecruitmentDocument;
 import com.tjoeun.elasticsearch.document.UserDocument;
+import com.tjoeun.elasticsearch.repository.ApplyHistorySearchRepository;
 import com.tjoeun.elasticsearch.repository.UserDocumentRepository;
+import com.tjoeun.elasticsearch.service.ApplyHistorySearchService;
+import com.tjoeun.elasticsearch.service.RecruitmentSearchService;
+import com.tjoeun.elasticsearch.service.UserSearchService;
 import com.tjoeun.entity.*;
 import com.tjoeun.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -18,9 +22,10 @@ import org.springframework.validation.BindingResult;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Sort;
@@ -39,6 +44,9 @@ public class AdminService {
   private final UserSearchService userSearchService;
   private final UserDocumentRepository userDocumentRepository;
   private final ApplyHistorySearchService applyHistorySearchService;
+  private final ApplyHistorySearchRepository applyHistorySearchRepository;
+
+  DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
   // 모든 회원 리스트 조회
   public Page<UserListDto> getPagedUsers(int page, int size, String sortBy) {
@@ -75,19 +83,6 @@ public class AdminService {
       user.getUserBirth(),
       user.getUserNickname()
     ));
-  }
-
-
-  // 회원 삭제
-  @Transactional
-  public void deleteUserById(Integer userIdx) {
-    Users user = userRepository.findById(userIdx)
-      .orElseThrow(() -> new IllegalArgumentException("사용자 없음"));
-    userRepository.delete(user);
-    userDocumentRepository.deleteById(userIdx);
-  }
-  public int getTotalUserCount() {
-    return (int) userRepository.count();
   }
 
   // 회원 상세 조회
@@ -134,6 +129,7 @@ public class AdminService {
 
     userRepository.save(user);
 
+    // 1) ES users 인덱스 업데이트
     UserDocument userDoc = UserDocument.builder()
       .userIdx(user.getUserIdx())
       .userName(user.getUserName())
@@ -145,7 +141,21 @@ public class AdminService {
       .build();
 
     userDocumentRepository.save(userDoc);
+
+    // 2) ES apply_histories 인덱스 업데이트
+    List<ApplyHistoryDocument> relatedApplyHistories = applyHistorySearchRepository.findByUserId(user.getUserIdx());
+
+    for (ApplyHistoryDocument doc : relatedApplyHistories) {
+      doc.setUserId(user.getUserIdx());
+      doc.setUserEmail(user.getUserEmail());
+      doc.setUserNickname(user.getUserNickname());
+      doc.setUserName(user.getUserName());
+      doc.setUserBirth(user.getUserBirth().atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli());
+
+      applyHistorySearchRepository.save(doc);
+    }
   }
+
 
   public Page<ApplyHistoryDTO> getPagedApplyHistory(int page, int size, String sortOption) {
     Sort sort = Sort.unsorted();
@@ -183,6 +193,13 @@ public class AdminService {
     recruitmentRepository.deleteById(recruitmentIdx);
     try {
       recruitmentSearchService.deleteById(recruitmentIdx);
+
+      List<ApplyHistoryDocument> relatedHistories = applyHistorySearchRepository.findByRecruitmentId(recruitmentIdx);
+
+      relatedHistories.forEach(doc -> {
+        applyHistorySearchRepository.deleteById(doc.getApplyHistoryId());
+      });
+
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -273,7 +290,7 @@ public class AdminService {
       .recruitmentIdx(entity.getRecruitmentIdx())
       .title(entity.getTitle())
       .company(entity.getCompany())
-      .deadline(entity.getDeadline())
+      .deadline(entity.getDeadline() != null ? entity.getDeadline().format(formatter) : null)
       .qualifications(entity.getQualifications())
       .logoUrl(entity.getLogoUrl())
       .responsibilities(entity.getResponsibilities())
@@ -286,6 +303,10 @@ public class AdminService {
 
     try {
       recruitmentSearchService.saveOrUpdate(doc);
+      List<ApplyHistory> histories = applyHistoryRepository.findByRecruitment(entity);
+      for (ApplyHistory history : histories) {
+        applyHistorySearchService.save(history);
+      }
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -300,34 +321,18 @@ public class AdminService {
     };
   }
 
-  public Page<RecruitmentDTO> getFilteredRecruitments(
-    String title,
-    String content,
-    String region,
-    String company,
-    String startDate,
-    String endDate,
-    String deadlineSort,
-    int page,
-    int size) {
+  private List<RecruitmentDTO> sortRecruitmentDTOList(List<RecruitmentDTO> list, String deadlineSort) {
+    return switch (deadlineSort) {
+      case "deadline_latest" -> list.stream()
+        .sorted((a, b) -> b.getDeadline().compareTo(a.getDeadline()))
+        .collect(Collectors.toList());
 
-    Specification<Recruitment> spec = RecruitmentSpecification.searchWithFilter(title, content, region, company, startDate, endDate);
+      case "deadline_oldest" -> list.stream()
+        .sorted((a, b) -> a.getDeadline().compareTo(b.getDeadline()))
+        .collect(Collectors.toList());
 
-    Sort sort;
-    if ("deadline_desc".equals(deadlineSort)) {
-      sort = Sort.by(Sort.Direction.DESC, "deadline");
-    } else if ("deadline_asc".equals(deadlineSort)) {
-      sort = Sort.by(Sort.Direction.ASC, "deadline");
-    } else {
-      sort = Sort.unsorted();
-    }
-
-    int currentPage = Math.max(page - 1, 0);
-    Pageable pageable = PageRequest.of(currentPage, size, sort);
-
-    Page<Recruitment> recruitmentPage = recruitmentRepository.findAll(spec, pageable);
-
-    return recruitmentPage.map(RecruitmentDTO::new);
+      default -> list;
+    };
   }
 
   public Page<RecruitmentDTO> getFilteredRecruitmentsByEs(
@@ -341,7 +346,6 @@ public class AdminService {
     int page,
     int size) throws IOException {
 
-    // recruitmentSearchService.searchJobs 메서드가 이미 있음
     Page<RecruitmentDocument> esPage = recruitmentSearchService.searchJobs(
       title, content, region, company, startDate, endDate, deadlineSort, page, size);
 
@@ -350,7 +354,7 @@ public class AdminService {
         .recruitmentIdx(doc.getRecruitmentIdx())
         .title(doc.getTitle())
         .company(doc.getCompany())
-        .deadline(doc.getDeadline())
+        .deadline(doc.getDeadline() != null ? LocalDateTime.parse(doc.getDeadline(), formatter) : null)
         .scrapCount(doc.getScrapCount() != null ? doc.getScrapCount() : 0)
         .logoUrl(doc.getLogoUrl())
         .build())

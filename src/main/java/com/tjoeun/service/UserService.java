@@ -1,6 +1,8 @@
 package com.tjoeun.service;
 
+import com.tjoeun.elasticsearch.document.ApplyHistoryDocument;
 import com.tjoeun.elasticsearch.document.UserDocument;
+import com.tjoeun.elasticsearch.repository.ApplyHistorySearchRepository;
 import com.tjoeun.elasticsearch.repository.UserDocumentRepository;
 import com.tjoeun.entity.Users;
 import com.tjoeun.repository.UserRepository;
@@ -10,6 +12,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZoneId;
+import java.util.List;
+
+import java.security.Principal;
 
 @Service
 @Transactional
@@ -18,6 +23,7 @@ public class UserService implements UserDetailsService {
 
   private final UserRepository userRepository;
   private final UserDocumentRepository userDocumentRepository;
+  private final ApplyHistorySearchRepository applyHistorySearchRepository;
 
   public Users saveUser(Users user) {
     validateDuplicateUser(user);
@@ -86,6 +92,22 @@ public class UserService implements UserDetailsService {
 
     // Elasticsearch 문서도 삭제
     userDocumentRepository.deleteById(userIdx);
+    List<ApplyHistoryDocument> relatedHistories = applyHistorySearchRepository.findByUserId(userIdx);
+    for (ApplyHistoryDocument doc : relatedHistories) {
+      applyHistorySearchRepository.deleteById(doc.getApplyHistoryId());
+    }
+  }
+
+
+  public Integer getUserIdxFromPrincipal(Principal principal) {
+    String email = principal.getName(); // Security에서 로그인 식별자로 email 반환
+    Users user = userRepository.findByUserEmail(email);
+
+    if (user == null) {
+      throw new RuntimeException("사용자 없음");
+    }
+
+    return user.getUserIdx();
   }
 
 }

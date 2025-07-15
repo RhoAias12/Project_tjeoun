@@ -71,7 +71,7 @@
       emailChecked = false;
       return;
     }
-    const res = await fetch(`/api/user/check-email?email=$${encodeURIComponent(email)}`);
+    const res = await fetch(`/api/user/check-email?email=${encodeURIComponent(email)}`);
     const data = await res.json();
     if (data.exists) {
       msg.textContent = "이미 존재하는 이메일입니다.";
