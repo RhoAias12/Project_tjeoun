@@ -49,7 +49,7 @@ public class UnifiedJobCrawlerService {
   private RecruitmentSyncService recruitmentSyncService;
 
   private final String logoSaveDir = "src/main/resources/static/images/logos/";
-  @Scheduled(cron = "0 3 13 * * *", zone = "Asia/Seoul")
+  @Scheduled(cron = "0 0 4 * * *", zone = "Asia/Seoul")
 //  @Scheduled(fixedDelay = 10000) // 10초마다 실행
   public void runCrawler() {
     List<Recruitment> allJobs = new ArrayList<>();
@@ -467,6 +467,7 @@ public class UnifiedJobCrawlerService {
       return LocalDateTime.of(9999, 12, 31, 0, 0);
     }
   }
+
 
   private List<Recruitment> preprocessJobs(List<Recruitment> jobs) {
     String defaultLogo = "/images/tjoeun.jpg";

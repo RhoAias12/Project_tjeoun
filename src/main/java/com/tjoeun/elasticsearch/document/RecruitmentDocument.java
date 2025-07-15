@@ -52,7 +52,6 @@ public class RecruitmentDocument {
   @Field(type = FieldType.Text, analyzer = "ngram_analyzer", searchAnalyzer = "ngram_analyzer")
   private String location;
 
-
   @Field(type = FieldType.Text)
   private String salary;
 

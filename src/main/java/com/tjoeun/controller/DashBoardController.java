@@ -4,20 +4,15 @@ import com.tjoeun.dto.DashboardDTO;
 import com.tjoeun.entity.Users;
 import com.tjoeun.repository.UserRepository;
 import com.tjoeun.service.DashboardService;
-import com.tjoeun.service.ElasticsearchService;
-import com.tjoeun.service.RecruitmentSearchService;
+import com.tjoeun.elasticsearch.service.ElasticsearchService;
+import com.tjoeun.elasticsearch.service.RecruitmentSearchService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import java.io.IOException;
 import java.security.Principal;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Controller
 @RequiredArgsConstructor

@@ -3,26 +3,19 @@ package com.tjoeun.service;
 import com.tjoeun.constant.UserRole;
 import com.tjoeun.dto.RecruitmentDTO;
 import com.tjoeun.elasticsearch.document.RecruitmentDocument;
-import com.tjoeun.entity.Recruitment;
+import com.tjoeun.elasticsearch.service.RecruitmentSearchService;
 import com.tjoeun.repository.RecruitmentRepository;
 import com.tjoeun.repository.UserRepository;
-import com.tjoeun.specification.RecruitmentSpecification;
-import jakarta.persistence.criteria.JoinType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-
-import jakarta.persistence.criteria.Predicate;
 
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;

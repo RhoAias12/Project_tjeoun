@@ -6,6 +6,9 @@ import com.tjoeun.elasticsearch.document.RecruitmentDocument;
 import com.tjoeun.elasticsearch.document.UserDocument;
 import com.tjoeun.elasticsearch.repository.ApplyHistorySearchRepository;
 import com.tjoeun.elasticsearch.repository.UserDocumentRepository;
+import com.tjoeun.elasticsearch.service.ApplyHistorySearchService;
+import com.tjoeun.elasticsearch.service.RecruitmentSearchService;
+import com.tjoeun.elasticsearch.service.UserSearchService;
 import com.tjoeun.entity.*;
 import com.tjoeun.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +26,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Sort;
