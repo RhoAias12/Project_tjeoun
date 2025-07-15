@@ -27,6 +27,7 @@ public class RecruitmentSearchService {
   private final ElasticsearchClient esClient;
   private static final String INDEX_NAME = "recruitments";
 
+  //이 사이 친구들 안쓸듯..?
   private static final String[] SPECIAL_CHARS_FOR_SQS = {
     "+", "-", "&&", "||", "!", "(", ")", "{", "}", "[", "]", "^", "\"", "~", "*", "?", ":", "\\", "/"
   };
@@ -39,6 +40,7 @@ public class RecruitmentSearchService {
     }
     return escaped;
   }
+  //
 
   public Page<RecruitmentDocument> searchJobs(
     String title,
@@ -60,54 +62,68 @@ public class RecruitmentSearchService {
     builder.query(q -> q.bool(b -> {
 
       if (title != null && !title.isBlank()) {
-        String escapedTitle = escapeSpecialCharsForSimpleQueryString(title);
-        b.must(m -> m.simpleQueryString(sqs -> sqs
-          .fields("title")
-          .query(escapedTitle)
+        String escapedTitle = escapeForWildcard(title);
+        b.must(m -> m.wildcard(w -> w
+          .field("title")
+          .value("*" + escapedTitle + "*")
         ));
       }
 
       if (content != null && !content.isBlank()) {
-        String escapedContent = escapeSpecialCharsForSimpleQueryString(content);
-        b.must(m -> m.simpleQueryString(sqs -> sqs
-          .fields("combinedContent")
-          .query(escapedContent)
+        String escapedContent = escapeForWildcard(content);
+        b.must(m -> m.wildcard(w -> w
+          .field("combinedContent")
+          .value("*" + escapedContent + "*")
         ));
       }
 
       if (region != null && !region.isBlank()) {
-        String escapedRegion = escapeSpecialCharsForSimpleQueryString(region);
-        b.must(m -> m.simpleQueryString(sqs -> sqs
-          .fields("location")
-          .query(escapedRegion)
+        String escapedRegion = escapeForWildcard(region);
+        b.must(m -> m.wildcard(w -> w
+          .field("location")
+          .value("*" + escapedRegion + "*")
         ));
       }
 
       if (company != null && !company.isBlank()) {
-        String escapedCompany = escapeSpecialCharsForSimpleQueryString(company);
-        b.must(m -> m.simpleQueryString(sqs -> sqs
-          .fields("company")
-          .query(escapedCompany)
+        String escapedCompany = escapeForWildcard(company);
+        b.must(m -> m.wildcard(w -> w
+          .field("company")
+          .value("*" + escapedCompany + "*")
         ));
       }
 
       // 날짜 범위 필터 (deadline)
+      // 날짜 필터 + 상시채용
       if ((startDate != null && !startDate.isBlank()) || (endDate != null && !endDate.isBlank())) {
-        b.filter(f -> f.range(r -> {
-          r.field("deadline");
-          DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
-          if (startDate != null && !startDate.isBlank()) {
-            LocalDateTime start = LocalDate.parse(startDate).atStartOfDay();
-            r.gte(JsonData.of(start.format(formatter)));
-          }
-          if (endDate != null && !endDate.isBlank()) {
-            LocalDateTime end = LocalDate.parse(endDate).atTime(23, 59, 59);
-            r.lte(JsonData.of(end.format(formatter)));
-          }
-          return r;
-        }));
-      }
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
+        String formattedStart = null;
+        String formattedEnd = null;
+
+        if (startDate != null && !startDate.isBlank()) {
+          formattedStart = LocalDate.parse(startDate).atStartOfDay().format(formatter);
+        }
+        if (endDate != null && !endDate.isBlank()) {
+          formattedEnd = LocalDate.parse(endDate).atTime(23, 59, 59).format(formatter);
+        }
+
+        String finalStart = formattedStart;
+        String finalEnd = formattedEnd;
+
+        b.filter(f -> f.bool(bool -> bool
+          .should(s -> s.range(r -> {
+            r.field("deadline");
+            if (finalStart != null) r.gte(JsonData.of(finalStart));
+            if (finalEnd != null) r.lte(JsonData.of(finalEnd));
+            return r;
+          }))
+          .should(s -> s.term(t -> t
+            .field("deadline")
+            .value("9999-12-31T00:00:00")
+          ))
+        ));
+      }
       return b;
     }));
 
@@ -190,6 +206,12 @@ public class RecruitmentSearchService {
       .index(INDEX_NAME)
       .id(String.valueOf(recruitmentIdx))
     );
+  }
+
+  private String escapeForWildcard(String input) {
+    if (input == null) return null;
+    // wildcard 쿼리에서는 \, *, ?, [ ] 등의 문자만 escape 필요
+    return input.replaceAll("([\\\\*?\\[\\]])", "\\\\$1");
   }
 
 

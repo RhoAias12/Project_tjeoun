@@ -25,10 +25,10 @@ public class RecruitmentDocument {
   @Id
   private Long recruitmentIdx;
 
-  @Field(type = FieldType.Text, analyzer = "ngram_analyzer", searchAnalyzer = "standard")
+  @Field(type = FieldType.Text, analyzer = "ngram_analyzer", searchAnalyzer = "ngram_analyzer")
   private String title;
 
-  @Field(type = FieldType.Text, analyzer = "ngram_analyzer", searchAnalyzer = "standard")
+  @Field(type = FieldType.Text, analyzer = "ngram_analyzer", searchAnalyzer = "ngram_analyzer")
   private String company;
 
   private String deadline;
@@ -39,7 +39,7 @@ public class RecruitmentDocument {
   private String preferred;
   private String benefits;
 
-  @Field(type = FieldType.Text, analyzer = "ngram_analyzer", searchAnalyzer = "standard")
+  @Field(type = FieldType.Text, analyzer = "ngram_analyzer", searchAnalyzer = "ngram_analyzer")
   private String location;
 
   private String salary;
@@ -49,7 +49,7 @@ public class RecruitmentDocument {
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
   private LocalDateTime createdAt;
 
-  @Field(type = FieldType.Text, analyzer = "ngram_analyzer", searchAnalyzer = "standard")
+  @Field(type = FieldType.Text, analyzer = "ngram_analyzer", searchAnalyzer = "ngram_analyzer")
   private String combinedContent;
 
   @Field(type = FieldType.Integer)
