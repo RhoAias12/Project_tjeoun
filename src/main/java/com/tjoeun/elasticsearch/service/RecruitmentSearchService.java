@@ -87,37 +87,41 @@ public class RecruitmentSearchService {
     builder.query(q -> q.bool(b -> {
       // title
       if (title != null && !title.isBlank()) {
-        if (containsSpecialRegexChars(title)) {
-          b.must(m -> m.regexp(r -> r.field("title.keyword").value(".*" + escapeForRegexp(title) + ".*")));
-        } else {
-          b.must(m -> m.multiMatch(mm -> mm.fields("title.ngram^2", "title^1").query(title)));
-        }
+        String escapedTitle = escapeWildcard(title.toLowerCase());
+        b.must(m -> m
+          .wildcard(w -> w
+            .field("title.keyword") // .keyword 필드에서 정확히 일치 여부 확인
+            .value("*" + escapedTitle + "*") // 포함 검색
+          )
+        );
       }
       // content
       if (content != null && !content.isBlank()) {
-        if (containsSpecialRegexChars(content)) {
-          b.must(m -> m.regexp(r -> r.field("combinedContent.keyword").value(".*" + escapeForRegexp(content) + ".*")));
-        } else {
-          b.must(m -> m.multiMatch(mm -> mm.fields("combinedContent.ngram^2", "combinedContent^1").query(content)));
-        }
+        String escapedContent = escapeWildcard(content.toLowerCase());
+        b.must(m -> m.wildcard(w -> w
+          .field("combinedContent.keyword")
+          .value("*" + escapedContent + "*")
+        ));
       }
 
       // region
       if (region != null && !region.isBlank()) {
-        if (containsSpecialRegexChars(region)) {
-          b.must(m -> m.regexp(r -> r.field("location.keyword").value(".*" + escapeForRegexp(region) + ".*")));
-        } else {
-          b.must(m -> m.multiMatch(mm -> mm.fields("location.ngram^2", "location^1").query(region)));
-        }
+        String escapedRegion = escapeWildcard(region.toLowerCase());
+        b.must(m -> m.wildcard(w -> w
+          .field("location.keyword")
+          .value("*" + escapedRegion + "*")
+        ));
       }
+
       // company
       if (company != null && !company.isBlank()) {
-        if (containsSpecialRegexChars(company)) {
-          b.must(m -> m.regexp(r -> r.field("company.keyword").value(".*" + escapeForRegexp(company) + ".*")));
-        } else {
-          b.must(m -> m.multiMatch(mm -> mm.fields("company.ngram^2", "company^1").query(company)));
-        }
+        String escapedCompany = escapeWildcard(company.toLowerCase());
+        b.must(m -> m.wildcard(w -> w
+          .field("company.keyword")
+          .value("*" + escapedCompany + "*")
+        ));
       }
+
 
       // 날짜 필터 + 상시채용
       if ((startDate != null && !startDate.isBlank()) || (endDate != null && !endDate.isBlank())) {
@@ -186,5 +190,10 @@ public class RecruitmentSearchService {
   private boolean containsSpecialRegexChars(String input) {
     return input != null &&
       input.matches(".*[\\\\~`!#\\$%\\^&\\*()_\\-\\+=\\[\\]\\{\\};:'\",\\.<>/\\?@].*");
+  }
+
+  private String escapeWildcard(String input) {
+    // 이스케이프할 특수문자 목록에 \와 | 추가
+    return input.replaceAll("([~`!@#$%^&*()_\\-+=\\[\\]{};:\"',.<>?/\\\\|])", "\\\\$1");
   }
 }
