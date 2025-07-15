@@ -75,6 +75,14 @@
       }
     });
   });
+
+    function checkTitleLength() {
+    const titleInput = document.getElementById('title');
+    if (titleInput.value.length > 60) {
+      alert('제목은 60글자 이내입니다.');
+      titleInput.value = titleInput.value.substring(0, 60);
+    }
+  }
       </script>
 
   </head>
@@ -92,12 +100,14 @@
                     <th class="img">* 제목</th>
                     <td class="centered-cell">
                         <div class="form-group">
-                <textarea
-                        id="title" name="title"
-                        class="short-text"
-                        placeholder="제목를 입력해 주세요."
-                ></textarea
-                >
+      <textarea
+              id="title"
+              name="title"
+              class="short-text"
+              placeholder="제목을 입력해 주세요."
+              maxlength="60"
+              oninput="checkTitleLength()"
+      ></textarea>
                         </div>
                     </td>
                 </tr>
