@@ -112,6 +112,7 @@ public class AdminController {
 //            page = maxPage;
 //        }
 //
+
 //        return "redirect:/admin/member_list?page=" + page + "&sortBy=" + sortBy;
 //    }
 
