@@ -6,6 +6,7 @@ import com.tjoeun.elasticsearch.repository.RecruitmentSearchRepository;
 import com.tjoeun.entity.Recruitment;
 import com.tjoeun.repository.FavoriteRepository;
 import com.tjoeun.repository.RecruitmentRepository;
+import com.tjoeun.service.ESIndexService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,7 +24,9 @@ public class RecruitmentSyncService {
   private final RecruitmentSearchRepository recruitmentSearchRepository;
   private final FavoriteRepository favoriteRepository;
   private final ElasticsearchClient esClient;
+  private final ESIndexService esIndexService;
   private static final String INDEX_NAME = "recruitments";
+
 
   // MariaDB 저장 후 Elasticsearch 색인 생성/갱신
   @Transactional

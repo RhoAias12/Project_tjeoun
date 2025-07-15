@@ -19,7 +19,7 @@ import java.util.Optional;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Document(indexName = "recruitments")
+@Document(indexName = "recruitments", createIndex = false)
 public class RecruitmentDocument {
 
   @Id
