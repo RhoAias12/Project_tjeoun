@@ -60,34 +60,34 @@ public class RecruitmentSearchService {
     builder.query(q -> q.bool(b -> {
 
       if (title != null && !title.isBlank()) {
-        String escapedTitle = escapeSpecialCharsForSimpleQueryString(title);
-        b.must(m -> m.simpleQueryString(sqs -> sqs
-          .fields("title")
-          .query(escapedTitle)
+        String escapedTitle = escapeForWildcard(title);
+        b.must(m -> m.wildcard(w -> w
+          .field("title")
+          .value("*" + escapedTitle + "*")
         ));
       }
 
       if (content != null && !content.isBlank()) {
-        String escapedContent = escapeSpecialCharsForSimpleQueryString(content);
-        b.must(m -> m.simpleQueryString(sqs -> sqs
-          .fields("combinedContent")
-          .query(escapedContent)
+        String escapedContent = escapeForWildcard(content);
+        b.must(m -> m.wildcard(w -> w
+          .field("combinedContent")
+          .value("*" + escapedContent + "*")
         ));
       }
 
       if (region != null && !region.isBlank()) {
-        String escapedRegion = escapeSpecialCharsForSimpleQueryString(region);
-        b.must(m -> m.simpleQueryString(sqs -> sqs
-          .fields("location")
-          .query(escapedRegion)
+        String escapedRegion = escapeForWildcard(region);
+        b.must(m -> m.wildcard(w -> w
+          .field("location")
+          .value("*" + escapedRegion + "*")
         ));
       }
 
       if (company != null && !company.isBlank()) {
-        String escapedCompany = escapeSpecialCharsForSimpleQueryString(company);
-        b.must(m -> m.simpleQueryString(sqs -> sqs
-          .fields("company")
-          .query(escapedCompany)
+        String escapedCompany = escapeForWildcard(company);
+        b.must(m -> m.wildcard(w -> w
+          .field("company")
+          .value("*" + escapedCompany + "*")
         ));
       }
 
@@ -190,6 +190,12 @@ public class RecruitmentSearchService {
       .index(INDEX_NAME)
       .id(String.valueOf(recruitmentIdx))
     );
+  }
+
+  private String escapeForWildcard(String input) {
+    if (input == null) return null;
+    // wildcard 쿼리에서는 \, *, ?, [ ] 등의 문자만 escape 필요
+    return input.replaceAll("([\\\\*?\\[\\]])", "\\\\$1");
   }
 
 
