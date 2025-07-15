@@ -4,12 +4,12 @@ import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import com.tjoeun.constant.UserRole;
 import com.tjoeun.dto.DashboardDTO;
 import com.tjoeun.elasticsearch.repository.SearchLogRepository;
+import com.tjoeun.elasticsearch.service.ElasticsearchService;
 import com.tjoeun.repository.ApplyHistoryRepository;
 import com.tjoeun.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import org.springframework.ui.Model;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

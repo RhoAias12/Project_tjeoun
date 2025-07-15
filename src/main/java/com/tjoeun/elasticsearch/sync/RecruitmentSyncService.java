@@ -6,7 +6,7 @@ import com.tjoeun.elasticsearch.repository.RecruitmentSearchRepository;
 import com.tjoeun.entity.Recruitment;
 import com.tjoeun.repository.FavoriteRepository;
 import com.tjoeun.repository.RecruitmentRepository;
-import com.tjoeun.service.ElasticsearchService;
+import com.tjoeun.elasticsearch.service.ElasticsearchService;
 import com.tjoeun.elasticsearch.KoreanNounExtractor;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +25,6 @@ import java.util.Optional;
 public class RecruitmentSyncService {
 
   private final RecruitmentRepository recruitmentRepository;
-
   private final FavoriteRepository favoriteRepository;
   private final ElasticsearchClient esClient;
   private static final String INDEX_NAME = "recruitments";
@@ -58,7 +57,6 @@ public class RecruitmentSyncService {
 
     return saved;
   }
-
 
   @Transactional
   public void delete(Long recruitmentIdx) throws IOException {
