@@ -40,26 +40,6 @@ public class AdminController {
     @Value("${upload.path}")
     private String uploadRoot;
 
-//    @GetMapping("/member_list")
-//    public String memberList(@RequestParam(defaultValue = "1") int page,
-//                             @RequestParam(defaultValue = "latest") String sortBy,
-//                             @PageableDefault(size = 10) Pageable pageable,
-//                             Model model) {
-//
-//        // 정렬은 서비스에 위임
-//        Page<UserListDto> userPage = adminService.getPagedUsers(page, pageable.getPageSize(), sortBy);
-//
-//        PaginationUtil.setPaging(model, userPage, "/admin/member_list?sortBy=" + sortBy);
-//
-//        model.addAttribute("userList", userPage.getContent());
-//        model.addAttribute("userPage", userPage);
-//        model.addAttribute("sortBy", sortBy);
-//        model.addAttribute("page", page);
-//
-//        return "admin/member_list";
-//    }
-
-
     @GetMapping("/member_list")
     public String memberList(
       @RequestParam(defaultValue = "1") int page,
@@ -94,28 +74,6 @@ public class AdminController {
         return "admin/member_list";
     }
 
-
-
-
-
-//    @PostMapping("/member_list/delete")
-//    public String deleteMember(@RequestParam("userIdx") Integer userIdx,
-//                               @RequestParam(defaultValue = "1") int page,
-//                               @RequestParam(defaultValue = "latest") String sortBy) {
-//        adminService.deleteUserById(userIdx);
-//
-//        int totalUsers = adminService.getTotalUserCount();
-//        int pageSize = 10;
-//        int maxPage = (int) Math.ceil((double) totalUsers / pageSize);
-//
-//        if (page > maxPage && maxPage > 0) {
-//            page = maxPage;
-//        }
-//
-
-//        return "redirect:/admin/member_list?page=" + page + "&sortBy=" + sortBy;
-//    }
-
     @PostMapping("/member_list/delete")
     public String deleteMember(
       @RequestParam("userIdx") Integer userIdx,
@@ -126,8 +84,7 @@ public class AdminController {
     ) throws IOException {
         userService.deleteById(userIdx);
 
-        // 삭제 후 페이지 유효성 검증
-        int size = 10; // 페이지당 개수 (고정이면 상수로)
+        int size = 10;
         Page<UserListDto> userPage;
 
         if ((email != null && !email.isBlank()) || (nickname != null && !nickname.isBlank())) {
@@ -409,14 +366,11 @@ public class AdminController {
                                     @RequestParam(required = false) String endDate,
                                     RedirectAttributes redirectAttributes) throws IOException {
 
-        // 1) 상태 변경 처리
         adminService.updateApplyStatus(applyHistoryId, newStatus);
 
-        // 2) 상태명 가져오기
         String statusDisplay = adminService.getStatusDisplayName(newStatus);
 
-        // 3) 변경 후 다시 현재 조건으로 조회해서 페이징 체크
-        int size = 10; // 페이지 사이즈, 실제 사용하는 값과 동일하게 설정 필요
+        int size = 10;
         int pageIndex = page - 1 < 0 ? 0 : page - 1;
 
         Page<ApplyHistoryDTO> applyPage;
@@ -436,12 +390,10 @@ public class AdminController {
             applyPage = adminService.getPagedApplyHistory(pageIndex, size, sortOption);
         }
 
-        // 4) 현재 페이지에 데이터가 없고, page > 1 이면 page를 1 감소
         if (applyPage.isEmpty() && page > 1) {
             page = page - 1;
         }
 
-        // 5) 리다이렉트 시 파라미터 설정
         redirectAttributes.addAttribute("statusChanged", statusDisplay);
         redirectAttributes.addAttribute("page", page);
         redirectAttributes.addAttribute("sortOption", sortOption);
