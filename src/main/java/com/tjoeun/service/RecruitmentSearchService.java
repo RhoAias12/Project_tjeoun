@@ -88,18 +88,18 @@ public class RecruitmentSearchService {
             .collect(Collectors.toList());
   }
 
-  private static final String[] SPECIAL_CHARS_FOR_SQS = {
-    "+", "-", "&&", "||", "!", "(", ")", "{", "}", "[", "]", "^", "\"", "~", "*", "?", ":", "\\", "/"
-  };
-
-  private String escapeSpecialCharsForSimpleQueryString(String input) {
-    if (input == null) return null;
-    String escaped = input;
-    for (String ch : SPECIAL_CHARS_FOR_SQS) {
-      escaped = escaped.replace(ch, "\\" + ch);
-    }
-    return escaped;
-  }
+//  private static final String[] SPECIAL_CHARS_FOR_SQS = {
+//    "+", "-", "&&", "||", "!", "(", ")", "{", "}", "[", "]", "^", "\"", "~", "*", "?", ":", "\\", "/"
+//  };
+//
+//  private String escapeSpecialCharsForSimpleQueryString(String input) {
+//    if (input == null) return null;
+//    String escaped = input;
+//    for (String ch : SPECIAL_CHARS_FOR_SQS) {
+//      escaped = escaped.replace(ch, "\\" + ch);
+//    }
+//    return escaped;
+//  }
 
   public Page<RecruitmentDocument> searchJobs(
     String title,
@@ -121,35 +121,62 @@ public class RecruitmentSearchService {
     builder.query(q -> q.bool(b -> {
 
       if (title != null && !title.isBlank()) {
-        String escapedTitle = escapeForWildcard(title);
-        b.must(m -> m.wildcard(w -> w
-          .field("title")
-          .value("*" + escapedTitle + "*")
-        ));
+        if (containsSpecialRegexChars(title)) {
+          b.must(m -> m.regexp(r -> r
+            .field("title.keyword")
+            .value(".*" + escapeForRegexp(title) + ".*")
+          ));
+        } else {
+          b.must(m -> m.wildcard(w -> w
+            .field("title")
+            .value("*" + escapeForWildcard(title) + "*")
+          ));
+        }
       }
 
+      // CONTENT
       if (content != null && !content.isBlank()) {
-        String escapedContent = escapeForWildcard(content);
-        b.must(m -> m.wildcard(w -> w
-          .field("combinedContent")
-          .value("*" + escapedContent + "*")
-        ));
+        if (containsSpecialRegexChars(content)) {
+          b.must(m -> m.regexp(r -> r
+            .field("combinedContent.keyword")
+            .value(".*" + escapeForRegexp(content) + ".*")
+          ));
+        } else {
+          b.must(m -> m.wildcard(w -> w
+            .field("combinedContent")
+            .value("*" + escapeForWildcard(content) + "*")
+          ));
+        }
       }
 
+      // REGION (location)
       if (region != null && !region.isBlank()) {
-        String escapedRegion = escapeForWildcard(region);
-        b.must(m -> m.wildcard(w -> w
-          .field("location")
-          .value("*" + escapedRegion + "*")
-        ));
+        if (containsSpecialRegexChars(region)) {
+          b.must(m -> m.regexp(r -> r
+            .field("location.keyword")
+            .value(".*" + escapeForRegexp(region) + ".*")
+          ));
+        } else {
+          b.must(m -> m.wildcard(w -> w
+            .field("location")
+            .value("*" + escapeForWildcard(region) + "*")
+          ));
+        }
       }
 
+      // COMPANY
       if (company != null && !company.isBlank()) {
-        String escapedCompany = escapeForWildcard(company);
-        b.must(m -> m.wildcard(w -> w
-          .field("company")
-          .value("*" + escapedCompany + "*")
-        ));
+        if (containsSpecialRegexChars(company)) {
+          b.must(m -> m.regexp(r -> r
+            .field("company.keyword")
+            .value(".*" + escapeForRegexp(company) + ".*")
+          ));
+        } else {
+          b.must(m -> m.wildcard(w -> w
+            .field("company")
+            .value("*" + escapeForWildcard(company) + "*")
+          ));
+        }
       }
 
       // 날짜 범위 필터 (deadline)
@@ -268,9 +295,19 @@ public class RecruitmentSearchService {
     );
   }
 
+  // 정규표현식에서 이스케이프가 필요한 특수문자들
+  private String escapeForRegexp(String input) {
+    if (input == null) return null;
+    return input.replaceAll("([\\\\.^$|?*+()\\[\\]{}])", "\\\\$1");
+  }
+
+  private boolean containsSpecialRegexChars(String input) {
+    return input != null && input.matches(".*[\\\\.^$|?*+()\\[\\]{}].*");
+  }
+
+  // wildcard 쿼리용 이스케이프
   private String escapeForWildcard(String input) {
     if (input == null) return null;
-    // wildcard 쿼리에서는 \, *, ?, [ ] 등의 문자만 escape 필요
     return input.replaceAll("([\\\\*?\\[\\]])", "\\\\$1");
   }
 
