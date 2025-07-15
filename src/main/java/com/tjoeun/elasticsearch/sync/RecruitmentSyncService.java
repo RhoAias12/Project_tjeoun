@@ -36,7 +36,7 @@ public class RecruitmentSyncService {
     @PostConstruct
     public void init() {
         if (recruitmentSearchRepository.count() == 0) {
-            System.out.println("자동 동기화 실행됨 ✅");
+            System.out.println("자동 동기화 실행됨");
             syncAllToElasticsearch();
         } else {
             System.out.println("ES에 이미 데이터 있음, 자동 동기화 생략");
@@ -58,16 +58,6 @@ public class RecruitmentSyncService {
     return saved;
   }
 
-  @Transactional
-  public void delete(Long recruitmentIdx) throws IOException {
-    recruitmentRepository.deleteById(recruitmentIdx);
-
-    esClient.delete(d -> d
-      .index(INDEX_NAME)
-      .id(String.valueOf(recruitmentIdx))
-    );
-  }
-
     // 전체 DB 데이터를 ES에 동기화
     public void syncAllToElasticsearch() {
         List<Recruitment> recruitments = recruitmentRepository.findAllWithFavorites();
@@ -85,7 +75,7 @@ public class RecruitmentSyncService {
             }
         }
 
-        System.out.println("전체 ES 동기화 완료 ✅ 총 색인 건수: " + count);
+        System.out.println("전체 ES 동기화 완료 - 총 색인 건수: " + count);
     }
 
     private RecruitmentDocument mapToDocument(Recruitment recruitment) {

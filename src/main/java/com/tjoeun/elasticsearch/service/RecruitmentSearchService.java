@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.tjoeun.constant.UserRole;
 
+
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -34,50 +35,17 @@ public class RecruitmentSearchService {
   private static final String INDEX_NAME = "recruitments";
   private final UserRepository userRepository;
 
-  @Transactional
-  public List<RecruitmentDocument> search(String keyword, Long userIdx) throws IOException {
-    if (keyword != null && !keyword.isBlank()) {
-      boolean isAdmin = false;
-      if (userIdx != null) {
-        isAdmin = userRepository.findById(userIdx.intValue())
-          .map(user -> user.getUserRole() == UserRole.ADMIN)
-          .orElse(false);
-      }
-      if (!isAdmin) {
-        searchLogRepository.save(SearchLog.builder()
-          .keyword(keyword)
-          .searchedAt(LocalDateTime.now())
-          .userId(userIdx)
-          .build());
-      }
-    }
-
-    SearchResponse<RecruitmentDocument> response = esClient.search(s -> s
-      .index(INDEX_NAME)
-      .query(q -> containsSpecialRegexChars(keyword)
-        ? q.regexp(r -> r.field("title.keyword").value(".*" + escapeForRegexp(keyword) + ".*"))
-        : q.multiMatch(m -> m.fields("title.ngram^2", "title^1").query(keyword))
-      ), RecruitmentDocument.class);
-
-    return response.hits().hits().stream()
-      .map(Hit::source)
-      .collect(Collectors.toList());
-  }
-
-  public List<RecruitmentDocument> findAll() throws IOException {
-    SearchResponse<RecruitmentDocument> response = esClient.search(s -> s
-        .index(INDEX_NAME)
-        .query(q -> q.matchAll(m -> m)),
-      RecruitmentDocument.class);
-
-    return response.hits().hits().stream()
-      .map(Hit::source)
-      .collect(Collectors.toList());
-  }
-
-  public Page<RecruitmentDocument> searchJobs(String title, String content, String region, String company,
-                                              String startDate, String endDate, String sortOrder,
-                                              int page, int pageSize) throws IOException {
+  public Page<RecruitmentDocument> searchJobs(
+    String title,
+    String content,
+    String region,
+    String company,
+    String startDate,
+    String endDate,
+    String sortOrder,
+    int page,
+    int pageSize
+  ) throws IOException {
 
     SearchRequest.Builder builder = new SearchRequest.Builder()
       .index(INDEX_NAME)
@@ -122,7 +90,6 @@ public class RecruitmentSearchService {
         ));
       }
 
-
       // 날짜 필터 + 상시채용
       if ((startDate != null && !startDate.isBlank()) || (endDate != null && !endDate.isBlank())) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
@@ -159,6 +126,42 @@ public class RecruitmentSearchService {
 
     return new PageImpl<>(docs, PageRequest.of(page - 1, pageSize), total);
   }
+
+  @Transactional
+  public List<RecruitmentDocument> search(String keyword, Long userIdx) throws IOException {
+    if (keyword != null && !keyword.isBlank()) {
+      // userIdx가 null이 아닌 경우에만 사용자 조회
+      boolean isAdmin = false;
+      if (userIdx != null) {
+        isAdmin = userRepository.findById(userIdx.intValue())
+          .map(user -> user.getUserRole() == UserRole.ADMIN)
+          .orElse(false);
+      }
+
+      // admin이 아닐 경우에만 로그 저장
+      if (!isAdmin) {
+        searchLogRepository.save(SearchLog.builder()
+          .keyword(keyword)
+          .searchedAt(LocalDateTime.now())
+          .userId(userIdx) // null 허용
+          .build());
+      }
+    }
+
+    SearchResponse<RecruitmentDocument> response = esClient.search(s -> s
+      .index(INDEX_NAME)
+      .query(q -> q
+        .multiMatch(t -> t
+          .fields("title", "content")
+          .query(keyword)
+        )
+      ), RecruitmentDocument.class);
+
+    return response.hits().hits().stream()
+      .map(Hit::source)
+      .collect(Collectors.toList());
+  }
+
 
   public void updateScrapCountInES(Long recruitmentId, int newScrapCount) throws IOException {
     RecruitmentDocument doc = getDocumentById(recruitmentId);
