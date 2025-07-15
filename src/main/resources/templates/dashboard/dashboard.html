@@ -70,19 +70,6 @@
 
   const ctx = document.getElementById('regionChart').getContext('2d');
 
-<!--  new Chart(document.getElementById('jobTypeChart'), {-->
-<!--    type: 'pie',-->
-<!--    data: {-->
-<!--      labels: jobTypeLabels,-->
-<!--      datasets: [{-->
-<!--        data: jobTypeCounts-->
-<!--      }]-->
-<!--    }-->
-<!--  });-->
-
-  console.log("📍 지역 라벨:", regionLabels);
-  console.log("📊 지역별 채용 수:", regionCounts);
-
   new Chart(ctx, {
     type: 'doughnut',
     data: {
@@ -92,7 +79,7 @@
             borderWidth: 1
         }]
     }
-});
+  });
 
 
   new Chart(document.getElementById('trendChart'), {
@@ -111,13 +98,6 @@
   const topKeywordLabels = /*[[${dashboard.topKeywordLabels}]]*/ [];
   const topKeywordCounts = /*[[${dashboard.topKeywordCounts}]]*/ [];
 
-   console.log("🎯 직무 라벨:", jobTypeLabels);
-  console.log("🎯 직무 수치:", jobTypeCounts);
-  console.log("🔥 인기 직무 라벨:", popularRoleLabels);
-  console.log("📊 마감률:", /*[[${dashboard.closeRate}]]*/);
-  console.log("🔑 키워드 라벨:", topKeywordLabels);
-console.log("🔑 키워드 수치:", topKeywordCounts);
-
   new Chart(document.getElementById('keywordChart'), {
     type: 'bar',
     data: {
@@ -129,14 +109,9 @@ console.log("🔑 키워드 수치:", topKeywordCounts);
       }]
     },
     options: {
-      plugins: {
-        title: {
-          display: true,
-          text: '인기 키워드'
-        }
-      }
+      plugins: {}
     }
-});
+  });
 
 
   new Chart(document.getElementById('popularRoleChart'), {
@@ -159,8 +134,7 @@ console.log("🔑 키워드 수치:", topKeywordCounts);
   });
 
   const applyTrendLabels = /*[[${dashboard.applyTrendLabels}]]*/ [];
-const applyTrendCounts = /*[[${dashboard.applyTrendCounts}]]*/ [];
-
+  const applyTrendCounts = /*[[${dashboard.applyTrendCounts}]]*/ [];
 
   const applyTrendCtx = document.getElementById('applyTrendChart');
   if (applyTrendCtx) {
@@ -169,7 +143,6 @@ const applyTrendCounts = /*[[${dashboard.applyTrendCounts}]]*/ [];
       data: {
         labels: applyTrendLabels,
         datasets: [{
-          label: '일일 지원 횟수',
           data: applyTrendCounts,
           borderColor: 'rgba(54, 162, 235, 1)',
           backgroundColor: 'rgba(54, 162, 235, 0.1)',

@@ -44,6 +44,7 @@ public class DashboardService {
 
         Map<String, Long> topRoles = elasticsearchService.getTopRoles(5);
         List<Map.Entry<String, Long>> topSearchKeywords = getTopSearchedKeywords(5);
+
         Map<String, Long> regionData = elasticsearchService.getRegionDistribution();
 
         Map<String, Long> applyTrend = elasticsearchService.getUserWeeklyApplyTrend(userIdx, applyHistoryRepository);
@@ -89,8 +90,9 @@ public class DashboardService {
         // 전체 사용자 수
         long totalUserCount = userRepository.count();
 
-        // 전체 공고 수 등 기존 로직 재활용
+        // 전체 공고 수
         long totalJobCount = elasticsearchService.countRecruitments();
+
         long closedCount = elasticsearchService.countClosedRecruitments();
         long closingSoonCount = elasticsearchService.countClosingSoonRecruitments();
         double closeRate = calculateCloseRate(totalJobCount, closedCount);

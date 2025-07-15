@@ -218,25 +218,25 @@ public class ElasticsearchService {
     }
 
     // top keyword
-    public Map<String, Long> getTopKeywords(int size) {
-        try {
-            SearchResponse<Void> response = elasticsearchClient.search(s -> s
-                    .index("recruitments")
-                    .size(0)
-                    .aggregations("top_keywords", a -> a
-                            .terms(t -> t.field("jobKeywords").size(size))
-                    ), Void.class);
-
-            return response.aggregations().get("top_keywords").sterms().buckets().array().stream()
-                    .collect(Collectors.toMap(
-                            b -> b.key().stringValue(),
-                            b -> b.docCount()
-                    ));
-        } catch (IOException e) {
-            e.printStackTrace();
-            return Map.of();
-        }
-    }
+//    public Map<String, Long> getTopKeywords(int size) {
+//        try {
+//            SearchResponse<Void> response = elasticsearchClient.search(s -> s
+//                    .index("recruitments")
+//                    .size(0)
+//                    .aggregations("top_keywords", a -> a
+//                            .terms(t -> t.field("jobKeywords").size(size))
+//                    ), Void.class);
+//
+//            return response.aggregations().get("top_keywords").sterms().buckets().array().stream()
+//                    .collect(Collectors.toMap(
+//                            b -> b.key().stringValue(),
+//                            b -> b.docCount()
+//                    ));
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//            return Map.of();
+//        }
+//    }
 
 
     // 지역별 채용 분포
@@ -355,27 +355,27 @@ public class ElasticsearchService {
 
 
 
-    public Map<String, Long> getTopTitles(int size) {
-        try {
-            SearchResponse<Void> response = elasticsearchClient.search(s -> s
-                    .index("recruitments")
-                    .size(0)
-                    .aggregations("top_titles", a -> a
-                            .terms(t -> t.field("title.keyword").size(size))
-                    ), Void.class);
-
-            return response.aggregations().get("top_titles").sterms().buckets().array().stream()
-                    .collect(Collectors.toMap(
-                            b -> b.key().stringValue(),
-                            b -> b.docCount(),
-                            (a, b) -> a, // merge function
-                            LinkedHashMap::new
-                    ));
-        } catch (IOException e) {
-            e.printStackTrace();
-            return Map.of();
-        }
-    }
+//    public Map<String, Long> getTopTitles(int size) {
+//        try {
+//            SearchResponse<Void> response = elasticsearchClient.search(s -> s
+//                    .index("recruitments")
+//                    .size(0)
+//                    .aggregations("top_titles", a -> a
+//                            .terms(t -> t.field("title.keyword").size(size))
+//                    ), Void.class);
+//
+//            return response.aggregations().get("top_titles").sterms().buckets().array().stream()
+//                    .collect(Collectors.toMap(
+//                            b -> b.key().stringValue(),
+//                            b -> b.docCount(),
+//                            (a, b) -> a, // merge function
+//                            LinkedHashMap::new
+//                    ));
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//            return Map.of();
+//        }
+//    }
 
 
 
