@@ -35,71 +35,6 @@ public class RecruitmentSearchService {
   private static final String INDEX_NAME = "recruitments";
   private final UserRepository userRepository;
 
-  @Transactional
-  public List<RecruitmentDocument> search(String keyword, Long userIdx) throws IOException {
-    if (keyword != null && !keyword.isBlank()) {
-      // ✅ userIdx가 null이 아닌 경우에만 사용자 조회
-      boolean isAdmin = false;
-      if (userIdx != null) {
-        isAdmin = userRepository.findById(userIdx.intValue())
-                .map(user -> user.getUserRole() == UserRole.ADMIN)
-                .orElse(false);
-      }
-
-      // ✅ admin이 아닐 경우에만 로그 저장
-      if (!isAdmin) {
-        searchLogRepository.save(SearchLog.builder()
-                .keyword(keyword)
-                .searchedAt(LocalDateTime.now())
-                .userId(userIdx) // null 허용
-                .build());
-      }
-    }
-
-    SearchResponse<RecruitmentDocument> response = esClient.search(s -> s
-            .index(INDEX_NAME)
-            .query(q -> q
-                    .multiMatch(t -> t
-                            .fields("title", "content")
-                            .query(keyword)
-                    )
-            ), RecruitmentDocument.class);
-
-    return response.hits().hits().stream()
-            .map(Hit::source)
-            .collect(Collectors.toList());
-  }
-
-
-
-
-
-
-  public List<RecruitmentDocument> findAll() throws IOException {
-    SearchResponse<RecruitmentDocument> response = esClient.search(s -> s
-                    .index(INDEX_NAME)
-                    .query(q -> q.matchAll(m -> m)), // 모든 문서 조회
-            RecruitmentDocument.class
-    );
-
-    return response.hits().hits().stream()
-            .map(Hit::source)
-            .collect(Collectors.toList());
-  }
-
-  private static final String[] SPECIAL_CHARS_FOR_SQS = {
-    "+", "-", "&&", "||", "!", "(", ")", "{", "}", "[", "]", "^", "\"", "~", "*", "?", ":", "\\", "/"
-  };
-
-  private String escapeSpecialCharsForSimpleQueryString(String input) {
-    if (input == null) return null;
-    String escaped = input;
-    for (String ch : SPECIAL_CHARS_FOR_SQS) {
-      escaped = escaped.replace(ch, "\\" + ch);
-    }
-    return escaped;
-  }
-
   public Page<RecruitmentDocument> searchJobs(
     String title,
     String content,
@@ -219,6 +154,41 @@ public class RecruitmentSearchService {
     long total = response.hits().total().value();
 
     return new PageImpl<>(docs, PageRequest.of(page - 1, pageSize), total);
+  }
+
+  @Transactional
+  public List<RecruitmentDocument> search(String keyword, Long userIdx) throws IOException {
+    if (keyword != null && !keyword.isBlank()) {
+      // userIdx가 null이 아닌 경우에만 사용자 조회
+      boolean isAdmin = false;
+      if (userIdx != null) {
+        isAdmin = userRepository.findById(userIdx.intValue())
+          .map(user -> user.getUserRole() == UserRole.ADMIN)
+          .orElse(false);
+      }
+
+      // admin이 아닐 경우에만 로그 저장
+      if (!isAdmin) {
+        searchLogRepository.save(SearchLog.builder()
+          .keyword(keyword)
+          .searchedAt(LocalDateTime.now())
+          .userId(userIdx) // null 허용
+          .build());
+      }
+    }
+
+    SearchResponse<RecruitmentDocument> response = esClient.search(s -> s
+      .index(INDEX_NAME)
+      .query(q -> q
+        .multiMatch(t -> t
+          .fields("title", "content")
+          .query(keyword)
+        )
+      ), RecruitmentDocument.class);
+
+    return response.hits().hits().stream()
+      .map(Hit::source)
+      .collect(Collectors.toList());
   }
 
 

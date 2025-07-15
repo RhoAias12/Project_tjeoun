@@ -20,7 +20,7 @@ public class EmplRestController {
 
     private final EmplService emplService;
 
-    // ✅ [1] 채용공고 리스트 (JSON)
+    // 채용공고 리스트
     @GetMapping("/list")
     public ResponseEntity<List<RecruitmentDTO>> getRecruitments() {
         try {
@@ -34,7 +34,7 @@ public class EmplRestController {
         }
     }
 
-    // ✅ [2] 채용공고 상세 (JSON)
+    // 채용공고 상세
     @GetMapping("/{id}")
     public ResponseEntity<RecruitmentDTO> getRecruitment(@PathVariable Long id) {
         RecruitmentDTO dto = emplService.getRecruitmentDetail(id);

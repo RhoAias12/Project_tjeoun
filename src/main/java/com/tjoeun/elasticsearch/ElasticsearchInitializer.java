@@ -19,10 +19,6 @@ public class ElasticsearchInitializer implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) {
 
-//        unifiedJobCrawlerService.runCrawler();
-
-//       elasticsearchService.createIndexIfNotExists();
-
         elasticsearchService.resetRecruitmentIndex(recruitmentSyncService);
 
     }
