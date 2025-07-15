@@ -31,7 +31,7 @@ public class ESIndexService {
    * 서버 시작 시 인덱스를 존재 여부 확인 후, 없으면 생성
    */
   @PostConstruct
-  public void initializeIndex() throws IOException {
+  public void init() throws IOException {
     if (!indexExists(INDEX_NAME)) {
       createRecruitmentsIndex();
     }
@@ -45,11 +45,9 @@ public class ESIndexService {
   }
 
   public void createRecruitmentsIndex() throws IOException {
-    // custom analyzer 설정 (Map으로 직접 작성)
-    Map<String, Object> settings = new HashMap<>();
+    // analyzer 설정
     Map<String, Object> analysis = new HashMap<>();
 
-    // tokenizer 설정
     Map<String, Object> tokenizerMap = new HashMap<>();
     Map<String, Object> ngramTokenizer = new HashMap<>();
     ngramTokenizer.put("type", "ngram");
@@ -58,7 +56,6 @@ public class ESIndexService {
     ngramTokenizer.put("token_chars", List.of("letter", "digit"));
     tokenizerMap.put("ngram_tokenizer", ngramTokenizer);
 
-    // analyzer 설정
     Map<String, Object> analyzerMap = new HashMap<>();
     Map<String, Object> ngramAnalyzer = new HashMap<>();
     ngramAnalyzer.put("type", "custom");
@@ -70,12 +67,13 @@ public class ESIndexService {
     analysis.put("tokenizer", tokenizerMap);
 
     Map<String, Object> indexSettings = new HashMap<>();
-    indexSettings.put("max_ngram_diff", 30);
+    indexSettings.put("max_ngram_diff", 32);
 
+    Map<String, Object> settings = new HashMap<>();
     settings.put("index", indexSettings);
     settings.put("analysis", analysis);
 
-    // 매핑 설정
+    // 매핑 설정 (기존과 동일)
     Map<String, Object> mappings = new HashMap<>();
     Map<String, Object> properties = new HashMap<>();
 
@@ -87,6 +85,7 @@ public class ESIndexService {
         "keyword", Map.of("type", "keyword")
       )
     ));
+    // company, combinedContent, location도 동일하게 추가...
 
     properties.put("company", Map.of(
       "type", "text",
@@ -96,7 +95,6 @@ public class ESIndexService {
         "keyword", Map.of("type", "keyword")
       )
     ));
-
     properties.put("combinedContent", Map.of(
       "type", "text",
       "analyzer", "ngram_analyzer",
@@ -105,7 +103,6 @@ public class ESIndexService {
         "keyword", Map.of("type", "keyword")
       )
     ));
-
     properties.put("location", Map.of(
       "type", "text",
       "analyzer", "ngram_analyzer",
@@ -121,21 +118,15 @@ public class ESIndexService {
 
     mappings.put("properties", properties);
 
+    // 최종 JSON 구조에 settings 와 mappings를 넣음
+    Map<String, Object> root = new HashMap<>();
+    root.put("settings", settings);
+    root.put("mappings", mappings);
+
     ObjectMapper mapper = new ObjectMapper();
-    String settingsJson;
-    String mappingsJson;
+    String indexDefinition = mapper.writeValueAsString(root);
 
-    try {
-      settingsJson = mapper.writeValueAsString(settings);
-      mappingsJson = mapper.writeValueAsString(mappings);
-    } catch (JsonProcessingException e) {
-      throw new RuntimeException("JSON 직렬화 실패", e);
-    }
-
-    String indexDefinition = "{\n" +
-      "  \"settings\": " + settingsJson + ",\n" +
-      "  \"mappings\": " + mappingsJson + "\n" +
-      "}";
+    System.out.println("indexDefinition = " + indexDefinition);
 
     CreateIndexResponse response = esClient.indices().create(c -> c
       .index(INDEX_NAME)
@@ -148,6 +139,7 @@ public class ESIndexService {
       throw new IOException("❌ 인덱스 생성 실패");
     }
   }
+
 
 
 
