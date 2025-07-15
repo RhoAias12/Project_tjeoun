@@ -1,9 +1,6 @@
-package com.tjoeun.service;
+package com.tjoeun.elasticsearch.service;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
-import co.elastic.clients.elasticsearch._types.SortOrder;
-import co.elastic.clients.elasticsearch._types.aggregations.ExtendedBounds;
-import co.elastic.clients.elasticsearch._types.analysis.TokenFilterDefinition;
 import co.elastic.clients.elasticsearch._types.mapping.Property;
 import co.elastic.clients.elasticsearch.core.CountRequest;
 import co.elastic.clients.elasticsearch.core.CountResponse;
@@ -14,9 +11,6 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import co.elastic.clients.json.JsonData;
-import co.elastic.clients.elasticsearch._types.analysis.StopTokenFilter;
-import co.elastic.clients.elasticsearch._types.analysis.TokenFilterDefinition;
-import co.elastic.clients.elasticsearch._types.analysis.StopTokenFilter;
 
 
 import java.io.IOException;

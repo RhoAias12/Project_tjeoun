@@ -1,7 +1,7 @@
 package com.tjoeun.elasticsearch;
 
 import com.tjoeun.elasticsearch.sync.RecruitmentSyncService;
-import com.tjoeun.service.ElasticsearchService;
+import com.tjoeun.elasticsearch.service.ElasticsearchService;
 import com.tjoeun.service.UnifiedJobCrawlerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.ApplicationArguments;
