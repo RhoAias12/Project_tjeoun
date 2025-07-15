@@ -101,10 +101,6 @@ public class RecruitmentSearchService {
     return escaped;
   }
 
-  private String escapeWildcard(String input) {
-    return input.replaceAll("([\\*\\?\\[\\]])", "\\\\$1");
-  }
-
   public Page<RecruitmentDocument> searchJobs(
     String title,
     String content,

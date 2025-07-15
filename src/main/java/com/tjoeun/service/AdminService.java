@@ -83,19 +83,6 @@ public class AdminService {
     ));
   }
 
-
-//  // 회원 삭제
-//  @Transactional
-//  public void deleteUserById(Integer userIdx) {
-//    Users user = userRepository.findById(userIdx)
-//      .orElseThrow(() -> new IllegalArgumentException("사용자 없음"));
-//    userRepository.delete(user);
-//    userDocumentRepository.deleteById(userIdx);
-//  }
-//  public int getTotalUserCount() {
-//    return (int) userRepository.count();
-//  }
-
   // 회원 상세 조회
   public UserFormDto getUserFormDtoById(Integer userIdx) {
     Users user = userRepository.findById(userIdx)
@@ -166,6 +153,7 @@ public class AdminService {
       applyHistorySearchRepository.save(doc);
     }
   }
+
 
   public Page<ApplyHistoryDTO> getPagedApplyHistory(int page, int size, String sortOption) {
     Sort sort = Sort.unsorted();

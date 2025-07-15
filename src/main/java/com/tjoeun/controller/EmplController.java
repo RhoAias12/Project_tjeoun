@@ -22,23 +22,23 @@ import java.security.Principal;
 @RequestMapping("/empl")
 public class EmplController {
 
-  private final EmplService emplService;
-  private final MyPageService myPageService;
-  private final UserRepository userRepository;
+    private final EmplService emplService;
+    private final MyPageService myPageService;
+    private final UserRepository userRepository;
 
     @GetMapping("/empl_main")
     public String emplMainPage(
-      @RequestParam(defaultValue = "1") int page,
-      @RequestParam(defaultValue = "25") int pageSize,
-      @RequestParam(defaultValue = "all") String sortOrder,
-      @RequestParam(required = false) String title,
-      @RequestParam(required = false) String content,
-      @RequestParam(required = false) String region,
-      @RequestParam(required = false) String company,
-      @RequestParam(required = false) String startDate,
-      @RequestParam(required = false) String endDate,
-      Principal principal,
-      Model model) {
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "25") int pageSize,
+            @RequestParam(defaultValue = "all") String sortOrder,
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) String content,
+            @RequestParam(required = false) String region,
+            @RequestParam(required = false) String company,
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate,
+            Principal principal,
+            Model model) {
 
         Integer userIdx = null;
         if (principal != null) {
@@ -50,12 +50,12 @@ public class EmplController {
         }
 
         Page<RecruitmentDTO> jobPage = emplService.getJobPage(
-          page, pageSize, sortOrder,
-          title, content, region, company, startDate, endDate, userIdx);
+                page, pageSize, sortOrder,
+                title, content, region, company, startDate, endDate, userIdx);
 
         String prevUrl = emplService.buildPrevUrl(
-          page, pageSize, sortOrder,
-          title, content, region, company, startDate, endDate);
+                page, pageSize, sortOrder,
+                title, content, region, company, startDate, endDate);
 
         String encodedPrevUrl = URLEncoder.encode(prevUrl, StandardCharsets.UTF_8);
 
@@ -73,51 +73,50 @@ public class EmplController {
         model.addAttribute("endDate", endDate);
 
         PaginationUtil.setPaging(model, jobPage, "/empl/empl_main",
-          sortOrder, 10,
-          title, content, region, company, startDate, endDate);
+                sortOrder, 10,
+                title, content, region, company, startDate, endDate);
 
         return "empl/empl_main";
     }
 
     @GetMapping("/empl_detail/{id}")
     public String emplDetailPage(
-      @PathVariable("id") Long id,
-    @RequestParam(defaultValue = "1") int page,
-    @RequestParam(required = false) String prevUrl,
-    @RequestParam(required = false) String sortOrder,
-    @RequestParam(required = false) String title,
-    @RequestParam(required = false) String content,
-    @RequestParam(required = false) String region,
-    @RequestParam(required = false) String company,
-    @RequestParam(required = false) String startDate,
-    @RequestParam(required = false) String endDate,
-    Model model,
-    Principal principal) {
+            @PathVariable("id") Long id,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(required = false) String prevUrl,
+            @RequestParam(required = false) String sortOrder,
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) String content,
+            @RequestParam(required = false) String region,
+            @RequestParam(required = false) String company,
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate,
+            Model model,
+            Principal principal) {
 
-      RecruitmentDTO dto = emplService.getRecruitmentDetail(id);
-      if (dto == null) {
-        return "/main";
-      }
+        RecruitmentDTO dto = emplService.getRecruitmentDetail(id);
+        if (dto == null) {
+            return "/main";
+        }
 
-      boolean isFavorited = false;
-      if (principal != null) {
-        String userEmail = principal.getName();
-        isFavorited = myPageService.isFavorited(userEmail, id);
-      }
+        boolean isFavorited = false;
+        if (principal != null) {
+            String userEmail = principal.getName();
+            isFavorited = myPageService.isFavorited(userEmail, id);
+        }
 
-      model.addAttribute("page", page);
-      model.addAttribute("job", dto);
-      model.addAttribute("prevUrl", prevUrl != null ? prevUrl : "/empl/empl_main");
-      model.addAttribute("isFavorited", isFavorited);
-      model.addAttribute("sortOrder", sortOrder);
-      model.addAttribute("title", title);
-      model.addAttribute("content", content);
-      model.addAttribute("region", region);
-      model.addAttribute("company", company);
-      model.addAttribute("startDate", startDate);
-      model.addAttribute("endDate", endDate);
+        model.addAttribute("page", page);
+        model.addAttribute("job", dto);
+        model.addAttribute("prevUrl", prevUrl != null ? prevUrl : "/empl/empl_main");
+        model.addAttribute("isFavorited", isFavorited);
+        model.addAttribute("sortOrder", sortOrder);
+        model.addAttribute("title", title);
+        model.addAttribute("content", content);
+        model.addAttribute("region", region);
+        model.addAttribute("company", company);
+        model.addAttribute("startDate", startDate);
+        model.addAttribute("endDate", endDate);
 
-      return "empl/empl_detail";
+        return "empl/empl_detail";
     }
 }
-

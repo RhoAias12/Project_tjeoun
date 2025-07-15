@@ -2,12 +2,15 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8" />
+  <meta name="_csrf" th:content="${_csrf.token}" />
+  <meta name="_csrf_header" th:content="${_csrf.headerName}" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>공고 메인페이지</title>
   <link rel="stylesheet" th:href="@{/css/main.css}" />
   <link rel="stylesheet" th:href="@{/css/header.css}" />
   <link rel="stylesheet" th:href="@{/css/footer.css}" />
   <link rel="stylesheet" th:href="@{/css/empl_main.css}" />
+  <link rel="stylesheet" th:href="@{/css/chat.css}" />
 <!--  <script defer src="js/header.js"></script>-->
 <!--  <script defer src="js/footer.js"></script>-->
 
@@ -41,6 +44,88 @@
       startInput.addEventListener('change', () => validateDates('start'));
       endInput.addEventListener('change', () => validateDates('end'));
     });
+
+
+        //chat 챗봇
+    function toggleChat() {
+        const popup = document.getElementById("chatPopup");
+        popup.style.display = (popup.style.display === "block") ? "none" : "block";
+      }
+
+      async function sendMessage() {
+        const inputEl = document.getElementById("userInput");
+        const message = inputEl.value.trim();
+        if (!message) return;
+
+        const chatBox = document.getElementById("chatBox");
+
+        // 유저 메시지 추가
+        const userMsg = document.createElement("div");
+        userMsg.className = "message user-message";
+        userMsg.textContent = message;
+        chatBox.appendChild(userMsg);
+
+        inputEl.value = "";
+
+        // 작성중 메시지 추가
+        const botMsg = document.createElement("div");
+        botMsg.className = "message bot-message";
+        botMsg.textContent = "... 작성중입니다";
+        chatBox.appendChild(botMsg);
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        // ✅ CSRF 토큰 읽어오기
+        const csrfToken = document.querySelector("meta[name='_csrf']").getAttribute("content");
+        const csrfHeader = document.querySelector("meta[name='_csrf_header']").getAttribute("content");
+
+        try {
+          const response = await fetch("/api/chat", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              [csrfHeader]: csrfToken,  // ✅ CSRF 토큰 동적 헤더 적용
+            },
+            body: JSON.stringify({ input: message }),
+          });
+
+          if (response.status === 403) {
+            alert("로그인이 필요한 서비스입니다.\n로그인 페이지로 이동합니다.");
+            window.location.href = "/user/login";
+            return;
+          }
+
+          if (!response.ok) {
+            const errorText = await response.text();
+            console.error("서버 오류:", errorText);
+            botMsg.classList.add("error-message");
+            botMsg.textContent = "❌ 서버 오류가 발생했어요.\n" + errorText;
+            chatBox.scrollTop = chatBox.scrollHeight;
+            return;
+          }
+
+          const data = await response.json();
+          botMsg.textContent = data.reply;
+          chatBox.scrollTop = chatBox.scrollHeight;
+
+        } catch (error) {
+          console.error("요청 실패:", error);
+          botMsg.classList.add("error-message");
+          botMsg.textContent = "❌ 요청 실패: " + error;
+          chatBox.scrollTop = chatBox.scrollHeight;
+        }
+      }
+
+      // 엔터 키 전송
+      document.addEventListener("DOMContentLoaded", () => {
+        const inputEl = document.getElementById("userInput");
+        inputEl.addEventListener("keydown", function(event) {
+          if (event.key === "Enter" && !event.shiftKey) {
+            event.preventDefault();
+            sendMessage();
+          }
+        });
+      });
+
   </script>
 
 
@@ -94,22 +179,45 @@
 
 
       <!-- 채용 카드 리스트 -->
-    <div class="card-grid">
-      <div class="job-card"
-           th:each="job : ${jobPage.content}">
-        <a th:href="@{'/empl/empl_detail/' + ${job.recruitmentIdx} + '?prevUrl=' + ${encodedPrevUrl}}">
-          <img th:src="${job.logoUrl}" alt="회사 로고" class="job-logo" />
-          <h3 class="job-title" th:text="${job.title}">공고 제목</h3>
-          <p class="job-deadline"
-             th:text="${#strings.startsWith(job.deadline.toString(), '9999') ? '상시채용' : '마감일: ' + job.deadline}">
-          </p>
-          <p class="scrap-count">
-            스크랩 수: <span th:text="${job.scrapCount != null ? job.scrapCount : 0}">0</span>
-          </p>
-        </a>
+      <div class="card-grid">
+        <div class="job-card"
+             th:each="job : ${jobPage.content}">
+          <a th:href="@{'/empl/empl_detail/' + ${job.recruitmentIdx} + '?prevUrl=' + ${encodedPrevUrl}}">
+            <img th:src="${job.logoUrl}" alt="회사 로고" class="job-logo" />
+            <h3 class="job-title" th:text="${job.title}">공고 제목</h3>
+            <p class="job-deadline"
+               th:text="${#strings.startsWith(job.deadline.toString(), '9999') ? '상시채용' : '마감일: ' + job.deadline}">
+            </p>
+            <p class="scrap-count">
+              스크랩 수: <span th:text="${job.scrapCount != null ? job.scrapCount : 0}">0</span>
+            </p>
+          </a>
+        </div>
+
       </div>
 
-    </div>
+      <!-- chat.html -->
+      <!-- 채팅 토글 버튼 -->
+      <div class="chat-toggle-button" onclick="toggleChat()">💬</div>
+
+      <!-- 채팅 팝업 -->
+      <div class="chat-popup" id="chatPopup">
+        <div class="chat-header">
+          <span class="chat-title">AI Chat</span>
+          <button class="close-btn" onclick="toggleChat()">✖️</button>
+        </div>
+
+        <!-- 메시지 영역 -->
+        <div class="chat-box" id="chatBox">
+          <!-- 여기에 메시지들이 들어감 -->
+        </div>
+
+        <!-- 입력창은 형제로 따로! -->
+        <div class="input-box">
+          <input type="text" id="userInput" placeholder="메시지를 입력하세요..." />
+          <button onclick="sendMessage()">전송</button>
+        </div>
+      </div>
 
     <!-- 페이징 -->
       <div th:replace="~{fragments/pagination :: fragment(${jobPage}, ${startPage}, ${endPage}, '/empl/empl_main')}"></div>
