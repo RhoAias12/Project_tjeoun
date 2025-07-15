@@ -53,7 +53,7 @@ public class ChatService {
     headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
 
     Map<String, Object> payload = Map.of(
-      "model", "gpt-4o",
+      "model", "gpt-4.1-nano",
       "messages", messages
     );
 
