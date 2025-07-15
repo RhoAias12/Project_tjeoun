@@ -30,16 +30,44 @@
     function handleSortChange(selectElement) {
       const selectedSort = selectElement.value;
       const url = new URL(window.location.href);
-      url.searchParams.set("sortBy", selectedSort);
-      url.searchParams.set("page", 1);
-      // email, nickname 유지
-      const email = url.searchParams.get("email");
-      const nickname = url.searchParams.get("nickname");
-      if(email) url.searchParams.set("email", email);
-      if(nickname) url.searchParams.set("nickname", nickname);
+      const params = url.searchParams;
+
+      // 정렬 조건 세팅
+      params.set("sortBy", selectedSort);
+
+      // 페이지는 무조건 1로 리셋
+      params.set("page", 1);
+
+      // 기존 email, nickname 파라미터 유지
+      const email = document.querySelector("input[name='email']")?.value;
+      const nickname = document.querySelector("input[name='nickname']")?.value;
+      if (email) params.set("email", email);
+      else params.delete("email");
+
+      if (nickname) params.set("nickname", nickname);
+      else params.delete("nickname");
+
+      // 최종 URL 이동
+      url.search = params.toString();
       window.location.href = url.toString();
     }
+    document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById("searchForm");
+
+    // 검색 버튼 클릭 또는 Enter로 form 제출될 때
+    form.addEventListener("submit", function () {
+      let pageInput = form.querySelector("input[name='page']");
+      if (!pageInput) {
+        pageInput = document.createElement("input");
+        pageInput.type = "hidden";
+        pageInput.name = "page";
+        form.appendChild(pageInput);
+      }
+      pageInput.value = "1"; // 무조건 페이지 1로
+    });
+  });
   </script>
+
   <title>회원관리</title>
 </head>
 <body>
@@ -53,7 +81,7 @@
 
     <!-- 검색 및 정렬 영역 -->
     <div class="search">
-      <form method="get" th:action="@{/admin/member_list}">
+      <form method="get" th:action="@{/admin/member_list}" id="searchForm">
         <section class="search-bar">
           <input type="text" name="email" placeholder="이메일" th:value="${email}" />
           <input type="text" name="nickname" placeholder="닉네임" th:value="${nickname}" />

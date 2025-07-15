@@ -53,104 +53,75 @@ public class RecruitmentSearchService {
       .size(pageSize);
 
     builder.query(q -> q.bool(b -> {
-
+      // title
       if (title != null && !title.isBlank()) {
-        String escapedTitle = escapeForWildcard(title);
-        b.must(m -> m.wildcard(w -> w
-          .field("title")
-          .value("*" + escapedTitle + "*")
-        ));
+        String escapedTitle = escapeWildcard(title.toLowerCase());
+        b.must(m -> m
+          .wildcard(w -> w
+            .field("title.keyword") // .keyword 필드에서 정확히 일치 여부 확인
+            .value("*" + escapedTitle + "*") // 포함 검색
+          )
+        );
       }
-
+      // content
       if (content != null && !content.isBlank()) {
-        String escapedContent = escapeForWildcard(content);
+        String escapedContent = escapeWildcard(content.toLowerCase());
         b.must(m -> m.wildcard(w -> w
-          .field("combinedContent")
+          .field("combinedContent.keyword")
           .value("*" + escapedContent + "*")
         ));
       }
 
+      // region
       if (region != null && !region.isBlank()) {
-        String escapedRegion = escapeForWildcard(region);
+        String escapedRegion = escapeWildcard(region.toLowerCase());
         b.must(m -> m.wildcard(w -> w
-          .field("location")
+          .field("location.keyword")
           .value("*" + escapedRegion + "*")
         ));
       }
 
+      // company
       if (company != null && !company.isBlank()) {
-        String escapedCompany = escapeForWildcard(company);
+        String escapedCompany = escapeWildcard(company.toLowerCase());
         b.must(m -> m.wildcard(w -> w
-          .field("company")
+          .field("company.keyword")
           .value("*" + escapedCompany + "*")
         ));
       }
 
-      // 날짜 범위 필터 (deadline)
       // 날짜 필터 + 상시채용
       if ((startDate != null && !startDate.isBlank()) || (endDate != null && !endDate.isBlank())) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
-
-        String formattedStart = null;
-        String formattedEnd = null;
-
-        if (startDate != null && !startDate.isBlank()) {
-          formattedStart = LocalDate.parse(startDate).atStartOfDay().format(formatter);
-        }
-        if (endDate != null && !endDate.isBlank()) {
-          formattedEnd = LocalDate.parse(endDate).atTime(23, 59, 59).format(formatter);
-        }
-
-        String finalStart = formattedStart;
-        String finalEnd = formattedEnd;
+        String formattedStart = (startDate != null && !startDate.isBlank()) ?
+          LocalDate.parse(startDate).atStartOfDay().format(formatter) : null;
+        String formattedEnd = (endDate != null && !endDate.isBlank()) ?
+          LocalDate.parse(endDate).atTime(23, 59, 59).format(formatter) : null;
 
         b.filter(f -> f.bool(bool -> bool
           .should(s -> s.range(r -> {
             r.field("deadline");
-            if (finalStart != null) r.gte(JsonData.of(finalStart));
-            if (finalEnd != null) r.lte(JsonData.of(finalEnd));
+            if (formattedStart != null) r.gte(JsonData.of(formattedStart));
+            if (formattedEnd != null) r.lte(JsonData.of(formattedEnd));
             return r;
           }))
-          .should(s -> s.term(t -> t
-            .field("deadline")
-            .value("9999-12-31T00:00:00")
-          ))
+          .should(s -> s.term(t -> t.field("deadline").value("9999-12-31T00:00:00")))
         ));
       }
-
       return b;
     }));
 
-    // 정렬
     switch (sortOrder) {
-      case "all":
-        builder.sort(s -> s.field(f -> f.field("recruitmentIdx").order(SortOrder.Asc)));
-        break;
-      case "deadline_asc":
-        builder.sort(s -> s.field(f -> f.field("deadline").order(SortOrder.Asc)));
-        break;
-      case "deadline_desc":
-        builder.sort(s -> s.field(f -> f.field("deadline").order(SortOrder.Desc)));
-        break;
-      case "scrap_desc":
-        builder.sort(s -> s.field(f -> f.field("scrapCount").order(SortOrder.Desc)));
-        break;
-      case "scrap_asc":
-        builder.sort(s -> s.field(f -> f.field("scrapCount").order(SortOrder.Asc)));
-        break;
-      default:
-        builder.sort(s -> s.field(f -> f.field("createdAt").order(SortOrder.Desc)));
-        break;
+      case "all" -> builder.sort(s -> s.field(f -> f.field("recruitmentIdx").order(SortOrder.Asc)));
+      case "deadline_asc" -> builder.sort(s -> s.field(f -> f.field("deadline").order(SortOrder.Asc)));
+      case "deadline_desc" -> builder.sort(s -> s.field(f -> f.field("deadline").order(SortOrder.Desc)));
+      case "scrap_desc" -> builder.sort(s -> s.field(f -> f.field("scrapCount").order(SortOrder.Desc)));
+      case "scrap_asc" -> builder.sort(s -> s.field(f -> f.field("scrapCount").order(SortOrder.Asc)));
+      default -> builder.sort(s -> s.field(f -> f.field("createdAt").order(SortOrder.Desc)));
     }
 
-    SearchRequest request = builder.build();
-
-    SearchResponse<RecruitmentDocument> response = esClient.search(request, RecruitmentDocument.class);
-
-    List<RecruitmentDocument> docs = response.hits().hits().stream()
-      .map(Hit::source)
-      .collect(Collectors.toList());
-
+    SearchResponse<RecruitmentDocument> response = esClient.search(builder.build(), RecruitmentDocument.class);
+    List<RecruitmentDocument> docs = response.hits().hits().stream().map(Hit::source).collect(Collectors.toList());
     long total = response.hits().total().value();
 
     return new PageImpl<>(docs, PageRequest.of(page - 1, pageSize), total);
@@ -193,56 +164,39 @@ public class RecruitmentSearchService {
 
 
   public void updateScrapCountInES(Long recruitmentId, int newScrapCount) throws IOException {
-    // 문서 조회
     RecruitmentDocument doc = getDocumentById(recruitmentId);
-    if (doc == null) {
-      throw new IllegalStateException("해당 공고 문서를 Elasticsearch에서 찾을 수 없습니다.");
-    }
-
-    // 스크랩 수 갱신
+    if (doc == null) throw new IllegalStateException("문서 없음");
     doc.setScrapCount(newScrapCount);
-
-    // 문서 업데이트 (덮어쓰기)
-    esClient.index(i -> i
-      .index(INDEX_NAME)
-      .id(String.valueOf(recruitmentId))
-      .document(doc)
-    );
+    esClient.index(i -> i.index(INDEX_NAME).id(String.valueOf(recruitmentId)).document(doc));
   }
 
   public RecruitmentDocument getDocumentById(Long recruitmentId) throws IOException {
     try {
-      return esClient.get(g -> g
-          .index(INDEX_NAME)
-          .id(String.valueOf(recruitmentId)),
-        RecruitmentDocument.class
-      ).source();
+      return esClient.get(g -> g.index(INDEX_NAME).id(String.valueOf(recruitmentId)), RecruitmentDocument.class).source();
     } catch (Exception e) {
       return null;
     }
   }
 
   public void saveOrUpdate(RecruitmentDocument doc) throws IOException {
-    esClient.index(i -> i
-      .index(INDEX_NAME)
-      .id(String.valueOf(doc.getRecruitmentIdx()))
-      .document(doc)
-    );
+    esClient.index(i -> i.index(INDEX_NAME).id(String.valueOf(doc.getRecruitmentIdx())).document(doc));
   }
 
   public void deleteById(Long recruitmentIdx) throws IOException {
-    esClient.delete(d -> d
-      .index(INDEX_NAME)
-      .id(String.valueOf(recruitmentIdx))
-    );
+    esClient.delete(d -> d.index(INDEX_NAME).id(String.valueOf(recruitmentIdx)));
   }
 
-  private String escapeForWildcard(String input) {
-    if (input == null) return null;
-    // wildcard 쿼리에서는 \, *, ?, [ ] 등의 문자만 escape 필요
-    return input.replaceAll("([\\\\*?\\[\\]])", "\\\\$1");
+  private String escapeForRegexp(String input) {
+    return input == null ? null :
+      input.replaceAll("([\\\\~`!#\\$%\\^&\\*()_\\-\\+=\\[\\]\\{\\};:'\",\\.<>/\\?@])", "\\\\$1");
+  }
+  private boolean containsSpecialRegexChars(String input) {
+    return input != null &&
+      input.matches(".*[\\\\~`!#\\$%\\^&\\*()_\\-\\+=\\[\\]\\{\\};:'\",\\.<>/\\?@].*");
   }
 
-
+  private String escapeWildcard(String input) {
+    // 이스케이프할 특수문자 목록에 \와 | 추가
+    return input.replaceAll("([~`!@#$%^&*()_\\-+=\\[\\]{};:\"',.<>?/\\\\|])", "\\\\$1");
+  }
 }
-

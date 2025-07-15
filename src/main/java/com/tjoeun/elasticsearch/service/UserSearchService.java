@@ -42,10 +42,11 @@ public class UserSearchService {
     List<Query> mustQueries = new ArrayList<>();
 
     if (email != null && !email.isBlank()) {
+      String escapedEmail = escapeWildcard(email);
       mustQueries.add(Query.of(q -> q
         .wildcard(w -> w
           .field("userEmail")
-          .wildcard("*" + email + "*")
+          .wildcard("*" + escapedEmail + "*")
         )
       ));
     }
