@@ -6,13 +6,18 @@ import com.tjoeun.elasticsearch.repository.RecruitmentSearchRepository;
 import com.tjoeun.entity.Recruitment;
 import com.tjoeun.repository.FavoriteRepository;
 import com.tjoeun.repository.RecruitmentRepository;
+import com.tjoeun.service.ElasticsearchService;
+import com.tjoeun.elasticsearch.KoreanNounExtractor;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -20,10 +25,24 @@ import java.util.Optional;
 public class RecruitmentSyncService {
 
   private final RecruitmentRepository recruitmentRepository;
-  private final RecruitmentSearchRepository recruitmentSearchRepository;
+
   private final FavoriteRepository favoriteRepository;
   private final ElasticsearchClient esClient;
   private static final String INDEX_NAME = "recruitments";
+  @Lazy
+  private final RecruitmentSearchRepository recruitmentSearchRepository;
+
+  private final ElasticsearchService elasticsearchService;
+
+    @PostConstruct
+    public void init() {
+        if (recruitmentSearchRepository.count() == 0) {
+            System.out.println("자동 동기화 실행됨 ✅");
+            syncAllToElasticsearch();
+        } else {
+            System.out.println("ES에 이미 데이터 있음, 자동 동기화 생략");
+        }
+    }
 
   // MariaDB 저장 후 Elasticsearch 색인 생성/갱신
   @Transactional
@@ -40,6 +59,7 @@ public class RecruitmentSyncService {
     return saved;
   }
 
+
   @Transactional
   public void delete(Long recruitmentIdx) throws IOException {
     recruitmentRepository.deleteById(recruitmentIdx);
@@ -50,8 +70,33 @@ public class RecruitmentSyncService {
     );
   }
 
-  private RecruitmentDocument mapToDocument(Recruitment recruitment) {
-    int scrapCount = favoriteRepository.countByRecruitment(recruitment);
+    // 전체 DB 데이터를 ES에 동기화
+    public void syncAllToElasticsearch() {
+        List<Recruitment> recruitments = recruitmentRepository.findAllWithFavorites();
+        System.out.println("불러온 DB 데이터 수: " + recruitments.size());
+
+        int count = 0;
+        for (Recruitment r : recruitments) {
+            try {
+                RecruitmentDocument doc = mapToDocument(r);
+                System.out.println("색인할 문서: " + doc);
+                recruitmentSearchRepository.save(doc);
+                count++;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        System.out.println("전체 ES 동기화 완료 ✅ 총 색인 건수: " + count);
+    }
+
+    private RecruitmentDocument mapToDocument(Recruitment recruitment) {
+        String combined = Optional.ofNullable(recruitment.getTitle()).orElse("") + " " +
+                Optional.ofNullable(recruitment.getResponsibilities()).orElse("");
+
+        String jobKeywords = String.join(" ", KoreanNounExtractor.extractNouns(combined));
+
+        int scrapCount = favoriteRepository.countByRecruitment(recruitment);
 
     return RecruitmentDocument.builder()
       .recruitmentIdx(recruitment.getRecruitmentIdx())
@@ -79,6 +124,7 @@ public class RecruitmentSyncService {
         Optional.ofNullable(recruitment.getEmploymentType()).orElse(""))
       )
       .scrapCount(scrapCount)
+      .jobKeywords(jobKeywords)
       .build();
   }
 

@@ -2,6 +2,8 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
   <head>
     <meta charset="UTF-8" />
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>메인페이지</title>
     <link rel="stylesheet" th:href="@{/css/main.css}" />
@@ -12,82 +14,86 @@
 <!--    <script defer th:src="@{/js/main.js}"></script>-->
 
     <script>
-      //chat 챗봇
-  function toggleChat() {
-  const popup = document.getElementById("chatPopup");
-  popup.style.display = (popup.style.display === "block") ? "none" : "block";
-}
+      function toggleChat() {
+        const popup = document.getElementById("chatPopup");
+        popup.style.display = (popup.style.display === "block") ? "none" : "block";
+      }
 
-async function sendMessage() {
-  const inputEl = document.getElementById("userInput");
-  const message = inputEl.value.trim();
-  if (!message) return;
+      async function sendMessage() {
+        const inputEl = document.getElementById("userInput");
+        const message = inputEl.value.trim();
+        if (!message) return;
 
-  const chatBox = document.getElementById("chatBox");
+        const chatBox = document.getElementById("chatBox");
 
-  // 유저 메시지 추가
-  const userMsg = document.createElement("div");
-  userMsg.className = "message user-message";
-  userMsg.textContent = message;
-  chatBox.appendChild(userMsg);
+        // 유저 메시지 추가
+        const userMsg = document.createElement("div");
+        userMsg.className = "message user-message";
+        userMsg.textContent = message;
+        chatBox.appendChild(userMsg);
 
-  inputEl.value = "";
+        inputEl.value = "";
 
-  // 작성중 메시지 추가
-  const botMsg = document.createElement("div");
-  botMsg.className = "message bot-message";
-  botMsg.textContent = "... 작성중입니다";
-  chatBox.appendChild(botMsg);
-  chatBox.scrollTop = chatBox.scrollHeight;
+        // 작성중 메시지 추가
+        const botMsg = document.createElement("div");
+        botMsg.className = "message bot-message";
+        botMsg.textContent = "... 작성중입니다";
+        chatBox.appendChild(botMsg);
+        chatBox.scrollTop = chatBox.scrollHeight;
 
-  try {
-    const response = await fetch("/api/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ input: message }),
-    });
+        // ✅ CSRF 토큰 읽어오기
+        const csrfToken = document.querySelector("meta[name='_csrf']").getAttribute("content");
+        const csrfHeader = document.querySelector("meta[name='_csrf_header']").getAttribute("content");
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("서버 오류:", errorText);
+        try {
+          const response = await fetch("/api/chat", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              [csrfHeader]: csrfToken,  // ✅ CSRF 토큰 동적 헤더 적용
+            },
+            body: JSON.stringify({ input: message }),
+          });
 
-      // 작성중 메시지를 에러로 대체
-      botMsg.classList.add("error-message");
-      botMsg.textContent = "❌ 서버 오류가 발생했어요.\n" + errorText;
-      chatBox.scrollTop = chatBox.scrollHeight;
-      return;
-    }
+          if (response.status === 403) {
+            alert("로그인이 필요한 서비스입니다.\n로그인 페이지로 이동합니다.");
+            window.location.href = "/user/login";
+            return;
+          }
 
-    const data = await response.json();
+          if (!response.ok) {
+            const errorText = await response.text();
+            console.error("서버 오류:", errorText);
+            botMsg.classList.add("error-message");
+            botMsg.textContent = "❌ 서버 오류가 발생했어요.\n" + errorText;
+            chatBox.scrollTop = chatBox.scrollHeight;
+            return;
+          }
 
-    // 작성중 메시지를 답변으로 대체
-    botMsg.textContent = data.reply;
-    chatBox.scrollTop = chatBox.scrollHeight;
+          const data = await response.json();
+          botMsg.textContent = data.reply;
+          chatBox.scrollTop = chatBox.scrollHeight;
 
-  } catch (error) {
-    console.error("요청 실패:", error);
+        } catch (error) {
+          console.error("요청 실패:", error);
+          botMsg.classList.add("error-message");
+          botMsg.textContent = "❌ 요청 실패: " + error;
+          chatBox.scrollTop = chatBox.scrollHeight;
+        }
+      }
 
-    // 작성중 메시지를 네트워크 에러로 대체
-    botMsg.classList.add("error-message");
-    botMsg.textContent = "❌ 요청 실패: " + error;
-    chatBox.scrollTop = chatBox.scrollHeight;
-  }
-}
-
-// 엔터 키로 전송
-document.addEventListener("DOMContentLoaded", () => {
-  const inputEl = document.getElementById("userInput");
-  inputEl.addEventListener("keydown", function(event) {
-    if (event.key === "Enter" && !event.shiftKey) {
-      event.preventDefault();
-      sendMessage();
-    }
-  });
-});
-
-
-
+      // 엔터 키 전송
+      document.addEventListener("DOMContentLoaded", () => {
+        const inputEl = document.getElementById("userInput");
+        inputEl.addEventListener("keydown", function(event) {
+          if (event.key === "Enter" && !event.shiftKey) {
+            event.preventDefault();
+            sendMessage();
+          }
+        });
+      });
     </script>
+
   </head>
   <body>
   <div th:replace="include/header :: header"></div>

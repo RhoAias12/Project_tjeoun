@@ -13,6 +13,11 @@
       <a th:href="@{/mypage/member_modify}">마이페이지</a>
     </span>
 
+    <!--  사용자 대시보드 추가 -->
+    <span sec:authorize="hasAnyAuthority('ROLE_USER')">
+      <a th:href="@{/dashboard/user}">취업 시장 현황</a>
+    </span>
+
     <!-- 관리자만 -->
     <span sec:authorize="hasAnyAuthority('ROLE_ADMIN')">
       <a th:href="@{/admin/member_list}">회원관리</a>
@@ -22,6 +27,9 @@
     </span>
     <span sec:authorize="hasAnyAuthority('ROLE_ADMIN')">
       <a th:href="@{/admin/apply_list}">지원관리</a>
+    </span>
+    <span sec:authorize="hasAnyAuthority('ROLE_ADMIN')">
+      <a th:href="@{/dashboard/admin/dashboard}">관리자 인사이트</a>
     </span>
   </div>
   <div class="menu right">
