@@ -1,6 +1,8 @@
 package com.tjoeun.controller;
 
 import com.tjoeun.dto.RecruitmentDTO;
+import com.tjoeun.entity.Users;
+import com.tjoeun.repository.UserRepository;
 import com.tjoeun.service.EmplService;
 import com.tjoeun.service.MyPageService;
 import com.tjoeun.util.PaginationUtil;
@@ -22,23 +24,34 @@ public class EmplController {
 
   private final EmplService emplService;
   private final MyPageService myPageService;
+  private final UserRepository userRepository;
 
-  @GetMapping("/empl_main")
-  public String emplMainPage(
-    @RequestParam(defaultValue = "1") int page,
-    @RequestParam(defaultValue = "25") int pageSize,
-    @RequestParam(defaultValue = "all") String sortOrder,
-    @RequestParam(required = false) String title,
-    @RequestParam(required = false) String content,
-    @RequestParam(required = false) String region,
-    @RequestParam(required = false) String company,
-    @RequestParam(required = false) String startDate,
-    @RequestParam(required = false) String endDate,
-    Model model) {
-      try {
+    @GetMapping("/empl_main")
+    public String emplMainPage(
+      @RequestParam(defaultValue = "1") int page,
+      @RequestParam(defaultValue = "25") int pageSize,
+      @RequestParam(defaultValue = "all") String sortOrder,
+      @RequestParam(required = false) String title,
+      @RequestParam(required = false) String content,
+      @RequestParam(required = false) String region,
+      @RequestParam(required = false) String company,
+      @RequestParam(required = false) String startDate,
+      @RequestParam(required = false) String endDate,
+      Principal principal,
+      Model model) {
+
+        Integer userIdx = null;
+        if (principal != null) {
+            String userEmail = principal.getName();
+            Users user = userRepository.findByUserEmail(userEmail);
+            if (user != null) {
+                userIdx = user.getUserIdx();
+            }
+        }
+
         Page<RecruitmentDTO> jobPage = emplService.getJobPage(
           page, pageSize, sortOrder,
-          title, content, region, company, startDate, endDate);
+          title, content, region, company, startDate, endDate, userIdx);
 
         String prevUrl = emplService.buildPrevUrl(
           page, pageSize, sortOrder,
@@ -64,10 +77,6 @@ public class EmplController {
           title, content, region, company, startDate, endDate);
 
         return "empl/empl_main";
-      } catch (IOException e) {
-        e.printStackTrace();
-        return "/main";
-      }
     }
 
     @GetMapping("/empl_detail/{id}")
@@ -110,5 +119,5 @@ public class EmplController {
 
       return "empl/empl_detail";
     }
-  }
+}
 

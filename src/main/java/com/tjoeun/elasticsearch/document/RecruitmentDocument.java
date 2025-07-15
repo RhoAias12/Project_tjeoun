@@ -19,7 +19,7 @@ import java.util.Optional;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Document(indexName = "recruitments")
+@Document(indexName = "recruitments", createIndex = false)
 public class RecruitmentDocument {
 
   @Id
@@ -32,17 +32,35 @@ public class RecruitmentDocument {
   private String company;
 
   private String deadline;
+//  @Field(type = FieldType.Date, format = DateFormat.date, pattern = "yyyy-MM-dd")
+//  private LocalDate deadline;
 
+//  @Field(type = FieldType.Date, format = DateFormat.date_hour_minute_second)
+//  private LocalDateTime deadline;
+
+  @Field(type = FieldType.Text)
   private String qualifications;
+
+  @Field(type = FieldType.Keyword)
   private String logoUrl;
+
+  @Field(type = FieldType.Text)
   private String responsibilities;
+
+  @Field(type = FieldType.Text)
   private String preferred;
+
+  @Field(type = FieldType.Text)
   private String benefits;
 
   @Field(type = FieldType.Text, analyzer = "ngram_analyzer", searchAnalyzer = "ngram_analyzer")
   private String location;
 
+
+  @Field(type = FieldType.Text)
   private String salary;
+
+  @Field(type = FieldType.Keyword)
   private String employmentType;
 
   @Field(type = FieldType.Date, format = DateFormat.date_hour_minute_second)
@@ -51,6 +69,9 @@ public class RecruitmentDocument {
 
   @Field(type = FieldType.Text, analyzer = "ngram_analyzer", searchAnalyzer = "ngram_analyzer")
   private String combinedContent;
+
+  @Field(type = FieldType.Text, analyzer = "korean_custom", fielddata = true)
+  private String jobKeywords;
 
   @Field(type = FieldType.Integer)
   private Integer scrapCount;

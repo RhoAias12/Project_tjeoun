@@ -1,9 +1,11 @@
 package com.tjoeun.service;
 
+import com.tjoeun.constant.UserRole;
 import com.tjoeun.dto.RecruitmentDTO;
 import com.tjoeun.elasticsearch.document.RecruitmentDocument;
 import com.tjoeun.entity.Recruitment;
 import com.tjoeun.repository.RecruitmentRepository;
+import com.tjoeun.repository.UserRepository;
 import com.tjoeun.specification.RecruitmentSpecification;
 import jakarta.persistence.criteria.JoinType;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +33,7 @@ public class EmplService {
 
   private final RecruitmentRepository recruitmentRepository;
   private final RecruitmentSearchService recruitmentSearchService;
+  private final UserRepository userRepository;
 
   public Page<RecruitmentDTO> getJobPage(
     int page, int pageSize,
@@ -40,13 +43,41 @@ public class EmplService {
     String region,
     String company,
     String startDate,
-    String endDate
-  ) throws IOException {
+    String endDate,
+    Integer userIdx) {
 
-    // Elasticsearch에서 검색
-    Page<RecruitmentDocument> esPage = recruitmentSearchService.searchJobs(
-      title, content, region, company, startDate, endDate, sortOrder, page, pageSize
-    );
+    // [1] 검색 키워드 존재 시, 로그만 저장 (ES 검색 결과는 안 씀)
+    String combinedKeyword = Stream.of(title, content)
+            .filter(s -> s != null && !s.isBlank())
+            .collect(Collectors.joining(" "));
+
+    if (!combinedKeyword.isBlank()) {
+      try {
+        if (userIdx != null) {
+          // ✅ 먼저 관리자 여부 판단
+          boolean isAdmin = userRepository.findById(userIdx)
+                  .map(user -> user.getUserRole() == UserRole.ADMIN)
+                  .orElse(false);
+
+          // ✅ 일반 사용자일 경우만 로그 저장 메서드 호출
+          if (!isAdmin) {
+            recruitmentSearchService.search(combinedKeyword, Long.valueOf(userIdx));
+          }
+        } else {
+          // 비로그인 사용자도 로그 저장 (userId 없이)
+          recruitmentSearchService.search(combinedKeyword, null);
+        }
+      } catch (IOException e) {
+        System.out.println("❌ Elasticsearch 검색 로그 저장 실패: " + e.getMessage());
+      }
+    }
+
+
+
+    try {
+      Page<RecruitmentDocument> esPage = recruitmentSearchService.searchJobs(
+              title, content, region, company, startDate, endDate, sortOrder, page, pageSize
+      );
 
     // 문서를 DTO로 변환
     List<RecruitmentDTO> dtoList = esPage.getContent().stream()
@@ -60,7 +91,13 @@ public class EmplService {
         .build()
       ).toList();
 
-    return new PageImpl<>(dtoList, esPage.getPageable(), esPage.getTotalElements());
+      return new PageImpl<>(dtoList, esPage.getPageable(), esPage.getTotalElements());
+
+    } catch (IOException e) {
+      System.out.println("❌ Elasticsearch 공고 검색 실패: " + e.getMessage());
+      return Page.empty();  // 빈 페이지 반환 등 예외 상황 처리
+    }
+
   }
 
   private LocalDateTime parseDeadline(String deadlineStr) {

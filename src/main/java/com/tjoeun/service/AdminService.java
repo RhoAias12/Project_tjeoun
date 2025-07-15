@@ -83,6 +83,19 @@ public class AdminService {
     ));
   }
 
+
+//  // 회원 삭제
+//  @Transactional
+//  public void deleteUserById(Integer userIdx) {
+//    Users user = userRepository.findById(userIdx)
+//      .orElseThrow(() -> new IllegalArgumentException("사용자 없음"));
+//    userRepository.delete(user);
+//    userDocumentRepository.deleteById(userIdx);
+//  }
+//  public int getTotalUserCount() {
+//    return (int) userRepository.count();
+//  }
+
   // 회원 상세 조회
   public UserFormDto getUserFormDtoById(Integer userIdx) {
     Users user = userRepository.findById(userIdx)
@@ -153,7 +166,6 @@ public class AdminService {
       applyHistorySearchRepository.save(doc);
     }
   }
-
 
   public Page<ApplyHistoryDTO> getPagedApplyHistory(int page, int size, String sortOption) {
     Sort sort = Sort.unsorted();
@@ -317,6 +329,88 @@ public class AdminService {
       case "REJECTED"  -> "불합격";
       default -> "알 수 없음";
     };
+  }
+
+  @Transactional(readOnly = true)
+  public List<RecruitmentDTO> searchAndSort(String keyword, String deadlineSort, Long userIdx) throws IOException {
+    List<RecruitmentDocument> documents = recruitmentSearchService.search(keyword, userIdx);
+
+    // RecruitmentDocument → RecruitmentDTO 변환
+    List<RecruitmentDTO> dtoList = documents.stream()
+      .map(doc -> RecruitmentDTO.builder()
+        .recruitmentIdx(doc.getRecruitmentIdx())
+        .title(doc.getTitle())
+        .company(doc.getCompany())
+        .deadline(LocalDateTime.parse(doc.getDeadline(), DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")))
+        .location(doc.getLocation())
+        .logoUrl(doc.getLogoUrl())
+        .build())
+      .collect(Collectors.toList());
+
+    // 정렬 로직
+    return sortRecruitmentDTOList(dtoList, deadlineSort);
+  }
+
+  @Transactional(readOnly = true)
+  public List<RecruitmentDTO> getSortedRecruitments(String deadlineSort) {
+    List<Recruitment> recruitments = recruitmentRepository.findAll();
+
+    List<RecruitmentDTO> dtoList = recruitments.stream()
+      .map(r -> RecruitmentDTO.builder()
+        .recruitmentIdx(r.getRecruitmentIdx())
+        .title(r.getTitle())
+        .company(r.getCompany())
+        .deadline(r.getDeadline())
+        .location(r.getLocation())
+        .logoUrl(r.getLogoUrl())
+        .build())
+      .collect(Collectors.toList());
+
+    return sortRecruitmentDTOList(dtoList, deadlineSort);
+  }
+
+  private List<RecruitmentDTO> sortRecruitmentDTOList(List<RecruitmentDTO> list, String deadlineSort) {
+    return switch (deadlineSort) {
+      case "deadline_latest" -> list.stream()
+        .sorted((a, b) -> b.getDeadline().compareTo(a.getDeadline()))
+        .collect(Collectors.toList());
+
+      case "deadline_oldest" -> list.stream()
+        .sorted((a, b) -> a.getDeadline().compareTo(b.getDeadline()))
+        .collect(Collectors.toList());
+
+      default -> list;
+    };
+  }
+
+  public Page<RecruitmentDTO> searchAndSortWithFilter(
+    String title,
+    String content,
+    String region,
+    String company,
+    String startDate,
+    String endDate,
+    String deadlineSort,
+    int page,
+    int size
+  ) {
+    Specification<Recruitment> spec = RecruitmentSpecification.searchWithFilter(title, content, region, company, startDate, endDate);
+
+    Sort sort;
+    if ("deadline_desc".equals(deadlineSort)) {
+      sort = Sort.by(Sort.Direction.DESC, "deadline");
+    } else if ("deadline_asc".equals(deadlineSort)) {
+      sort = Sort.by(Sort.Direction.ASC, "deadline");
+    } else {
+      sort = Sort.unsorted();
+    }
+
+    int currentPage = Math.max(page - 1, 0);
+    Pageable pageable = PageRequest.of(currentPage, size, sort);
+
+    Page<Recruitment> recruitmentPage = recruitmentRepository.findAll(spec, pageable);
+
+    return recruitmentPage.map(RecruitmentDTO::new);
   }
 
   public Page<RecruitmentDTO> getFilteredRecruitmentsByEs(

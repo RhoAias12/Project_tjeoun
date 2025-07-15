@@ -29,6 +29,11 @@ public class UserSearchService {
   private final ElasticsearchClient esClient;
   private final String indexName = "users";
 
+  // escape 메서드 추가
+  private String escapeWildcard(String input) {
+    return input.replaceAll("([\\*\\?])", "\\\\$1"); // *와 ?를 \* 와 \? 로 escape
+  }
+
   public Page<UserListDto> searchUsers(
     String email, String nickname, String sortBy, int page, int size
   ) throws IOException {
@@ -37,6 +42,7 @@ public class UserSearchService {
 
     // 필터 조건 설정
     List<Query> mustQueries = new ArrayList<>();
+
     if (email != null && !email.isBlank()) {
       mustQueries.add(Query.of(q -> q
         .wildcard(w -> w
@@ -46,11 +52,12 @@ public class UserSearchService {
       ));
     }
     if (nickname != null && !nickname.isBlank()) {
+      String escapedNickname = escapeWildcard(nickname);
       mustQueries.add(Query.of(q -> q
-        .wildcard(w -> w
-          .field("userNickname")
-          .wildcard("*" + nickname + "*")
-        )
+              .wildcard(w -> w
+                      .field("userNickname")
+                      .wildcard("*" + escapedNickname + "*")
+              )
       ));
     }
 

@@ -7,15 +7,22 @@ import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import co.elastic.clients.json.JsonData;
 import com.tjoeun.elasticsearch.document.RecruitmentDocument;
+import com.tjoeun.elasticsearch.repository.SearchLogRepository;
+import com.tjoeun.entity.SearchLog;
+import com.tjoeun.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import com.tjoeun.constant.UserRole;
+
 
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,9 +32,62 @@ import java.util.stream.Collectors;
 public class RecruitmentSearchService {
 
   private final ElasticsearchClient esClient;
+  private final SearchLogRepository searchLogRepository;
   private static final String INDEX_NAME = "recruitments";
+  private final UserRepository userRepository;
 
-  //이 사이 친구들 안쓸듯..?
+  @Transactional
+  public List<RecruitmentDocument> search(String keyword, Long userIdx) throws IOException {
+    if (keyword != null && !keyword.isBlank()) {
+      // ✅ userIdx가 null이 아닌 경우에만 사용자 조회
+      boolean isAdmin = false;
+      if (userIdx != null) {
+        isAdmin = userRepository.findById(userIdx.intValue())
+                .map(user -> user.getUserRole() == UserRole.ADMIN)
+                .orElse(false);
+      }
+
+      // ✅ admin이 아닐 경우에만 로그 저장
+      if (!isAdmin) {
+        searchLogRepository.save(SearchLog.builder()
+                .keyword(keyword)
+                .searchedAt(LocalDateTime.now())
+                .userId(userIdx) // null 허용
+                .build());
+      }
+    }
+
+    SearchResponse<RecruitmentDocument> response = esClient.search(s -> s
+            .index(INDEX_NAME)
+            .query(q -> q
+                    .multiMatch(t -> t
+                            .fields("title", "content")
+                            .query(keyword)
+                    )
+            ), RecruitmentDocument.class);
+
+    return response.hits().hits().stream()
+            .map(Hit::source)
+            .collect(Collectors.toList());
+  }
+
+
+
+
+
+
+  public List<RecruitmentDocument> findAll() throws IOException {
+    SearchResponse<RecruitmentDocument> response = esClient.search(s -> s
+                    .index(INDEX_NAME)
+                    .query(q -> q.matchAll(m -> m)), // 모든 문서 조회
+            RecruitmentDocument.class
+    );
+
+    return response.hits().hits().stream()
+            .map(Hit::source)
+            .collect(Collectors.toList());
+  }
+
   private static final String[] SPECIAL_CHARS_FOR_SQS = {
     "+", "-", "&&", "||", "!", "(", ")", "{", "}", "[", "]", "^", "\"", "~", "*", "?", ":", "\\", "/"
   };
@@ -40,7 +100,10 @@ public class RecruitmentSearchService {
     }
     return escaped;
   }
-  //
+
+  private String escapeWildcard(String input) {
+    return input.replaceAll("([\\*\\?\\[\\]])", "\\\\$1");
+  }
 
   public Page<RecruitmentDocument> searchJobs(
     String title,
@@ -124,6 +187,7 @@ public class RecruitmentSearchService {
           ))
         ));
       }
+
       return b;
     }));
 

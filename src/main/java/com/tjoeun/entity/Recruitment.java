@@ -1,9 +1,9 @@
 package com.tjoeun.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -16,6 +16,8 @@ import java.util.List;
 })
 @Getter
 @Setter
+@AllArgsConstructor
+@Builder
 @NoArgsConstructor
 public class Recruitment {
 
@@ -24,9 +26,11 @@ public class Recruitment {
   private Long recruitmentIdx;
 
   @Column(columnDefinition = "TEXT")
+  @Field(type = FieldType.Keyword)
   private String title;
 
   @Column(columnDefinition = "TEXT")
+  @Field(type = FieldType.Keyword)
   private String company;
 
   @Column
@@ -48,6 +52,7 @@ public class Recruitment {
   private String benefits; //복지 및 혜택
 
   @Column(columnDefinition = "TEXT")
+  @Field(type = FieldType.Keyword)
   private String location;
 
   @Column(columnDefinition = "TEXT")
@@ -61,6 +66,12 @@ public class Recruitment {
 
   @Column
   private LocalDateTime createdAt;
+
+  @Column(columnDefinition = "TEXT")
+  @Field(type = FieldType.Text)
+  private String jobKeywords;
+
+
 
   @PrePersist
   protected void onCreate() {
