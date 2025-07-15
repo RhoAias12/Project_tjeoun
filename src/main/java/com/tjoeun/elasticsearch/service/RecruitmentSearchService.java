@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.tjoeun.constant.UserRole;
 
-
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -38,79 +37,47 @@ public class RecruitmentSearchService {
   @Transactional
   public List<RecruitmentDocument> search(String keyword, Long userIdx) throws IOException {
     if (keyword != null && !keyword.isBlank()) {
-      // ✅ userIdx가 null이 아닌 경우에만 사용자 조회
       boolean isAdmin = false;
       if (userIdx != null) {
         isAdmin = userRepository.findById(userIdx.intValue())
-                .map(user -> user.getUserRole() == UserRole.ADMIN)
-                .orElse(false);
+          .map(user -> user.getUserRole() == UserRole.ADMIN)
+          .orElse(false);
       }
-
-      // ✅ admin이 아닐 경우에만 로그 저장
       if (!isAdmin) {
         searchLogRepository.save(SearchLog.builder()
-                .keyword(keyword)
-                .searchedAt(LocalDateTime.now())
-                .userId(userIdx) // null 허용
-                .build());
+          .keyword(keyword)
+          .searchedAt(LocalDateTime.now())
+          .userId(userIdx)
+          .build());
       }
     }
 
     SearchResponse<RecruitmentDocument> response = esClient.search(s -> s
-            .index(INDEX_NAME)
-            .query(q -> q
-                    .multiMatch(t -> t
-                            .fields("title", "content")
-                            .query(keyword)
-                    )
-            ), RecruitmentDocument.class);
+      .index(INDEX_NAME)
+      .query(q -> containsSpecialRegexChars(keyword)
+        ? q.regexp(r -> r.field("title.keyword").value(".*" + escapeForRegexp(keyword) + ".*"))
+        : q.multiMatch(m -> m.fields("title.ngram^2", "title^1").query(keyword))
+      ), RecruitmentDocument.class);
 
     return response.hits().hits().stream()
-            .map(Hit::source)
-            .collect(Collectors.toList());
+      .map(Hit::source)
+      .collect(Collectors.toList());
   }
-
-
-
-
-
 
   public List<RecruitmentDocument> findAll() throws IOException {
     SearchResponse<RecruitmentDocument> response = esClient.search(s -> s
-                    .index(INDEX_NAME)
-                    .query(q -> q.matchAll(m -> m)), // 모든 문서 조회
-            RecruitmentDocument.class
-    );
+        .index(INDEX_NAME)
+        .query(q -> q.matchAll(m -> m)),
+      RecruitmentDocument.class);
 
     return response.hits().hits().stream()
-            .map(Hit::source)
-            .collect(Collectors.toList());
+      .map(Hit::source)
+      .collect(Collectors.toList());
   }
 
-//  private static final String[] SPECIAL_CHARS_FOR_SQS = {
-//    "+", "-", "&&", "||", "!", "(", ")", "{", "}", "[", "]", "^", "\"", "~", "*", "?", ":", "\\", "/"
-//  };
-//
-//  private String escapeSpecialCharsForSimpleQueryString(String input) {
-//    if (input == null) return null;
-//    String escaped = input;
-//    for (String ch : SPECIAL_CHARS_FOR_SQS) {
-//      escaped = escaped.replace(ch, "\\" + ch);
-//    }
-//    return escaped;
-//  }
-
-  public Page<RecruitmentDocument> searchJobs(
-    String title,
-    String content,
-    String region,
-    String company,
-    String startDate,
-    String endDate,
-    String sortOrder,
-    int page,
-    int pageSize
-  ) throws IOException {
+  public Page<RecruitmentDocument> searchJobs(String title, String content, String region, String company,
+                                              String startDate, String endDate, String sortOrder,
+                                              int page, int pageSize) throws IOException {
 
     SearchRequest.Builder builder = new SearchRequest.Builder()
       .index(INDEX_NAME)
@@ -118,197 +85,106 @@ public class RecruitmentSearchService {
       .size(pageSize);
 
     builder.query(q -> q.bool(b -> {
-
+      // title
       if (title != null && !title.isBlank()) {
         if (containsSpecialRegexChars(title)) {
-          b.must(m -> m.regexp(r -> r
-            .field("title.keyword")
-            .value(".*" + escapeForRegexp(title) + ".*")
-          ));
+          b.must(m -> m.regexp(r -> r.field("title.keyword").value(".*" + escapeForRegexp(title) + ".*")));
         } else {
-          b.must(m -> m.wildcard(w -> w
-            .field("title")
-            .value("*" + escapeForWildcard(title) + "*")
-          ));
+          b.must(m -> m.multiMatch(mm -> mm.fields("title.ngram^2", "title^1").query(title)));
         }
       }
-
-      // CONTENT
+      // content
       if (content != null && !content.isBlank()) {
         if (containsSpecialRegexChars(content)) {
-          b.must(m -> m.regexp(r -> r
-            .field("combinedContent.keyword")
-            .value(".*" + escapeForRegexp(content) + ".*")
-          ));
+          b.must(m -> m.regexp(r -> r.field("combinedContent.keyword").value(".*" + escapeForRegexp(content) + ".*")));
         } else {
-          b.must(m -> m.wildcard(w -> w
-            .field("combinedContent")
-            .value("*" + escapeForWildcard(content) + "*")
-          ));
+          b.must(m -> m.multiMatch(mm -> mm.fields("combinedContent.ngram^2", "combinedContent^1").query(content)));
         }
       }
 
-      // REGION (location)
+      // region
       if (region != null && !region.isBlank()) {
         if (containsSpecialRegexChars(region)) {
-          b.must(m -> m.regexp(r -> r
-            .field("location.keyword")
-            .value(".*" + escapeForRegexp(region) + ".*")
-          ));
+          b.must(m -> m.regexp(r -> r.field("location.keyword").value(".*" + escapeForRegexp(region) + ".*")));
         } else {
-          b.must(m -> m.wildcard(w -> w
-            .field("location")
-            .value("*" + escapeForWildcard(region) + "*")
-          ));
+          b.must(m -> m.multiMatch(mm -> mm.fields("location.ngram^2", "location^1").query(region)));
         }
       }
-
-      // COMPANY
+      // company
       if (company != null && !company.isBlank()) {
         if (containsSpecialRegexChars(company)) {
-          b.must(m -> m.regexp(r -> r
-            .field("company.keyword")
-            .value(".*" + escapeForRegexp(company) + ".*")
-          ));
+          b.must(m -> m.regexp(r -> r.field("company.keyword").value(".*" + escapeForRegexp(company) + ".*")));
         } else {
-          b.must(m -> m.wildcard(w -> w
-            .field("company")
-            .value("*" + escapeForWildcard(company) + "*")
-          ));
+          b.must(m -> m.multiMatch(mm -> mm.fields("company.ngram^2", "company^1").query(company)));
         }
       }
 
-      // 날짜 범위 필터 (deadline)
       // 날짜 필터 + 상시채용
       if ((startDate != null && !startDate.isBlank()) || (endDate != null && !endDate.isBlank())) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
-
-        String formattedStart = null;
-        String formattedEnd = null;
-
-        if (startDate != null && !startDate.isBlank()) {
-          formattedStart = LocalDate.parse(startDate).atStartOfDay().format(formatter);
-        }
-        if (endDate != null && !endDate.isBlank()) {
-          formattedEnd = LocalDate.parse(endDate).atTime(23, 59, 59).format(formatter);
-        }
-
-        String finalStart = formattedStart;
-        String finalEnd = formattedEnd;
+        String formattedStart = (startDate != null && !startDate.isBlank()) ?
+          LocalDate.parse(startDate).atStartOfDay().format(formatter) : null;
+        String formattedEnd = (endDate != null && !endDate.isBlank()) ?
+          LocalDate.parse(endDate).atTime(23, 59, 59).format(formatter) : null;
 
         b.filter(f -> f.bool(bool -> bool
           .should(s -> s.range(r -> {
             r.field("deadline");
-            if (finalStart != null) r.gte(JsonData.of(finalStart));
-            if (finalEnd != null) r.lte(JsonData.of(finalEnd));
+            if (formattedStart != null) r.gte(JsonData.of(formattedStart));
+            if (formattedEnd != null) r.lte(JsonData.of(formattedEnd));
             return r;
           }))
-          .should(s -> s.term(t -> t
-            .field("deadline")
-            .value("9999-12-31T00:00:00")
-          ))
+          .should(s -> s.term(t -> t.field("deadline").value("9999-12-31T00:00:00")))
         ));
       }
-
       return b;
     }));
 
-    // 정렬
     switch (sortOrder) {
-      case "all":
-        builder.sort(s -> s.field(f -> f.field("recruitmentIdx").order(SortOrder.Asc)));
-        break;
-      case "deadline_asc":
-        builder.sort(s -> s.field(f -> f.field("deadline").order(SortOrder.Asc)));
-        break;
-      case "deadline_desc":
-        builder.sort(s -> s.field(f -> f.field("deadline").order(SortOrder.Desc)));
-        break;
-      case "scrap_desc":
-        builder.sort(s -> s.field(f -> f.field("scrapCount").order(SortOrder.Desc)));
-        break;
-      case "scrap_asc":
-        builder.sort(s -> s.field(f -> f.field("scrapCount").order(SortOrder.Asc)));
-        break;
-      default:
-        builder.sort(s -> s.field(f -> f.field("createdAt").order(SortOrder.Desc)));
-        break;
+      case "all" -> builder.sort(s -> s.field(f -> f.field("recruitmentIdx").order(SortOrder.Asc)));
+      case "deadline_asc" -> builder.sort(s -> s.field(f -> f.field("deadline").order(SortOrder.Asc)));
+      case "deadline_desc" -> builder.sort(s -> s.field(f -> f.field("deadline").order(SortOrder.Desc)));
+      case "scrap_desc" -> builder.sort(s -> s.field(f -> f.field("scrapCount").order(SortOrder.Desc)));
+      case "scrap_asc" -> builder.sort(s -> s.field(f -> f.field("scrapCount").order(SortOrder.Asc)));
+      default -> builder.sort(s -> s.field(f -> f.field("createdAt").order(SortOrder.Desc)));
     }
 
-    SearchRequest request = builder.build();
-
-    SearchResponse<RecruitmentDocument> response = esClient.search(request, RecruitmentDocument.class);
-
-    List<RecruitmentDocument> docs = response.hits().hits().stream()
-      .map(Hit::source)
-      .collect(Collectors.toList());
-
+    SearchResponse<RecruitmentDocument> response = esClient.search(builder.build(), RecruitmentDocument.class);
+    List<RecruitmentDocument> docs = response.hits().hits().stream().map(Hit::source).collect(Collectors.toList());
     long total = response.hits().total().value();
 
     return new PageImpl<>(docs, PageRequest.of(page - 1, pageSize), total);
   }
 
-
   public void updateScrapCountInES(Long recruitmentId, int newScrapCount) throws IOException {
-    // 문서 조회
     RecruitmentDocument doc = getDocumentById(recruitmentId);
-    if (doc == null) {
-      throw new IllegalStateException("해당 공고 문서를 Elasticsearch에서 찾을 수 없습니다.");
-    }
-
-    // 스크랩 수 갱신
+    if (doc == null) throw new IllegalStateException("문서 없음");
     doc.setScrapCount(newScrapCount);
-
-    // 문서 업데이트 (덮어쓰기)
-    esClient.index(i -> i
-      .index(INDEX_NAME)
-      .id(String.valueOf(recruitmentId))
-      .document(doc)
-    );
+    esClient.index(i -> i.index(INDEX_NAME).id(String.valueOf(recruitmentId)).document(doc));
   }
 
   public RecruitmentDocument getDocumentById(Long recruitmentId) throws IOException {
     try {
-      return esClient.get(g -> g
-          .index(INDEX_NAME)
-          .id(String.valueOf(recruitmentId)),
-        RecruitmentDocument.class
-      ).source();
+      return esClient.get(g -> g.index(INDEX_NAME).id(String.valueOf(recruitmentId)), RecruitmentDocument.class).source();
     } catch (Exception e) {
       return null;
     }
   }
 
   public void saveOrUpdate(RecruitmentDocument doc) throws IOException {
-    esClient.index(i -> i
-      .index(INDEX_NAME)
-      .id(String.valueOf(doc.getRecruitmentIdx()))
-      .document(doc)
-    );
+    esClient.index(i -> i.index(INDEX_NAME).id(String.valueOf(doc.getRecruitmentIdx())).document(doc));
   }
 
   public void deleteById(Long recruitmentIdx) throws IOException {
-    esClient.delete(d -> d
-      .index(INDEX_NAME)
-      .id(String.valueOf(recruitmentIdx))
-    );
+    esClient.delete(d -> d.index(INDEX_NAME).id(String.valueOf(recruitmentIdx)));
   }
 
-  // 정규표현식에서 이스케이프가 필요한 특수문자들
   private String escapeForRegexp(String input) {
-    if (input == null) return null;
-    return input.replaceAll("([\\\\.^$|?*+()\\[\\]{}])", "\\\\$1");
+    return input == null ? null :
+      input.replaceAll("([\\\\~`!#\\$%\\^&\\*()_\\-\\+=\\[\\]\\{\\};:'\",\\.<>/\\?@])", "\\\\$1");
   }
-
   private boolean containsSpecialRegexChars(String input) {
-    return input != null && input.matches(".*[\\\\.^$|?*+()\\[\\]{}].*");
+    return input != null &&
+      input.matches(".*[\\\\~`!#\\$%\\^&\\*()_\\-\\+=\\[\\]\\{\\};:'\",\\.<>/\\?@].*");
   }
-  // wildcard 쿼리용 이스케이프
-  private String escapeForWildcard(String input) {
-    if (input == null) return null;
-    return input.replaceAll("([\\\\*?\\[\\]])", "\\\\$1");
-  }
-
-
 }
-
