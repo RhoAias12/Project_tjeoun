@@ -46,7 +46,6 @@ public class MyPageService {
   private final RecruitmentSyncService recruitmentSyncService;
   private final ApplyHistorySyncService applyHistorySyncService;
   private final UserSyncService userSyncService;
-  private final ApplyHistorySearchRepository applyHistorySearchRepository;
 
   public Page<ApplyHistoryDTO> getPagedApplyHistories(String email, Pageable pageable) {
     Users user = userRepository.findByUserEmail(email);
@@ -101,6 +100,8 @@ public class MyPageService {
 
     userSyncService.save(user);
 
+    applyHistorySyncService.updateUserInfoInES(user);
+
     return "redirect:/mypage/member_modify?success";
   }
 
@@ -113,6 +114,7 @@ public class MyPageService {
     if (user != null) {
       userRepository.delete(user);
       userSyncService.deleteById(user.getUserIdx().longValue());
+      applyHistorySyncService.deleteByUserId(user.getUserIdx());
     } else {
       throw new IllegalArgumentException("해당 이메일의 사용자가 존재하지 않습니다.");
     }
@@ -178,40 +180,6 @@ public class MyPageService {
             .orElseThrow(() -> new IllegalArgumentException("공고를 찾을 수 없습니다."));
 
     favoriteRepository.deleteByUserAndRecruitment(user, recruitment);
-  }
-
-//  public List<Favorite> getFavorites(String userEmail) {
-//    Users user = userRepository.findByUserEmail(userEmail);
-//    if (user == null) {
-//      throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
-//    }
-//    return favoriteRepository.findByUser(user);
-//  }
-
-  public List<FavoriteDTO> getFavorites(String userEmail) {
-    Users user = userRepository.findByUserEmail(userEmail);
-    if (user == null) {
-      throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
-    }
-
-    List<Favorite> favorites = favoriteRepository.findByUser(user);
-
-    return favorites.stream()
-            .map(favorite -> {
-              Recruitment r = favorite.getRecruitment();
-              if (r == null) return null;
-              return FavoriteDTO.builder()
-                      .favoriteIdx(favorite.getFavoriteIdx())
-                      .userIdx(favorite.getUser().getUserIdx())
-                      .recruitmentIdx(r.getRecruitmentIdx())
-                      .title(r.getTitle() != null ? r.getTitle() : "제목 없음")
-                      .company(r.getCompany() != null ? r.getCompany() : "회사 없음")
-                      .deadline(r.getDeadline())
-                      .scrapCount(favoriteRepository.countByRecruitment(r))
-                      .build();
-            })
-            .filter(Objects::nonNull)
-            .collect(Collectors.toList());
   }
 
   public Page<FavoriteDTO> getPagedFavorites(String userEmail, Pageable pageable) {

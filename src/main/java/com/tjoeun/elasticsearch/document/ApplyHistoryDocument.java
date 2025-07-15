@@ -29,7 +29,10 @@ public class ApplyHistoryDocument {
   private String statusDisplay;
 
   // 공고 관련
+  @Field(type = FieldType.Keyword)
   private String recruitmentTitle;
+
+  @Field(type = FieldType.Keyword)
   private String recruitmentCompany;
   private Long recruitmentId;
   private Long recruitmentDeadline;
@@ -38,7 +41,11 @@ public class ApplyHistoryDocument {
 
   // 지원자 정보
   private Integer userId;
+
+  @Field(type = FieldType.Keyword)
   private String userEmail;
+
+  @Field(type = FieldType.Keyword)
   private String userNickname;
   private String userName;
   private Long userBirth;

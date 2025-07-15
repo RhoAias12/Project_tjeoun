@@ -1,6 +1,8 @@
 package com.tjoeun.service;
 
+import com.tjoeun.elasticsearch.document.ApplyHistoryDocument;
 import com.tjoeun.elasticsearch.document.UserDocument;
+import com.tjoeun.elasticsearch.repository.ApplyHistorySearchRepository;
 import com.tjoeun.elasticsearch.repository.UserDocumentRepository;
 import com.tjoeun.entity.Users;
 import com.tjoeun.repository.UserRepository;
@@ -10,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZoneId;
+import java.util.List;
 
 import java.security.Principal;
 
@@ -20,6 +23,7 @@ public class UserService implements UserDetailsService {
 
   private final UserRepository userRepository;
   private final UserDocumentRepository userDocumentRepository;
+  private final ApplyHistorySearchRepository applyHistorySearchRepository;
 
   public Users saveUser(Users user) {
     validateDuplicateUser(user);
@@ -88,6 +92,10 @@ public class UserService implements UserDetailsService {
 
     // Elasticsearch 문서도 삭제
     userDocumentRepository.deleteById(userIdx);
+    List<ApplyHistoryDocument> relatedHistories = applyHistorySearchRepository.findByUserId(userIdx);
+    for (ApplyHistoryDocument doc : relatedHistories) {
+      applyHistorySearchRepository.deleteById(doc.getApplyHistoryId());
+    }
   }
 
 

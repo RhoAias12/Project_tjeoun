@@ -4,6 +4,7 @@ import com.tjoeun.dto.*;
 import com.tjoeun.elasticsearch.document.ApplyHistoryDocument;
 import com.tjoeun.elasticsearch.document.RecruitmentDocument;
 import com.tjoeun.elasticsearch.document.UserDocument;
+import com.tjoeun.elasticsearch.repository.ApplyHistorySearchRepository;
 import com.tjoeun.elasticsearch.repository.UserDocumentRepository;
 import com.tjoeun.entity.*;
 import com.tjoeun.repository.*;
@@ -41,6 +42,7 @@ public class AdminService {
   private final UserSearchService userSearchService;
   private final UserDocumentRepository userDocumentRepository;
   private final ApplyHistorySearchService applyHistorySearchService;
+  private final ApplyHistorySearchRepository applyHistorySearchRepository;
 
   DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
@@ -82,17 +84,17 @@ public class AdminService {
   }
 
 
-  // 회원 삭제
-  @Transactional
-  public void deleteUserById(Integer userIdx) {
-    Users user = userRepository.findById(userIdx)
-      .orElseThrow(() -> new IllegalArgumentException("사용자 없음"));
-    userRepository.delete(user);
-    userDocumentRepository.deleteById(userIdx);
-  }
-  public int getTotalUserCount() {
-    return (int) userRepository.count();
-  }
+//  // 회원 삭제
+//  @Transactional
+//  public void deleteUserById(Integer userIdx) {
+//    Users user = userRepository.findById(userIdx)
+//      .orElseThrow(() -> new IllegalArgumentException("사용자 없음"));
+//    userRepository.delete(user);
+//    userDocumentRepository.deleteById(userIdx);
+//  }
+//  public int getTotalUserCount() {
+//    return (int) userRepository.count();
+//  }
 
   // 회원 상세 조회
   public UserFormDto getUserFormDtoById(Integer userIdx) {
@@ -138,6 +140,7 @@ public class AdminService {
 
     userRepository.save(user);
 
+    // 1) ES users 인덱스 업데이트
     UserDocument userDoc = UserDocument.builder()
       .userIdx(user.getUserIdx())
       .userName(user.getUserName())
@@ -149,6 +152,19 @@ public class AdminService {
       .build();
 
     userDocumentRepository.save(userDoc);
+
+    // 2) ES apply_histories 인덱스 업데이트
+    List<ApplyHistoryDocument> relatedApplyHistories = applyHistorySearchRepository.findByUserId(user.getUserIdx());
+
+    for (ApplyHistoryDocument doc : relatedApplyHistories) {
+      doc.setUserId(user.getUserIdx());
+      doc.setUserEmail(user.getUserEmail());
+      doc.setUserNickname(user.getUserNickname());
+      doc.setUserName(user.getUserName());
+      doc.setUserBirth(user.getUserBirth().atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli());
+
+      applyHistorySearchRepository.save(doc);
+    }
   }
 
   public Page<ApplyHistoryDTO> getPagedApplyHistory(int page, int size, String sortOption) {
@@ -187,6 +203,13 @@ public class AdminService {
     recruitmentRepository.deleteById(recruitmentIdx);
     try {
       recruitmentSearchService.deleteById(recruitmentIdx);
+
+      List<ApplyHistoryDocument> relatedHistories = applyHistorySearchRepository.findByRecruitmentId(recruitmentIdx);
+
+      relatedHistories.forEach(doc -> {
+        applyHistorySearchRepository.deleteById(doc.getApplyHistoryId());
+      });
+
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -290,6 +313,10 @@ public class AdminService {
 
     try {
       recruitmentSearchService.saveOrUpdate(doc);
+      List<ApplyHistory> histories = applyHistoryRepository.findByRecruitment(entity);
+      for (ApplyHistory history : histories) {
+        applyHistorySearchService.save(history);
+      }
     } catch (IOException e) {
       e.printStackTrace();
     }
