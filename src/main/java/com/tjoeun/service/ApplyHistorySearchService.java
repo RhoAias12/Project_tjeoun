@@ -94,7 +94,7 @@ public class ApplyHistorySearchService {
       String escapedTitle = escapeWildcard(recruitmentTitle.toLowerCase());
       mustQueries.add(Query.of(q -> q
         .wildcard(w -> w
-          .field("recruitmentTitle.keyword")
+          .field("recruitmentTitle")
           .value("*" + escapedTitle + "*")
         )
       ));
@@ -105,7 +105,7 @@ public class ApplyHistorySearchService {
       String escapedCompany = escapeWildcard(recruitmentCompany.toLowerCase());
       mustQueries.add(Query.of(q -> q
         .wildcard(w -> w
-          .field("recruitmentCompany.keyword")
+          .field("recruitmentCompany")
           .value("*" + escapedCompany + "*")
         )
       ));
@@ -116,7 +116,7 @@ public class ApplyHistorySearchService {
       String escapedEmail = escapeWildcard(userEmail.toLowerCase());
       mustQueries.add(Query.of(q -> q
         .wildcard(w -> w
-          .field("userEmail.keyword")
+          .field("userEmail")
           .value("*" + escapedEmail + "*")
         )
       ));
@@ -127,7 +127,7 @@ public class ApplyHistorySearchService {
       String escapedNickname = escapeWildcard(userNickname.toLowerCase());
       mustQueries.add(Query.of(q -> q
         .wildcard(w -> w
-          .field("userNickname.keyword")
+          .field("userNickname")
           .value("*" + escapedNickname + "*")
         )
       ));
