@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Repository
 public interface RecruitmentRepository extends JpaRepository<Recruitment, Long> , JpaSpecificationExecutor<Recruitment> {
@@ -53,4 +54,8 @@ public interface RecruitmentRepository extends JpaRepository<Recruitment, Long> 
 
   // 마감일 오름차순
   Page<Recruitment> findAllByOrderByDeadlineAsc(Pageable pageable);
+
+  @Query("SELECT r FROM Recruitment r LEFT JOIN FETCH r.favorites")
+  List<Recruitment> findAllWithFavorites();
+
 }

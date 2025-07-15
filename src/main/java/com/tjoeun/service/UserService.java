@@ -14,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.ZoneId;
 import java.util.List;
 
+import java.security.Principal;
+
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -94,6 +96,18 @@ public class UserService implements UserDetailsService {
     for (ApplyHistoryDocument doc : relatedHistories) {
       applyHistorySearchRepository.deleteById(doc.getApplyHistoryId());
     }
+  }
+
+
+  public Integer getUserIdxFromPrincipal(Principal principal) {
+    String email = principal.getName(); // Security에서 로그인 식별자로 email 반환
+    Users user = userRepository.findByUserEmail(email);
+
+    if (user == null) {
+      throw new RuntimeException("사용자 없음");
+    }
+
+    return user.getUserIdx();
   }
 
 }
