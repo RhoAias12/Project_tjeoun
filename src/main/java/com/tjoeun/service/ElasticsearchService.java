@@ -4,12 +4,10 @@ import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch._types.aggregations.ExtendedBounds;
 import co.elastic.clients.elasticsearch._types.analysis.TokenFilterDefinition;
+import co.elastic.clients.elasticsearch._types.mapping.Property;
 import co.elastic.clients.elasticsearch.core.CountRequest;
 import co.elastic.clients.elasticsearch.core.CountResponse;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
-import co.elastic.clients.elasticsearch._types.aggregations.CalendarInterval;
-import co.elastic.clients.util.NamedValue;
-import com.tjoeun.document.RecruitmentSearchDocument;
 import com.tjoeun.elasticsearch.sync.RecruitmentSyncService;
 import com.tjoeun.repository.ApplyHistoryRepository;
 import jakarta.annotation.PostConstruct;
@@ -40,12 +38,10 @@ public class ElasticsearchService {
         createIndexIfNotExists();
     }
 
-
     public void createIndexIfNotExists() {
         String indexName = "recruitments";
 
         try {
-            // 🔥 기존 인덱스 삭제
             boolean exists = elasticsearchClient.indices()
                     .exists(e -> e.index(indexName)).value();
 
@@ -54,36 +50,80 @@ public class ElasticsearchService {
                 System.out.println("[Elasticsearch] 기존 인덱스 삭제 완료");
             }
 
-            //  새 인덱스 생성 (커스텀 분석기 포함)
             elasticsearchClient.indices().create(c -> c
-                    .index("recruitments")
+                    .index(indexName)
                     .settings(s -> s.withJson(new StringReader("""
-            {
-              "analysis": {
-                "analyzer": {
-                  "korean_custom": {
-                    "type": "custom",
-                    "tokenizer": "nori_tokenizer",
-                    "filter": ["lowercase", "nori_readingform", "my_stop"]
-                  }
-                },
-                "filter": {
-                  "my_stop": {
-                    "type": "stop",
-                    "stopwords": ["이", "자", "직", "주요", "사", "관리", "동"]
-                  }
-                }
-              }
-            }
-            """)))
+                    {
+                      "analysis": {
+                        "analyzer": {
+                          "korean_custom": {
+                            "type": "custom",
+                            "tokenizer": "nori_tokenizer",
+                            "filter": ["lowercase", "nori_readingform", "my_stop"]
+                          },
+                          "ngram_analyzer": {
+                            "type": "custom",
+                            "tokenizer": "ngram_tokenizer",
+                            "filter": ["lowercase"]
+                          }
+                        },
+                        "tokenizer": {
+                          "ngram_tokenizer": {
+                            "type": "ngram",
+                            "min_gram": 2,
+                            "max_gram": 3,
+                            "token_chars": ["letter", "digit"]
+                          }
+                        },
+                        "filter": {
+                          "my_stop": {
+                            "type": "stop",
+                            "stopwords": ["이", "자", "직", "주요", "사", "관리", "동", "ᆫ", "통하", "통해"]
+                          }
+                        }
+                      }
+                    }
+                    """)))
                     .mappings(mb -> mb
-                            .properties("jobKeywords", p -> p.text(t -> t.analyzer("korean_custom").fielddata(true)))
-                            .properties("title", p -> p.text(t -> t.analyzer("korean_custom")))
-                            .properties("combinedContent", p -> p.text(t -> t.analyzer("korean_custom")))
-                            .properties("company", p -> p.keyword(k -> k))
+                            .properties("jobKeywords", p -> p.text(t -> t
+                                    .analyzer("korean_custom")
+                                    .fielddata(true)
+                                    .fields(Map.of(
+                                            "ngram", Property.of(prop -> prop.text(t2 -> t2.analyzer("ngram_analyzer")))
+                                    ))
+                            ))
+                            .properties("title", p -> p.text(t -> t
+                                    .analyzer("korean_custom")
+                                    .fields(Map.of(
+                                            "ngram", Property.of(prop -> prop.text(t2 -> t2.analyzer("ngram_analyzer"))),
+                                            "keyword", Property.of(prop -> prop.keyword(k -> k.ignoreAbove(256)))
+                                    ))
+                            ))
+                            .properties("combinedContent", p -> p.text(t -> t
+                                    .analyzer("korean_custom")
+                                    .fields(Map.of(
+                                            "ngram", Property.of(prop -> prop.text(t2 -> t2.analyzer("ngram_analyzer"))),
+                                            "keyword", Property.of(prop -> prop.keyword(k -> k.ignoreAbove(256)))
+                                    ))
+                            ))
+
+                            .properties("company", p -> p.text(t -> t
+                                    .analyzer("korean_custom")
+                                    .fields(Map.of(
+                                            "ngram", Property.of(prop -> prop.text(t2 -> t2.analyzer("ngram_analyzer"))),
+                                            "keyword", Property.of(prop -> prop.keyword(k -> k.ignoreAbove(256)))
+                                    ))
+                            ))
                             .properties("deadline", p -> p.date(d -> d.format("strict_date_optional_time")))
                             .properties("createdAt", p -> p.date(d -> d.format("strict_date_optional_time")))
-                            .properties("location", p -> p.keyword(k -> k))
+                            .properties("location", p -> p.text(t -> t
+                                    .analyzer("korean_custom")
+                                    .fields(Map.of(
+                                            "ngram", Property.of(prop -> prop.text(t2 -> t2.analyzer("ngram_analyzer"))),
+                                            "keyword", Property.of(prop -> prop.keyword(k -> k.ignoreAbove(256)))
+                                    ))
+                            ))
+
                             .properties("_class", p -> p.keyword(k -> k.index(false).docValues(false)))
                     )
             );
@@ -299,18 +339,6 @@ public class ElasticsearchService {
         }
 
         return trend;
-    }
-
-
-    public void saveToES(RecruitmentSearchDocument doc) {
-        try {
-            elasticsearchClient.index(i -> i
-                    .index("recruitments")
-                    .document(doc)
-            );
-        } catch (IOException e) {
-            throw new RuntimeException("Elasticsearch 저장 실패", e);
-        }
     }
 
     public long countClosedRecruitments() {

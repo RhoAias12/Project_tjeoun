@@ -19,7 +19,7 @@ import java.util.Optional;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Document(indexName = "recruitments")
+@Document(indexName = "recruitments", createIndex = false)
 @Data
 public class RecruitmentDocument {
 
@@ -33,9 +33,6 @@ public class RecruitmentDocument {
   private String company;
 
   private String deadline;
-
-//  @Field(type = FieldType.Date, format = DateFormat.date_hour_minute_second)
-//  private LocalDateTime deadline;
 
   @Field(type = FieldType.Text)
   private String qualifications;

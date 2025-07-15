@@ -27,7 +27,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
-
 @Service
 @RequiredArgsConstructor
 public class RecruitmentSearchService {
@@ -89,7 +88,6 @@ public class RecruitmentSearchService {
             .collect(Collectors.toList());
   }
 
-  //이 사이 친구들 안쓸듯..?
   private static final String[] SPECIAL_CHARS_FOR_SQS = {
     "+", "-", "&&", "||", "!", "(", ")", "{", "}", "[", "]", "^", "\"", "~", "*", "?", ":", "\\", "/"
   };
@@ -102,7 +100,6 @@ public class RecruitmentSearchService {
     }
     return escaped;
   }
-  //
 
   public Page<RecruitmentDocument> searchJobs(
     String title,
