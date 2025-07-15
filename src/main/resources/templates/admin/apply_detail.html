@@ -152,9 +152,14 @@
           <tr>
             <!-- 이미지 -->
             <th>
-              <img class="img" th:src="@{${applyDetail.resumeImg}}" alt="이미지" />
-              <div id="fileName" style="margin-top: 4px"></div>
+              <div th:if="${applyDetail.resumeImg != null and !#strings.isEmpty(applyDetail.resumeImg)}">
+                <img class="img" th:src="@{${applyDetail.resumeImg}}" alt="이력서 이미지" />
+              </div>
+              <div th:if="${applyDetail.resumeImg == null or #strings.isEmpty(applyDetail.resumeImg)}">
+                <p style="font-style: italic; color: gray;">이미지가 없습니다</p>
+              </div>
             </th>
+
 
             <!-- 오른쪽: 개인정보 출력 -->
             <td>
@@ -200,16 +205,19 @@
             </td>
           </tr>
 
-          <tr th:each="content : ${applyDetail.resumeContentList}">
+          <tr th:each="content : ${applyDetail.resumeContentList}"
+              th:if="${content.question != null and !#strings.isEmpty(content.question)} or
+           ${content.context != null and !#strings.isEmpty(content.context)}">
             <th>
               <div class="question">
-                <p th:text="'질문: ' + ${content.question}"></p>
+                <p th:text="${content.question}"></p>
               </div>
             </th>
             <td>
               <p class="content" th:text="${content.context}"></p>
             </td>
           </tr>
+
 
           <!-- 추가 질문/답변 반복 -->
           <tr th:if="${applyDetail.resumeContext != null and !#strings.isEmpty(applyDetail.resumeContext)}">
