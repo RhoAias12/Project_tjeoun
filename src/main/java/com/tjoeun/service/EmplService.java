@@ -39,7 +39,7 @@ public class EmplService {
     String endDate,
     Integer userIdx) {
 
-    // [1] 검색 키워드 존재 시, 로그만 저장 (ES 검색 결과는 안 씀)
+    // 검색 키워드 존재 시, 로그만 저장 (ES 검색 결과는 안 씀)
     String combinedKeyword = Stream.of(title, content)
             .filter(s -> s != null && !s.isBlank())
             .collect(Collectors.joining(" "));
@@ -47,12 +47,12 @@ public class EmplService {
     if (!combinedKeyword.isBlank()) {
       try {
         if (userIdx != null) {
-          // ✅ 먼저 관리자 여부 판단
+          // 먼저 관리자 여부 판단
           boolean isAdmin = userRepository.findById(userIdx)
                   .map(user -> user.getUserRole() == UserRole.ADMIN)
                   .orElse(false);
 
-          // ✅ 일반 사용자일 경우만 로그 저장 메서드 호출
+          // 일반 사용자일 경우만 로그 저장 메서드 호출
           if (!isAdmin) {
             recruitmentSearchService.search(combinedKeyword, Long.valueOf(userIdx));
           }
@@ -61,7 +61,7 @@ public class EmplService {
           recruitmentSearchService.search(combinedKeyword, null);
         }
       } catch (IOException e) {
-        System.out.println("❌ Elasticsearch 검색 로그 저장 실패: " + e.getMessage());
+        System.out.println("Elasticsearch 검색 로그 저장 실패: " + e.getMessage());
       }
     }
 
@@ -87,8 +87,8 @@ public class EmplService {
       return new PageImpl<>(dtoList, esPage.getPageable(), esPage.getTotalElements());
 
     } catch (IOException e) {
-      System.out.println("❌ Elasticsearch 공고 검색 실패: " + e.getMessage());
-      return Page.empty();  // 빈 페이지 반환 등 예외 상황 처리
+      System.out.println("Elasticsearch 공고 검색 실패: " + e.getMessage());
+      return Page.empty();
     }
 
   }
