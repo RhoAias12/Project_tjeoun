@@ -17,6 +17,8 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,13 +54,23 @@ public class EmplService {
         .recruitmentIdx(doc.getRecruitmentIdx())
         .title(doc.getTitle())
         .company(doc.getCompany())
-        .deadline(doc.getDeadline())
+        .deadline(parseDeadline(doc.getDeadline()))
         .scrapCount(doc.getScrapCount() != null ? doc.getScrapCount() : 0)
         .logoUrl(doc.getLogoUrl())
         .build()
       ).toList();
 
     return new PageImpl<>(dtoList, esPage.getPageable(), esPage.getTotalElements());
+  }
+
+  private LocalDateTime parseDeadline(String deadlineStr) {
+    try {
+      return deadlineStr != null
+        ? LocalDateTime.parse(deadlineStr, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+        : null;
+    } catch (DateTimeParseException e) {
+      return null; // 파싱 실패 시 null 반환
+    }
   }
 
 

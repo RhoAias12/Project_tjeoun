@@ -5,10 +5,12 @@ import com.tjoeun.elasticsearch.repository.ApplyHistorySearchRepository;
 import com.tjoeun.entity.ApplyHistory;
 import com.tjoeun.entity.ApplyHistoryResume;
 import com.tjoeun.entity.Users;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.ZoneId;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -69,5 +71,29 @@ public class ApplyHistorySyncService {
       .build();
 
     applyHistorySearchRepository.save(document);
+  }
+
+  @Transactional
+  public void updateUserInfoInES(Users user) {
+    List<ApplyHistoryDocument> docs = applyHistorySearchRepository.findByUserId(user.getUserIdx());
+
+    for (ApplyHistoryDocument doc : docs) {
+      doc.setUserId(user.getUserIdx());
+      doc.setUserEmail(user.getUserEmail());
+      doc.setUserNickname(user.getUserNickname());
+      doc.setUserName(user.getUserName());
+      doc.setUserBirth(user.getUserBirth().atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli());
+
+      applyHistorySearchRepository.save(doc);
+    }
+  }
+
+  @Transactional
+  public void deleteByUserId(Integer userId) {
+    List<ApplyHistoryDocument> docs = applyHistorySearchRepository.findByUserId(userId);
+
+    for (ApplyHistoryDocument doc : docs) {
+      applyHistorySearchRepository.deleteById(doc.getApplyHistoryId());
+    }
   }
 }

@@ -27,6 +27,19 @@ public class RecruitmentSearchService {
   private final ElasticsearchClient esClient;
   private static final String INDEX_NAME = "recruitments";
 
+  private static final String[] SPECIAL_CHARS_FOR_SQS = {
+    "+", "-", "&&", "||", "!", "(", ")", "{", "}", "[", "]", "^", "\"", "~", "*", "?", ":", "\\", "/"
+  };
+
+  private String escapeSpecialCharsForSimpleQueryString(String input) {
+    if (input == null) return null;
+    String escaped = input;
+    for (String ch : SPECIAL_CHARS_FOR_SQS) {
+      escaped = escaped.replace(ch, "\\" + ch);
+    }
+    return escaped;
+  }
+
   public Page<RecruitmentDocument> searchJobs(
     String title,
     String content,
@@ -45,43 +58,53 @@ public class RecruitmentSearchService {
       .size(pageSize);
 
     builder.query(q -> q.bool(b -> {
-      // title, content, region, company 필터
+
       if (title != null && !title.isBlank()) {
-        b.must(m -> m.wildcard(wc -> wc.field("title").value("*" + title + "*")));
+        String escapedTitle = escapeSpecialCharsForSimpleQueryString(title);
+        b.must(m -> m.simpleQueryString(sqs -> sqs
+          .fields("title")
+          .query(escapedTitle)
+        ));
       }
+
       if (content != null && !content.isBlank()) {
-        b.must(m -> m.wildcard(mm -> mm.field("combinedContent").value("*" + content + "*")));
+        String escapedContent = escapeSpecialCharsForSimpleQueryString(content);
+        b.must(m -> m.simpleQueryString(sqs -> sqs
+          .fields("combinedContent")
+          .query(escapedContent)
+        ));
       }
+
       if (region != null && !region.isBlank()) {
-        b.must(m -> m.wildcard(mm -> mm.field("location").value("*" + region + "*")));
+        String escapedRegion = escapeSpecialCharsForSimpleQueryString(region);
+        b.must(m -> m.simpleQueryString(sqs -> sqs
+          .fields("location")
+          .query(escapedRegion)
+        ));
       }
+
       if (company != null && !company.isBlank()) {
-        b.must(m -> m.wildcard(wc -> wc.field("combinedContent").value("*" + company + "*")));
+        String escapedCompany = escapeSpecialCharsForSimpleQueryString(company);
+        b.must(m -> m.simpleQueryString(sqs -> sqs
+          .fields("company")
+          .query(escapedCompany)
+        ));
       }
 
-      // 날짜 필터 조건 (deadline or 9999-12-31T00:00:00)
+      // 날짜 범위 필터 (deadline)
       if ((startDate != null && !startDate.isBlank()) || (endDate != null && !endDate.isBlank())) {
-        b.filter(f -> f.bool(boolQuery -> {
-          boolQuery.should(s1 -> s1.range(r -> {
-            r.field("deadline");
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
-            if (startDate != null && !startDate.isBlank()) {
-              LocalDateTime start = LocalDate.parse(startDate).atStartOfDay();
-              r.gte(JsonData.of(start.format(formatter)));
-            }
-            if (endDate != null && !endDate.isBlank()) {
-              LocalDateTime end = LocalDate.parse(endDate).atTime(23, 59, 59);
-              r.lte(JsonData.of(end.format(formatter)));
-            }
-            return r;
-          }));
-
-          boolQuery.should(s2 -> s2.term(t ->
-            t.field("deadline").value("9999-12-31T00:00:00")
-          ));
-
-          boolQuery.minimumShouldMatch("1");
-          return boolQuery;
+        b.filter(f -> f.range(r -> {
+          r.field("deadline");
+          DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+          if (startDate != null && !startDate.isBlank()) {
+            LocalDateTime start = LocalDate.parse(startDate).atStartOfDay();
+            r.gte(JsonData.of(start.format(formatter)));
+          }
+          if (endDate != null && !endDate.isBlank()) {
+            LocalDateTime end = LocalDate.parse(endDate).atTime(23, 59, 59);
+            r.lte(JsonData.of(end.format(formatter)));
+          }
+          return r;
         }));
       }
 
@@ -89,28 +112,40 @@ public class RecruitmentSearchService {
     }));
 
     // 정렬
-    if ("all".equals(sortOrder)) {
-      builder.sort(s -> s.field(f -> f.field("recruitmentIdx").order(SortOrder.Asc)));
-    }else if ("deadline_asc".equals(sortOrder)) {
-      builder.sort(s -> s.field(f -> f.field("deadline").order(SortOrder.Asc)));
-    } else if ("deadline_desc".equals(sortOrder)) {
-      builder.sort(s -> s.field(f -> f.field("deadline").order(SortOrder.Desc)));
-    } else if ("scrap_desc".equals(sortOrder)) {
-      builder.sort(s -> s.field(f -> f.field("scrapCount").order(SortOrder.Desc)));
-    } else if ("scrap_asc".equals(sortOrder)) {
-      builder.sort(s -> s.field(f -> f.field("scrapCount").order(SortOrder.Asc)));
-    } else {
-      builder.sort(s -> s.field(f -> f.field("createdAt").order(SortOrder.Desc)));
+    switch (sortOrder) {
+      case "all":
+        builder.sort(s -> s.field(f -> f.field("recruitmentIdx").order(SortOrder.Asc)));
+        break;
+      case "deadline_asc":
+        builder.sort(s -> s.field(f -> f.field("deadline").order(SortOrder.Asc)));
+        break;
+      case "deadline_desc":
+        builder.sort(s -> s.field(f -> f.field("deadline").order(SortOrder.Desc)));
+        break;
+      case "scrap_desc":
+        builder.sort(s -> s.field(f -> f.field("scrapCount").order(SortOrder.Desc)));
+        break;
+      case "scrap_asc":
+        builder.sort(s -> s.field(f -> f.field("scrapCount").order(SortOrder.Asc)));
+        break;
+      default:
+        builder.sort(s -> s.field(f -> f.field("createdAt").order(SortOrder.Desc)));
+        break;
     }
 
-    SearchResponse<RecruitmentDocument> response = esClient.search(builder.build(), RecruitmentDocument.class);
+    SearchRequest request = builder.build();
+
+    SearchResponse<RecruitmentDocument> response = esClient.search(request, RecruitmentDocument.class);
+
     List<RecruitmentDocument> docs = response.hits().hits().stream()
       .map(Hit::source)
       .collect(Collectors.toList());
+
     long total = response.hits().total().value();
 
     return new PageImpl<>(docs, PageRequest.of(page - 1, pageSize), total);
   }
+
 
   public void updateScrapCountInES(Long recruitmentId, int newScrapCount) throws IOException {
     // 문서 조회
