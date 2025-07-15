@@ -304,7 +304,6 @@ public class RecruitmentSearchService {
   private boolean containsSpecialRegexChars(String input) {
     return input != null && input.matches(".*[\\\\.^$|?*+()\\[\\]{}].*");
   }
-
   // wildcard 쿼리용 이스케이프
   private String escapeForWildcard(String input) {
     if (input == null) return null;
