@@ -24,6 +24,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 
@@ -120,14 +122,29 @@ public class AdminController {
       @RequestParam("sortBy") String sortBy,
       @RequestParam(required = false) String email,
       @RequestParam(required = false) String nickname
-    ) {
+    ) throws IOException {
         userService.deleteById(userIdx);
 
-        return "redirect:/admin/member_list?page=" + page +
-          "&sortBy=" + sortBy +
-          (email != null ? "&email=" + email : "") +
-          (nickname != null ? "&nickname=" + nickname : "");
+        // 삭제 후 페이지 유효성 검증
+        int size = 10; // 페이지당 개수 (고정이면 상수로)
+        Page<UserListDto> userPage;
+
+        if ((email != null && !email.isBlank()) || (nickname != null && !nickname.isBlank())) {
+            userPage = adminService.getUsersBySearchFromES(email, nickname, sortBy, page, size);
+        } else {
+            userPage = adminService.getPagedUsers(page, size, sortBy);
+        }
+
+        if (userPage.isEmpty() && page > 1) {
+            page--;
+        }
+        StringBuilder redirectUrl = new StringBuilder("/admin/member_list?page=" + page + "&sortBy=" + sortBy);
+        if (email != null) redirectUrl.append("&email=").append(URLEncoder.encode(email, StandardCharsets.UTF_8));
+        if (nickname != null) redirectUrl.append("&nickname=").append(URLEncoder.encode(nickname, StandardCharsets.UTF_8));
+
+        return "redirect:" + redirectUrl;
     }
+
 
 
     @GetMapping("/member_modify")
