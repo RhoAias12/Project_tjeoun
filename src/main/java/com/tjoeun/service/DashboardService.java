@@ -51,8 +51,8 @@ public class DashboardService {
         List<Long> applyTrendCounts = new ArrayList<>(applyTrend.values());
 
 
-        System.out.println("✅ topRoles = " + topRoles);
-        System.out.println("🔍 topSearchKeywords = " + topSearchKeywords);
+        System.out.println("topRoles = " + topRoles);
+        System.out.println("topSearchKeywords = " + topSearchKeywords);
 
 
         return DashboardDTO.builder()

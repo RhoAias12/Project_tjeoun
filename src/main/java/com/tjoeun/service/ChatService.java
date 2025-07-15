@@ -65,7 +65,7 @@ public class ChatService {
 
       MediaType contentType = response.getHeaders().getContentType();
       if (contentType == null || !contentType.includes(MediaType.APPLICATION_JSON)) {
-        return "❌ OpenAI 서버 오류 또는 유효하지 않은 응답 형식입니다.";
+        return "OpenAI 서버 오류 또는 유효하지 않은 응답 형식입니다.";
       }
 
       ObjectMapper mapper = new ObjectMapper();
@@ -87,7 +87,7 @@ public class ChatService {
 
     } catch (Exception e) {
       e.printStackTrace();
-      return "❌ GPT 응답 처리 중 오류: " + e.getMessage();
+      return "GPT 응답 처리 중 오류: " + e.getMessage();
     }
   }
 }
