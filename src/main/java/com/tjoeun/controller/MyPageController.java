@@ -123,8 +123,12 @@ public class MyPageController {
       BindingResult bindingResult,
       Principal principal) throws IOException {
 
+        if (resumeDto.getTitle() != null && resumeDto.getTitle().length() > 45) {
+            bindingResult.rejectValue("title", "length", "제목은 최대 45자까지 입력할 수 있습니다.");
+        }
+
         if (bindingResult.hasErrors()) {
-            return "mypage/react_write"; // 에러가 있으면 작성 페이지로 다시 돌아감
+            return "mypage/react_write";
         }
 
         // 로그인된 사용자 정보 가져오기
@@ -249,7 +253,8 @@ public class MyPageController {
 
     @PostMapping("/react_modify/{id}")
     public String updateResume(@PathVariable Long id,
-                               @ModelAttribute ResumeDto resumeDto,
+                               @ModelAttribute @Valid ResumeDto resumeDto,
+                               BindingResult bindingResult,
                                @RequestParam("imgFile") MultipartFile imgFile) throws IOException {
 
         // 서비스 레이어에 모든 로직 위임
