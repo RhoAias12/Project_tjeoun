@@ -126,3 +126,23 @@
 }
 
 
+.tab5 {
+  width: 80px;
+  padding: 10px 0;
+  font-size: 16px;
+  background-color: #0085ff;
+  color: white;
+  border: 1px solid #0085ff;
+  border-radius: 4px;
+  margin-top: 20px;
+  cursor: pointer;
+  display: block;
+  margin-left: auto; /* 오른쪽으로 자동 밀림 */
+  margin-top: 20px;
+}
+.tab5:hover {
+  background-color: white;
+  color: #0085ff;
+}
+
+

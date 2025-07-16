@@ -32,7 +32,7 @@ dependencies {
     implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
 
 //    // Mariadb
-//    implementation 'org.mariadb.jdbc:mariadb-java-client:3.3.1'
+    implementation 'org.mariadb.jdbc:mariadb-java-client:3.3.1'
     // MySQL
     implementation 'mysql:mysql-connector-java:8.0.33'
 
