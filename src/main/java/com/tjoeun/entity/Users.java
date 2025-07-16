@@ -54,7 +54,8 @@ public class Users {
       .userNickname(dto.getUserNickname())
       .userBirth(dto.getUserBirth())
       .userCreatedAt(new Timestamp(System.currentTimeMillis()))
-      .userRole(UserRole.ADMIN)
+//      .userRole(UserRole.ADMIN)
+      .userRole(UserRole.USER)
       .build();
   }
 

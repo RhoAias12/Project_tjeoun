@@ -202,7 +202,7 @@ textarea:not(.short-text) {
 }
 
 /* 반응형 - 레이아웃 변경으로 안해 주석처리 */
-/*
+
 @media (max-width: 768px) {
   .container {
     padding: 20px;
@@ -228,4 +228,3 @@ textarea:not(.short-text) {
     text-align: center;
   }
 }
-*/
