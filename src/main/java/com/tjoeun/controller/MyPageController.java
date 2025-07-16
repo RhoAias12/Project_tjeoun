@@ -123,7 +123,7 @@ public class MyPageController {
       BindingResult bindingResult,
       Principal principal) throws IOException {
 
-        if (resumeDto.getTitle() != null && resumeDto.getTitle().length() > 45) {
+        if (resumeDto.getTitle() != null && resumeDto.getTitle().length() > 45 ) {
             bindingResult.rejectValue("title", "length", "제목은 최대 45자까지 입력할 수 있습니다.");
         }
 

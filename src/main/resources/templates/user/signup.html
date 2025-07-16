@@ -66,11 +66,22 @@
   async function checkEmail() {
     const email = document.getElementById("userEmail").value.trim();
     const msg = document.getElementById("emailMessage");
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+
     if (!email) {
-      msg.textContent = "이메일을 입력해주세요.";
-      emailChecked = false;
-      return;
+        msg.textContent = "이메일을 입력해주세요.";
+        emailChecked = false;
+        return;
     }
+     if (!emailRegex.test(email)) {
+        msg.style.color = "blue";
+        msg.textContent = "이메일 형식에 맞게 입력해 주세요.";
+        emailChecked = false;
+        return;
+      }
+
     const res = await fetch(`/api/user/check-email?email=${encodeURIComponent(email)}`);
     const data = await res.json();
     if (data.exists) {
