@@ -49,7 +49,7 @@
         chatBox.appendChild(botMsg);
         chatBox.scrollTop = chatBox.scrollHeight;
 
-        // ✅ CSRF 토큰 읽어오기
+        // CSRF 토큰 읽어오기
         const csrfToken = document.querySelector("meta[name='_csrf']").getAttribute("content");
         const csrfHeader = document.querySelector("meta[name='_csrf_header']").getAttribute("content");
 
@@ -58,7 +58,7 @@
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              [csrfHeader]: csrfToken,  // ✅ CSRF 토큰 동적 헤더 적용
+              [csrfHeader]: csrfToken,  // CSRF 토큰 동적 헤더 적용
             },
             body: JSON.stringify({ input: message }),
           });
@@ -73,7 +73,7 @@
             const errorText = await response.text();
             console.error("서버 오류:", errorText);
             botMsg.classList.add("error-message");
-            botMsg.textContent = "❌ 서버 오류가 발생했어요.\n" + errorText;
+            botMsg.textContent = "서버 오류가 발생했어요.\n" + errorText;
             chatBox.scrollTop = chatBox.scrollHeight;
             return;
           }
@@ -85,7 +85,7 @@
         } catch (error) {
           console.error("요청 실패:", error);
           botMsg.classList.add("error-message");
-          botMsg.textContent = "❌ 요청 실패: " + error;
+          botMsg.textContent = "요청 실패: " + error;
           chatBox.scrollTop = chatBox.scrollHeight;
         }
       }
@@ -212,7 +212,7 @@
 <div class="chat-popup" id="chatPopup">
   <div class="chat-header">
     <span class="chat-title">AI Chat</span>
-    <button class="close-btn" onclick="toggleChat()">✖️</button>
+    <button class="close-btn" onclick="toggleChat()"></button>
   </div>
 
   <!-- 메시지 영역 -->
