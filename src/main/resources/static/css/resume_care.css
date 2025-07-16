@@ -7,20 +7,20 @@
 }
 
 .tab-inner {
-  width: 700px; /* ✅ .mypage-container와 같은 너비로 고정 */
+  width: 700px; /* .mypage-container와 같은 너비로 고정 */
 }
 
 .mypage-title {
   font-size: 30px;
   color: #444;
   margin: 0 0 30px 0; /* 위는 없고 아래 간격만 약간 */
-  transform: translateY(4px); /* ✅ 시각적으로 살짝 내려주기 */
+  transform: translateY(4px); /* 시각적으로 살짝 내려주기 */
   text-align: left;
 }
 
 .tab-buttons {
   display: flex;
-  justify-content: flex-start; /* ✅ 왼쪽 정렬 */
+  justify-content: flex-start; /* 왼쪽 정렬 */
   gap: 20px;
   margin-top: 20px;
 }
@@ -90,7 +90,7 @@
   justify-content: center;
   gap: 8px;
   padding: 0;
-  margin: 20px 0 0 0; /* 🔹 위쪽 여백만 추가 */
+  margin: 20px 0 0 0; /* 위쪽 여백만 추가 */
 }
 
 /* 페이지 버튼 기본 스타일 */
@@ -99,7 +99,7 @@
   padding: 4px 8px;
   text-align: center;
   color: #333;
-  text-decoration: none; /* ✅ 기본 밑줄 제거 */
+  text-decoration: none; /* 기본 밑줄 제거 */
   font-size: 16px;
   border: none;
   background-color: transparent;
@@ -158,7 +158,7 @@
   margin-top: 20px;
   cursor: pointer;
   display: block;
-  margin-left: auto; /* ✅ 오른쪽으로 자동 밀림 */
+  margin-left: auto; /* 오른쪽으로 자동 밀림 */
   margin-top: 20px;
 }
 .tab5:hover {
