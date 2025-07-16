@@ -51,7 +51,7 @@ public class UnifiedJobCrawlerService {
   private final String logoSaveDir = "src/main/resources/static/images/logos/";
 
   //실제로는 0,6,12,18시에 한번씩 하루 4번 실행
-  @Scheduled(cron = "0 30 10 * * *", zone = "Asia/Seoul")
+  @Scheduled(cron = "0 37 10 * * *", zone = "Asia/Seoul")
   public void runCrawler() {
     List<Recruitment> allJobs = new ArrayList<>();
     System.out.println("크롤러 실행됨 (스케줄링 시작)");
