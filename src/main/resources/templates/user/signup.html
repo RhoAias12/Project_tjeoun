@@ -14,6 +14,7 @@
       margin-bottom: 8px;
     }
   </style>
+
 </head>
 <body>
 <div th:replace="include/header :: header"></div>
@@ -66,6 +67,16 @@
   async function checkEmail() {
     const email = document.getElementById("userEmail").value.trim();
     const msg = document.getElementById("emailMessage");
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+     if (!emailRegex.test(email)) {
+        msg.style.color = "blue";
+        msg.textContent = "이메일 형식에 맞게 입력해 주세요.";
+        emailChecked = false;
+        return;
+      }
+
     if (!email) {
       msg.textContent = "이메일을 입력해주세요.";
       emailChecked = false;
@@ -85,6 +96,14 @@
   async function checkNickname() {
     const nickname = document.getElementById("userNickname").value.trim();
     const msg = document.getElementById("nicknameMessage");
+
+    if (nickname.length < 2 || nickname.length > 20) {
+    msg.style.color = "blue";
+    msg.textContent = "닉네임은 2~20글자 사이여야 합니다.";
+    nicknameChecked = false;
+    return;
+    }
+
     if (!nickname) {
       msg.textContent = "닉네임을 입력해주세요.";
       nicknameChecked = false;
