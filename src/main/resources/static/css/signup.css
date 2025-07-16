@@ -55,7 +55,7 @@ body {
   color: #0085ff;
 }
 
-/* ✅ 아이디 + 중복확인 버튼 통합 input 스타일 */
+/* 아이디 + 중복확인 버튼 통합 input 스타일 */
 .input-wrapper {
   position: relative;
   width: 70%;

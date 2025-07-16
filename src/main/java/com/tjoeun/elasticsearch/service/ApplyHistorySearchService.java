@@ -56,11 +56,6 @@ public class ApplyHistorySearchService {
     };
   }
 
-//  private String escapeWildcard(String input) {
-//    // 이스케이프할 특수문자 목록을 정규식으로 정의
-//    return input.replaceAll("([~`!@#$%^&*()_\\-+=\\[\\]{};:\"',.<>?/])", "\\\\$1");
-//  }
-
   private String escapeWildcard(String input) {
     // 이스케이프할 특수문자 목록에 \와 | 추가
     return input.replaceAll("([~`!@#$%^&*()_\\-+=\\[\\]{};:\"',.<>?/\\\\|])", "\\\\$1");

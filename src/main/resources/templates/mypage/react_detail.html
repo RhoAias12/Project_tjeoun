@@ -29,14 +29,15 @@
     </tr>
 
     <!-- 이미지 -->
-    <th style="text-align: center">
-      <div th:if="${resume.img != null}">
-        <img class="img" th:src="@{${resume.img}}" alt="이력서 이미지 없음" />
-      </div>
-      <div th:if="${resume.img == null}">
-        <p>이미지가 없습니다.</p>
-      </div>
-    </th>
+    <tr>
+      <th style="text-align: center">
+        <div th:if="${resume.img != null}">
+          <img class="img" th:src="@{${resume.img}}" alt="이력서 이미지 없음" />
+        </div>
+        <div th:if="${resume.img == null}">
+          <p>이미지가 없습니다.</p>
+        </div>
+      </th>
 
       <!-- 개인정보 -->
       <td>
@@ -100,7 +101,7 @@
         </div>
       </th>
       <td>
-        <p class="content" th:text="${content.context}"></p>
+        <pre class="content" th:text="${content.context}"></pre>
       </td>
     </tr>
 

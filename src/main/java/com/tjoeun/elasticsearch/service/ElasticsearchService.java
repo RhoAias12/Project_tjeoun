@@ -302,7 +302,7 @@ public class ElasticsearchService {
                             }
                     ));
 
-            System.out.println("✅ [지역 분포] 결과: " + sorted);
+            System.out.println("[지역 분포] 결과: " + sorted);
             return sorted;
 
         } catch (IOException e) {

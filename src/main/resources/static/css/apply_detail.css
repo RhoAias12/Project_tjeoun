@@ -1,4 +1,4 @@
-/* ✅ 1) 공통 박스 설정 */
+/* 1) 공통 박스 설정 */
 * {
   box-sizing: border-box;
 }
@@ -12,7 +12,7 @@ body {
   background-color: #f9f9f9;
 }
 
-/* ✅ 2) 페이지 타이틀 */
+/* 2) 페이지 타이틀 */
 .page-title {
   max-width: 1200px;
   width: 100%;
@@ -27,7 +27,7 @@ body {
   font-weight: 600;
 }
 
-/* ✅ 컨테이너 수정 */
+/* 컨테이너 수정 */
 .container {
   max-width: 1200px; /* 최대 폭은 유지 */
   width: 100%;
@@ -39,7 +39,7 @@ body {
   box-sizing: border-box; /* 혹시 몰라서 추가 */
 }
 
-/* ✅ 4) 공고 정보 영역 */
+/* 4) 공고 정보 영역 */
 .job-info {
   display: grid;
   grid-template-columns: 1fr auto;
@@ -98,7 +98,7 @@ body {
   background: #fff;
 }
 
-/* ✅ 5) 이력서 테이블 */
+/* 5) 이력서 테이블 */
 .resume-table {
   width: 100%;
   border-collapse: collapse;
@@ -166,7 +166,7 @@ body {
   font-weight: bold;
 }
 
-/* ✅ 7) 버튼 그룹 & 상태 선택 */
+/* 7) 버튼 그룹 & 상태 선택 */
 .button-group {
   display: flex;
   flex-wrap: wrap;
@@ -216,12 +216,12 @@ body {
 }
 
 /* 테이블 폼 */
-/* ✅ form-group: label + textarea 묶음 간격 */
+/* form-group: label + textarea 묶음 간격 */
 .form-group {
   margin-bottom: 12px;
 }
 
-/* ✅ label 스타일 */
+/* label 스타일 */
 .form-group label {
   display: block;
   font-size: 14px;
@@ -229,7 +229,7 @@ body {
   margin-bottom: 4px;
 }
 
-/* ✅ textarea 기본 스타일 (이미 있으나 재확인) */
+/* textarea 기본 스타일 (이미 있으나 재확인) */
 textarea {
   width: 100%;
   border: 1px solid #ccc;
@@ -242,19 +242,19 @@ textarea {
   box-sizing: border-box;
 }
 
-/* ✅ 짧은 입력용 */
+/* 짧은 입력용 */
 .short-text {
   height: 40px;
   resize: none;
   margin-bottom: 5px;
 }
 
-/* ✅ 경력, 수상이력 */
+/* 경력, 수상이력 */
 .short-text1 {
   margin-bottom: 5px;
 }
 
-/* ✅ 이미지 스타일 */
+/* 이미지 스타일 */
 #preview {
   width: 113px;
   height: 151px;
@@ -266,7 +266,7 @@ textarea {
 
 
 
-/* ✅ 파일 선택 input */
+/* 파일 선택 input */
 input[type='file'] {
   display: block;
   margin: 10px auto 0;
@@ -278,7 +278,8 @@ input[type='file'] {
   font-size: 12px;
 }
 
-/* ✅ 8) 반응형 */
+/* 8) 반응형 - 레이아웃 변경으로 인한 주석처리 */
+/*
 @media (max-width: 768px) {
   .container {
     padding: 20px;
@@ -333,3 +334,4 @@ input[type='file'] {
     width: 100%;
   }
 }
+*/

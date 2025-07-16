@@ -40,7 +40,7 @@ public class ElasticsearchIndexCreator {
                 ))
         );
 
-        System.out.println("✅ Index created: " + response.acknowledged());
+        System.out.println("Index created: " + response.acknowledged());
     }
 }
 

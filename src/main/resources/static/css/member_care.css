@@ -39,7 +39,7 @@ body {
   text-align: center;
 }
 
-/* ✅ form-group: label+input 묶음 */
+/* form-group: label+input 묶음 */
 .form-group {
   display: flex;
   flex-direction: column;
@@ -54,7 +54,7 @@ body {
   margin-bottom: 4px;
 }
 
-/* ✅ 일반 input (form-group 안) */
+/* 일반 input (form-group 안) */
 .form-group input {
   width: 100%;
   padding: 12px;
@@ -65,7 +65,7 @@ body {
   border-radius: 8px;
 }
 
-/* ✅ 아이디 + 중복확인 버튼 통합 input-wrapper */
+/* 아이디 + 중복확인 버튼 통합 input-wrapper */
 .input-wrapper {
   position: relative;
   width: 100%;
