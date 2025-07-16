@@ -78,14 +78,12 @@ public class Recruitment {
     this.createdAt = LocalDateTime.now();
   }
 
-//  @OneToMany(mappedBy = "recruitment", cascade = CascadeType.ALL, orphanRemoval = true)
-//  private List<Favorite> favorites;
-
-
 
   @OneToMany(mappedBy = "recruitment", cascade = CascadeType.ALL, orphanRemoval = true)
+  @Builder.Default
   private List<Favorite> favorites = new ArrayList<>();
 
   @OneToMany(mappedBy = "recruitment", cascade = CascadeType.REMOVE, orphanRemoval = true)
+  @Builder.Default
   private List<ApplyHistory> applyHistories = new ArrayList<>();
 }
