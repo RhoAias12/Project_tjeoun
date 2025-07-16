@@ -240,6 +240,7 @@ public class ElasticsearchService {
 
 
     // 지역별 채용 분포
+    @SuppressWarnings("unchecked")
     public Map<String, Long> getRegionDistribution() {
         try {
             SearchResponse<Map> response = elasticsearchClient.search(s -> s
