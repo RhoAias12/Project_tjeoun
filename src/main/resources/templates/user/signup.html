@@ -101,6 +101,12 @@
       nicknameChecked = false;
       return;
     }
+    if (nickname.length < 2 || nickname.length > 20) {
+      msg.style.color = "blue";
+      msg.textContent = "닉네임은 2~20글자 사이여야 합니다.";
+      nicknameChecked = false;
+      return;
+    }
     const res = await fetch(`/api/user/check-nickname?nickname=${encodeURIComponent(nickname)}`);
     const data = await res.json();
     if (data.exists) {
