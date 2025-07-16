@@ -14,7 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 public class ResumeDto {
 
-  @Size(max = 60, message = "제목은 최대 60자까지 입력할 수 있습니다.")
+  @Size(max = 45, message = "제목은 최대 45자까지 입력할 수 있습니다.")
   private String title;
   private String context;
   private String img;

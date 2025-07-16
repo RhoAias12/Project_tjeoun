@@ -78,9 +78,9 @@
 
     function checkTitleLength() {
     const titleInput = document.getElementById('title');
-    if (titleInput.value.length > 60) {
+    if (titleInput.value.length > 45) {
       alert('제목은 60글자 이내입니다.');
-      titleInput.value = titleInput.value.substring(0, 60);
+      titleInput.value = titleInput.value.substring(0, 45);
     }
   }
       </script>
@@ -105,7 +105,7 @@
               name="title"
               class="short-text"
               placeholder="제목을 입력해 주세요."
-              maxlength="60"
+              maxlength="45"
               oninput="checkTitleLength()"
       ></textarea>
                         </div>

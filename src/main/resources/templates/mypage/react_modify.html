@@ -76,9 +76,9 @@ function validateForm() {
 }
 
     function checkTitleLength(textarea) {
-    const maxLength = 60;
+    const maxLength = 45;
     if (textarea.value.length > maxLength) {
-        alert("제목은 60글자 이내입니다.");
+        alert("제목은 45글자 이내입니다.");
         textarea.value = textarea.value.slice(0, maxLength);
     }
 }
@@ -105,7 +105,7 @@ function validateForm() {
                     name="title"
                     id="title"
                     class="short-text"
-                    maxlength="60"
+                    maxlength="45"
                     placeholder="제목을 입력해 주세요."
                     oninput="checkTitleLength(this)"
                     th:text="${resume.title}"></textarea>
