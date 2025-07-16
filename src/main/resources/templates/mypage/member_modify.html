@@ -148,6 +148,7 @@
         nicknameChecked = false;
         return;
       }
+
       fetch(`/api/user/check-nickname?nickname=${encodeURIComponent(nickname)}`)
         .then(res => res.json())
         .then(data => {
