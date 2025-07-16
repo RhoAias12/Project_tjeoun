@@ -34,39 +34,39 @@ public class KoreanNounExtractor {
                 .filter(token -> token.getPos().toString().equals("Noun"))
                 .map(token -> token.getText().toString().trim())
                 .peek(raw -> {
-                    System.out.println("원본 추출된 명사: " + raw);
+//                    System.out.println("원본 추출된 명사: " + raw);
                     raw.codePoints().forEach(cp -> System.out.printf("  U+%04X (%c)%n", cp, cp));
                 })
                 .map(noun -> noun.replaceAll("[^a-zA-Z가-힣]", "").toLowerCase()) // 정규 한글만 남기기
                 .peek(cleaned -> {
-                    System.out.println("정제 후 명사: " + cleaned);
+//                    System.out.println("정제 후 명사: " + cleaned);
                     cleaned.codePoints().forEach(cp -> System.out.printf("  ↳ U+%04X (%c)%n", cp, cp));
                 })
                 .filter(cleanedNoun -> {
                     if (cleanedNoun.isEmpty()) return false;
                     if (cleanedNoun.equals("ᆫ") || cleanedNoun.contains("ᆫ")) {
-                        System.out.println("'ᆫ' 직접 포함 제거됨: " + cleanedNoun);
+//                        System.out.println("'ᆫ' 직접 포함 제거됨: " + cleanedNoun);
                         return false;
                     }
                     if (cleanedNoun.matches("^[ㄱ-ㅎ]$")) {
-                        System.out.println("자음 한 글자 제거됨: " + cleanedNoun);
+//                        System.out.println("자음 한 글자 제거됨: " + cleanedNoun);
                         return false;
                     }
                     if (cleanedNoun.codePoints().anyMatch(c -> c >= 0x11A8 && c <= 0x11FF)) {
-                        System.out.println("종성 자모 제거됨: " + cleanedNoun);
+//                        System.out.println("종성 자모 제거됨: " + cleanedNoun);
                         return false;
                     }
                     if (cleanedNoun.length() <= 1) {
-                        System.out.println("한 글자 제거됨: " + cleanedNoun);
+//                        System.out.println("한 글자 제거됨: " + cleanedNoun);
                         return false;
                     }
                     if (STOPWORDS.contains(cleanedNoun)) {
-                        System.out.println("불용어 제거됨: " + cleanedNoun);
+//                        System.out.println("불용어 제거됨: " + cleanedNoun);
                         return false;
                     }
 
                     if (cleanedNoun.contains("통하") || cleanedNoun.equals("통한") || cleanedNoun.equals("통해")) {
-                        System.out.println("통하/통한/통해 제거됨: " + cleanedNoun);
+//                        System.out.println("통하/통한/통해 제거됨: " + cleanedNoun);
                         return false;
                     }
 
