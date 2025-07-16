@@ -5,7 +5,7 @@
     <title>관리자 대시보드</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <!-- ✅ CSS -->
+    <!-- CSS -->
     <link rel="stylesheet" th:href="@{/css/header.css}" />
     <link rel="stylesheet" th:href="@{/css/footer.css}" />
     <link rel="stylesheet" th:href="@{/css/ad_dashboard.css}" />
@@ -61,7 +61,7 @@
 <!-- 푸터 -->
 <div th:replace="include/footer :: footer"></div>
 
-<!-- ✅ 차트 스크립트 -->
+<!-- 차트 스크립트 -->
 <script th:inline="javascript">
     const keywordLabels = [[${dashboard.topKeywordLabels}]];
     const keywordCounts = [[${dashboard.topKeywordCounts}]];
@@ -104,8 +104,8 @@
   const ageGroupLabels = [[${dashboard.ageGroupLabels}]];
   const ageGroupCounts = [[${dashboard.ageGroupCounts}]];
 
-  console.log("✅ 연령대 라벨:", ageGroupLabels);
-  console.log("✅ 연령대 카운트:", ageGroupCounts);
+  console.log("연령대 라벨:", ageGroupLabels);
+  console.log("연령대 카운트:", ageGroupCounts);
 
   const ctx = document.getElementById('ageGroupChart').getContext('2d');
   new Chart(ctx, {

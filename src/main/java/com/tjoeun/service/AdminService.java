@@ -156,6 +156,123 @@ public class AdminService {
     }
   }
 
+  @Transactional(readOnly = true)
+  public Page<UserListDto> getUsersBySearchFromES(
+    String email,
+    String nickname,
+    String sortBy,
+    int page,
+    int size
+  ) throws IOException {
+
+    Page<UserListDto> esPage = userSearchService.searchUsers(email, nickname, sortBy, page, size);
+
+    List<UserListDto> dtoList = esPage.getContent().stream()
+      .map(doc -> UserListDto.builder()
+        .userIdx(doc.getUserIdx())
+        .userName(doc.getUserName())
+        .userEmail(doc.getUserEmail())
+        .userNickname(doc.getUserNickname())
+        .userBirth(doc.getUserBirth())
+        .build())
+      .toList();
+
+    return new PageImpl<>(dtoList, esPage.getPageable(), esPage.getTotalElements());
+  }
+
+
+  public void deleteRecruitmentById(Long recruitmentIdx) {
+    recruitmentRepository.deleteById(recruitmentIdx);
+    try {
+      recruitmentSearchService.deleteById(recruitmentIdx);
+
+      List<ApplyHistoryDocument> relatedHistories = applyHistorySearchRepository.findByRecruitmentId(recruitmentIdx);
+
+      relatedHistories.forEach(doc -> {
+        applyHistorySearchRepository.deleteById(doc.getApplyHistoryId());
+      });
+
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  public int countRecruitments() {
+    return (int) recruitmentRepository.count();
+  }
+
+  @Transactional
+  public void updateRecruitment(RecruitmentDTO dto) {
+    Recruitment entity = recruitmentRepository.findById(dto.getRecruitmentIdx())
+      .orElseThrow(() -> new IllegalArgumentException("해당 공고가 존재하지 않습니다."));
+
+    entity.setTitle(dto.getTitle());
+    entity.setCompany(dto.getCompany());
+    entity.setDeadline(dto.getDeadline());
+    entity.setQualifications(dto.getQualifications());
+    entity.setLogoUrl(dto.getLogoUrl());
+    entity.setResponsibilities(dto.getResponsibilities());
+    entity.setPreferred(dto.getPreferred());
+    entity.setBenefits(dto.getBenefits());
+    entity.setLocation(dto.getLocation());
+    entity.setSalary(dto.getSalary());
+    entity.setEmploymentType(dto.getEmploymentType());
+
+    recruitmentRepository.save(entity);
+
+    RecruitmentDocument doc = RecruitmentDocument.builder()
+      .recruitmentIdx(entity.getRecruitmentIdx())
+      .title(entity.getTitle())
+      .company(entity.getCompany())
+      .deadline(entity.getDeadline() != null ? entity.getDeadline().format(formatter) : null)
+      .qualifications(entity.getQualifications())
+      .logoUrl(entity.getLogoUrl())
+      .responsibilities(entity.getResponsibilities())
+      .preferred(entity.getPreferred())
+      .benefits(entity.getBenefits())
+      .location(entity.getLocation())
+      .salary(entity.getSalary())
+      .employmentType(entity.getEmploymentType())
+      .build();
+
+    try {
+      recruitmentSearchService.saveOrUpdate(doc);
+      List<ApplyHistory> histories = applyHistoryRepository.findByRecruitment(entity);
+      for (ApplyHistory history : histories) {
+        applyHistorySearchService.save(history);
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  public Page<RecruitmentDTO> getFilteredRecruitmentsByEs(
+    String title,
+    String content,
+    String region,
+    String company,
+    String startDate,
+    String endDate,
+    String deadlineSort,
+    int page,
+    int size) throws IOException {
+
+    Page<RecruitmentDocument> esPage = recruitmentSearchService.searchJobs(
+      title, content, region, company, startDate, endDate, deadlineSort, page, size);
+
+    List<RecruitmentDTO> dtoList = esPage.getContent().stream()
+      .map(doc -> RecruitmentDTO.builder()
+        .recruitmentIdx(doc.getRecruitmentIdx())
+        .title(doc.getTitle())
+        .company(doc.getCompany())
+        .deadline(doc.getDeadline() != null ? LocalDateTime.parse(doc.getDeadline(), formatter) : null)
+        .scrapCount(doc.getScrapCount() != null ? doc.getScrapCount() : 0)
+        .logoUrl(doc.getLogoUrl())
+        .build())
+      .toList();
+
+    return new PageImpl<>(dtoList, esPage.getPageable(), esPage.getTotalElements());
+  }
 
   public Page<ApplyHistoryDTO> getPagedApplyHistory(int page, int size, String sortOption) {
     Sort sort = Sort.unsorted();
@@ -188,28 +305,6 @@ public class AdminService {
       .userNickname(applyHistory.getUser().getUserNickname())
       .build());
   }
-
-  public void deleteRecruitmentById(Long recruitmentIdx) {
-    recruitmentRepository.deleteById(recruitmentIdx);
-    try {
-      recruitmentSearchService.deleteById(recruitmentIdx);
-
-      List<ApplyHistoryDocument> relatedHistories = applyHistorySearchRepository.findByRecruitmentId(recruitmentIdx);
-
-      relatedHistories.forEach(doc -> {
-        applyHistorySearchRepository.deleteById(doc.getApplyHistoryId());
-      });
-
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-  }
-
-  public int countRecruitments() {
-    return (int) recruitmentRepository.count();
-  }
-
-
 
   @Transactional(readOnly = true)
   public ApplyDetailDTO getApplyDetailById(Integer applyHistoryId) {
@@ -267,51 +362,6 @@ public class AdminService {
   }
 
 
-  @Transactional
-  public void updateRecruitment(RecruitmentDTO dto) {
-    Recruitment entity = recruitmentRepository.findById(dto.getRecruitmentIdx())
-      .orElseThrow(() -> new IllegalArgumentException("해당 공고가 존재하지 않습니다."));
-
-    entity.setTitle(dto.getTitle());
-    entity.setCompany(dto.getCompany());
-    entity.setDeadline(dto.getDeadline());
-    entity.setQualifications(dto.getQualifications());
-    entity.setLogoUrl(dto.getLogoUrl());
-    entity.setResponsibilities(dto.getResponsibilities());
-    entity.setPreferred(dto.getPreferred());
-    entity.setBenefits(dto.getBenefits());
-    entity.setLocation(dto.getLocation());
-    entity.setSalary(dto.getSalary());
-    entity.setEmploymentType(dto.getEmploymentType());
-
-    recruitmentRepository.save(entity);
-
-    RecruitmentDocument doc = RecruitmentDocument.builder()
-      .recruitmentIdx(entity.getRecruitmentIdx())
-      .title(entity.getTitle())
-      .company(entity.getCompany())
-      .deadline(entity.getDeadline() != null ? entity.getDeadline().format(formatter) : null)
-      .qualifications(entity.getQualifications())
-      .logoUrl(entity.getLogoUrl())
-      .responsibilities(entity.getResponsibilities())
-      .preferred(entity.getPreferred())
-      .benefits(entity.getBenefits())
-      .location(entity.getLocation())
-      .salary(entity.getSalary())
-      .employmentType(entity.getEmploymentType())
-      .build();
-
-    try {
-      recruitmentSearchService.saveOrUpdate(doc);
-      List<ApplyHistory> histories = applyHistoryRepository.findByRecruitment(entity);
-      for (ApplyHistory history : histories) {
-        applyHistorySearchService.save(history);
-      }
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-  }
-
   public String getStatusDisplayName(String status) {
     return switch (status) {
       case "SUBMITTED" -> "진행중";
@@ -321,72 +371,6 @@ public class AdminService {
     };
   }
 
-  private List<RecruitmentDTO> sortRecruitmentDTOList(List<RecruitmentDTO> list, String deadlineSort) {
-    return switch (deadlineSort) {
-      case "deadline_latest" -> list.stream()
-        .sorted((a, b) -> b.getDeadline().compareTo(a.getDeadline()))
-        .collect(Collectors.toList());
-
-      case "deadline_oldest" -> list.stream()
-        .sorted((a, b) -> a.getDeadline().compareTo(b.getDeadline()))
-        .collect(Collectors.toList());
-
-      default -> list;
-    };
-  }
-
-  public Page<RecruitmentDTO> getFilteredRecruitmentsByEs(
-    String title,
-    String content,
-    String region,
-    String company,
-    String startDate,
-    String endDate,
-    String deadlineSort,
-    int page,
-    int size) throws IOException {
-
-    Page<RecruitmentDocument> esPage = recruitmentSearchService.searchJobs(
-      title, content, region, company, startDate, endDate, deadlineSort, page, size);
-
-    List<RecruitmentDTO> dtoList = esPage.getContent().stream()
-      .map(doc -> RecruitmentDTO.builder()
-        .recruitmentIdx(doc.getRecruitmentIdx())
-        .title(doc.getTitle())
-        .company(doc.getCompany())
-        .deadline(doc.getDeadline() != null ? LocalDateTime.parse(doc.getDeadline(), formatter) : null)
-        .scrapCount(doc.getScrapCount() != null ? doc.getScrapCount() : 0)
-        .logoUrl(doc.getLogoUrl())
-        .build())
-      .toList();
-
-    return new PageImpl<>(dtoList, esPage.getPageable(), esPage.getTotalElements());
-  }
-
-
-  @Transactional(readOnly = true)
-  public Page<UserListDto> getUsersBySearchFromES(
-    String email,
-    String nickname,
-    String sortBy,
-    int page,
-    int size
-  ) throws IOException {
-
-    Page<UserListDto> esPage = userSearchService.searchUsers(email, nickname, sortBy, page, size);
-
-    List<UserListDto> dtoList = esPage.getContent().stream()
-      .map(doc -> UserListDto.builder()
-        .userIdx(doc.getUserIdx())
-        .userName(doc.getUserName())
-        .userEmail(doc.getUserEmail())
-        .userNickname(doc.getUserNickname())
-        .userBirth(doc.getUserBirth())
-        .build())
-      .toList();
-
-    return new PageImpl<>(dtoList, esPage.getPageable(), esPage.getTotalElements());
-  }
 
   @Transactional(readOnly = true)
   public Page<ApplyHistoryDTO> searchApplyHistoriesFromES(

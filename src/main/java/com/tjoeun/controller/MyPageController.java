@@ -150,7 +150,7 @@ public class MyPageController {
         resume.setCreatedAt(now);
         resume.setUpdatedAt(now);
 
-        // ✅ 이미지 업로드 처리
+        // 이미지 업로드 처리
         if (!imgFile.isEmpty()) {
             String fileName = imgFile.getOriginalFilename();
 
@@ -252,7 +252,7 @@ public class MyPageController {
                                @ModelAttribute ResumeDto resumeDto,
                                @RequestParam("imgFile") MultipartFile imgFile) throws IOException {
 
-        // ✅ 서비스 레이어에 모든 로직 위임
+        // 서비스 레이어에 모든 로직 위임
         myPageService.updateResume(id, resumeDto, imgFile);
 
         return "redirect:/mypage/react_detail/" + id;

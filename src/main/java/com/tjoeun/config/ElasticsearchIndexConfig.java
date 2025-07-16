@@ -51,10 +51,10 @@ public class ElasticsearchIndexConfig {
                                 .properties("_class", p -> p.keyword(k -> k.index(false).docValues(false)))
                         )
                 );
-                System.out.println("✅ recruitments 인덱스 자동 생성 완료");
+                System.out.println("recruitments 인덱스 자동 생성 완료");
             }
         } catch (Exception e) {
-            System.err.println("❌ recruitments 인덱스 자동 생성 실패");
+            System.err.println("recruitments 인덱스 자동 생성 실패");
             e.printStackTrace();
         }
     }
