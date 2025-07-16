@@ -26,6 +26,5 @@ public class ResumeDto {
   private String awards;
   private Timestamp createdAt;
   private Timestamp updatedAt;
-
   private List<ResumeContentDTO> resumeContents;
 }

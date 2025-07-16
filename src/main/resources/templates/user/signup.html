@@ -70,6 +70,12 @@
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+
+    if (!email) {
+        msg.textContent = "이메일을 입력해주세요.";
+        emailChecked = false;
+        return;
+    }
      if (!emailRegex.test(email)) {
         msg.style.color = "blue";
         msg.textContent = "이메일 형식에 맞게 입력해 주세요.";
@@ -77,11 +83,6 @@
         return;
       }
 
-    if (!email) {
-      msg.textContent = "이메일을 입력해주세요.";
-      emailChecked = false;
-      return;
-    }
     const res = await fetch(`/api/user/check-email?email=${encodeURIComponent(email)}`);
     const data = await res.json();
     if (data.exists) {
@@ -96,16 +97,14 @@
   async function checkNickname() {
     const nickname = document.getElementById("userNickname").value.trim();
     const msg = document.getElementById("nicknameMessage");
-
-    if (nickname.length < 2 || nickname.length > 20) {
-    msg.style.color = "blue";
-    msg.textContent = "닉네임은 2~20글자 사이여야 합니다.";
-    nicknameChecked = false;
-    return;
-    }
-
     if (!nickname) {
       msg.textContent = "닉네임을 입력해주세요.";
+      nicknameChecked = false;
+      return;
+    }
+    if (nickname.length < 2 || nickname.length > 20) {
+      msg.style.color = "blue";
+      msg.textContent = "닉네임은 2~20글자 사이여야 합니다.";
       nicknameChecked = false;
       return;
     }
