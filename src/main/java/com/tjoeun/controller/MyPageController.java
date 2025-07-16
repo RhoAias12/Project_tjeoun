@@ -209,7 +209,7 @@ public class MyPageController {
         model.addAttribute("resume", resume);
         model.addAttribute("page", page);
         model.addAttribute("readonly", readonly);
-        model.addAttribute("prevUrl", prevUrl); // ← 이거 중요!
+        model.addAttribute("prevUrl", prevUrl);
         return "mypage/react_detail";
     }
 
