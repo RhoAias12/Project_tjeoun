@@ -65,11 +65,13 @@ public class RecruitmentSearchService {
       }
       // content
       if (content != null && !content.isBlank()) {
-        String escapedContent = escapeWildcard(content.toLowerCase());
-        b.must(m -> m.wildcard(w -> w
-          .field("combinedContent.keyword")
-          .value("*" + escapedContent + "*")
-        ));
+        String cleanedContent = removeSpecialChars(content.toLowerCase());  // 특수문자 제거
+        b.must(m -> m
+          .match(t -> t
+            .field("combinedContent")
+            .query(cleanedContent)
+          )
+        );
       }
 
       // region
@@ -199,4 +201,13 @@ public class RecruitmentSearchService {
     // 이스케이프할 특수문자 목록에 \와 | 추가
     return input.replaceAll("([~`!@#$%^&*()_\\-+=\\[\\]{};:\"',.<>?/\\\\|])", "\\\\$1");
   }
+
+  private String removeSpecialChars(String input) {
+    if (input == null) {
+      return null;
+    }
+    // 특수문자를 제거하려면 정규식을 사용
+    return input.replaceAll("[^a-zA-Z0-9가-힣]", "");  // 한글, 숫자, 영문자만 남기고 나머지 특수문자 제거
+  }
+
 }
